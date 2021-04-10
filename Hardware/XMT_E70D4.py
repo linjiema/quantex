@@ -1,6 +1,6 @@
 # coding=gbk
 import ctypes
-import os.path
+import os
 import sys
 import time
 
@@ -9,6 +9,8 @@ class XMT():
     def __init__(self):
 
         dll = os.path.dirname(__file__) + '/DLL/XMT_DLL_USB.dll'  # Give the path of dll file
+        path = os.path.dirname(__file__) + '/DLL'
+        os.chdir(path)
         self.xmt_dll = ctypes.cdll.LoadLibrary(dll)
 
     def scan_devices(self):
