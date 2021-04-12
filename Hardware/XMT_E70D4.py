@@ -292,6 +292,9 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
+    def scan(self):
+        pass
+
 
 if __name__ == '__main__':
     xmt = XMT()
