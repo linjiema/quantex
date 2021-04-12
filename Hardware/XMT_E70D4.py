@@ -189,13 +189,14 @@ class XMT():
         location_z = self.read_position_single(channel=4)
         return [location_x, location_y, location_z]
 
-    def move_position_single(self, channel, location=0.000, num_of_device=0):
+    def move_position_single(self, channel, location=0.000, accuracy=0.005, check=True, num_of_device=0):
         # Move the position for single channel
         # Channel 3 can not move location, must be 150V
         # The unit of position is um
+        # The default accuracy is 5nm, check the accuracy by default setting.
         command_b4 = 0
         channel_num = channel - 1
-        if channel_num == 2:
+        if channel_num == 2:  # The channel 3 need to be given a 150V constant voltage, not position
             print('Channel 3 must be 150V.')
             return 1
         self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
@@ -205,6 +206,11 @@ class XMT():
                                              ctypes.c_char(channel_num),
                                              ctypes.c_double(location)  # Move to position
                                              )
+        while check:  # Check if the stage move to the target position
+            temp_location = self.read_position_single(channel=channel)  # Get current location from the build-in sensor
+            if abs(location - temp_location) < accuracy:  # Check if the current location satisfy the accuracy
+                return 0  # If satisfy the requirement, end the function
+            time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
     def clear(self):
