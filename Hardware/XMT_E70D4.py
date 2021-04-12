@@ -1,4 +1,8 @@
 # coding=gbk
+"""
+This file is the functions for CoreTomorrow E70.4 4 channel controller
+
+"""
 import ctypes
 import os
 import sys
@@ -69,6 +73,23 @@ class XMT():
         io_type = chr(io_type)  # Change the return value into unsigned_char
         return loop_type, signal_type, io_type
 
+    def check_all_status(self, num_of_device=0):
+        # Check if all the channel of device is close loop, digital and output
+        # If every channel status is fine, nothing happens and return 0
+        # Else, give a  warning and return 1
+        for i in range(4):
+            loop_status, signal_status, io_type = self.read_status(channel=(i + 1), nmb_of_device=num_of_device)
+            if not i == 2:
+                if not loop_status == 'C' and signal_status == 'D' and io_type == 'O':  # Check status
+                    print('Please set the device status!')
+                    return 0
+            else:
+                if not loop_status == 'O' and signal_status == 'D' and io_type == 'O':  # Check status
+                    print('Please set the device status!')
+                    return 0
+
+        return 1
+
     def set_status(self, channel, nmb_of_device=0):
         # Set the status of the single channel
         # Set three values: Loop type, Signal Type, I/O type
@@ -77,13 +98,22 @@ class XMT():
         channel_num = channel - 1
 
         # The type of loop (Open loop or Close Loop)
-        self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
-                                                ctypes.c_char(1),  # Address of controller(always 1)
-                                                ctypes.c_char(18),  # Command_b3, 18 for loop type
-                                                ctypes.c_char(command_b4),
-                                                ctypes.c_char(channel_num),
-                                                ctypes.c_char('C')
-                                                )
+        if channel == 3:
+            self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
+                                                    ctypes.c_char(1),  # Address of controller(always 1)
+                                                    ctypes.c_char(18),  # Command_b3, 18 for loop type
+                                                    ctypes.c_char(command_b4),
+                                                    ctypes.c_char(channel_num),
+                                                    ctypes.c_char('O')
+                                                    )
+        else:
+            self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
+                                                    ctypes.c_char(1),  # Address of controller(always 1)
+                                                    ctypes.c_char(18),  # Command_b3, 18 for loop type
+                                                    ctypes.c_char(command_b4),
+                                                    ctypes.c_char(channel_num),
+                                                    ctypes.c_char('C')
+                                                    )
 
         # The type of signal (Digital or Analog)
         signal_type = self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
@@ -103,28 +133,30 @@ class XMT():
                                                           ctypes.c_char('O')
                                                           )
 
-    def check_all_status(self, num_of_device=0):
-        # Check if all the channel of device is close loop, digital and output
-        # If every channel status is fine, nothing happens and return 0
-        # Else, give a  warning and return 1
-        for i in range(4):
-            if not i == 2:
-                loop_status, signal_status, io_type = self.read_status(channel=(i + 1), nmb_of_device=num_of_device)
-                if not loop_status == 'C' and signal_status == 'D' and io_type == 'O':  # Check status
-                    print('Please set the device status!')
-                    return 0
-        return 1
-
     def set_all_status(self, num_of_device=0):
         # Set all the channel of device to close loop, digital and output
         for i in range(4):
-            if not i == 2:
-                self.set_status(channel=(i + 1), nmb_of_device=num_of_device)
+            self.set_status(channel=(i + 1), nmb_of_device=num_of_device)
 
-    def move_position(self):
-        pass
+    def set_voltage(self, channel=3, voltage=150.0, num_of_device=0):
+        # Set the voltage for single channel
+        # Default voltage for channel 3 is 150V
+        command_b4 = 0
+        channel_nmm = channel - 1
+        if channel_nmm == 2:
+            if not voltage == 150.0:
+                print('Channel 3 must be 150V.')
+                return 1
+        self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
+                                             ctypes.c_char(1),  # Address of controller(always 1)
+                                             ctypes.c_char(0),  # Command_b3, 0 for send voltage
+                                             ctypes.c_char(command_b4),
+                                             ctypes.c_char(channel_nmm),
+                                             ctypes.c_double(voltage)  # Move to position
+                                             )
+        return 0
 
-    def read_position(self, channel, num_of_device=0):
+    def read_position_single(self, channel, num_of_device=0):
         # Read the position of Channel n
         # Channel 3 do not have location information
         # return the location of selected channel ()
@@ -149,11 +181,67 @@ class XMT():
                                                      )
         return location
 
+    def read_position_all(self):
+        # Read the location of all 3 channels
+        # Return an array of [x, y, z]
+        location_x = self.read_position_single(channel=1)
+        location_y = self.read_position_single(channel=2)
+        location_z = self.read_position_single(channel=4)
+        return [location_x, location_y, location_z]
+
+    def move_position_single(self, channel, location=0.000, num_of_device=0):
+        # Move the position for single channel
+        # Channel 3 can not move location, must be 150V
+        # The unit of position is um
+        command_b4 = 0
+        channel_num = channel - 1
+        if channel_num == 2:
+            print('Channel 3 must be 150V.')
+            return 1
+        self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
+                                             ctypes.c_char(1),  # Address of controller(always 1)
+                                             ctypes.c_char(1),  # Command_b3, 1 for send position
+                                             ctypes.c_char(command_b4),
+                                             ctypes.c_char(channel_num),
+                                             ctypes.c_double(location)  # Move to position
+                                             )
+        return 0
+
+    def clear(self):
+        # Move the position to [0,0,0]
+        # Set Voltage of Channel 3 to 150V.
+        self.set_voltage()
+        self.move_position_single(channel=1)
+        self.move_position_single(channel=2)
+        self.move_position_single(channel=4)
+
 
 if __name__ == '__main__':
     xmt = XMT()
     device = xmt.scan_devices()
     xmt.open_devices(nmb_of_device=device)
     xmt.check_all_status(num_of_device=device)
-    position = xmt.read_position(channel=4)
-    print(position)
+    xmt.move_position_single(channel=1, location=0.524621)
+    xmt.move_position_single(channel=2, location=50.498746513)
+    xmt.move_position_single(channel=4, location=30.14684135)
+    time.sleep(0.1)
+    old_location = xmt.read_position_all()
+    print(old_location)
+    xmt.clear()
+    time.sleep(0.1)
+    new_location = xmt.read_position_all()
+    print(new_location)
+
+
+'''
+    xmt.move_position_single(channel=1, location=0.524621)
+    xmt.move_position_single(channel=2, location=50.498746513)
+    xmt.move_position_single(channel=4, location=30.14684135)
+    time.sleep(0.005)
+    position1 = xmt.read_position(channel=1)
+    print('X = ', position1)
+    position2 = xmt.read_position(channel=2)
+    print('Y = ', position2)
+    position3 = xmt.read_position(channel=4)
+    print('Z = ', position3)
+'''
