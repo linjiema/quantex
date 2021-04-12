@@ -7,6 +7,7 @@ import ctypes
 import os
 import sys
 import time
+import numpy as np
 
 
 class XMT():
@@ -187,18 +188,34 @@ class XMT():
         location_x = self.read_position_single(channel=1)
         location_y = self.read_position_single(channel=2)
         location_z = self.read_position_single(channel=4)
-        return [location_x, location_y, location_z]
+        return location_x, location_y, location_z
 
     def move_position_single(self, channel, location=0.000, accuracy=0.005, check=True, num_of_device=0):
         # Move the position for single channel
         # Channel 3 can not move location, must be 150V
         # The unit of position is um
         # The default accuracy is 5nm, check the accuracy by default setting.
+        # Return 0 means good
+        # Return 1 means try to send location to channel 3
+        # Return 2 means input out of range
         command_b4 = 0
         channel_num = channel - 1
-        if channel_num == 2:  # The channel 3 need to be given a 150V constant voltage, not position
-            print('Channel 3 must be 150V.')
+
+        # The channel 3 need to be given a 150V constant voltage, not position
+        if channel == 3:
+            print('Warning: Can not send position to channel 3! Channel 3 must be 150V.')
             return 1
+
+        # Check the input range
+        if channel == 1 or channel == 2:
+            if location > 100.0:
+                print('Warning: Input out of Range! The movement for X/Y axis is out of range(0.0~150.0um).')
+                return 2
+        else:
+            if location > 50.0:
+                print('Warning: Input out of Range! The movement for Z axis is out of range(0.0~50.0um).')
+                return 2
+
         self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
                                              ctypes.c_char(1),  # Address of controller(always 1)
                                              ctypes.c_char(1),  # Command_b3, 1 for send position
@@ -213,13 +230,48 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def clear(self):
+    def clear(self, num_of_device=0):
         # Move the position to [0,0,0]
         # Set Voltage of Channel 3 to 150V.
-        self.set_voltage()
-        self.move_position_single(channel=1)
-        self.move_position_single(channel=2)
-        self.move_position_single(channel=4)
+        self.set_voltage(num_of_device=num_of_device)
+        self.move_position_single(channel=1, num_of_device=num_of_device)
+        self.move_position_single(channel=2, num_of_device=num_of_device)
+        self.move_position_single(channel=4, num_of_device=num_of_device)
+
+    def move_position_all(self, location=(0.000, 0.000, 0.000), accuracy=0.005, check=True, num_of_device=0):
+        # Move the stage to a new position(3 axis)
+        # The input should be in the form of (X, Y, Z)
+        # The input can not out of moving range
+        # Return 0 means fine
+        # Return -1 means input form is wrong
+        # Return 1 means input out of range
+
+        # Check if the input position data is in right form
+        if not np.size(location) == 3:
+            print('Warning: The form of the location data is wrong!')
+            return -1
+
+        # Check if the input is inside the moving range
+        status_temp = 0
+        status_temp += self.move_position_single(channel=1, location=location[0], check=False, num_of_device=num_of_device)
+        status_temp += self.move_position_single(channel=2, location=location[1], check=False, num_of_device=num_of_device)
+        status_temp += self.move_position_single(channel=4, location=location[2], check=False, num_of_device=num_of_device)
+        if not status_temp == 0:
+            return 1
+
+        # Check if the stage move to the target position
+        while check:
+            temp_location = self.read_position_all()  # Get current location from the build-in sensor
+            for i in range(3):  # Check if all 3 channels move to target position
+                if abs(location[i] - temp_location[i]) < accuracy:
+                    if i == 2:
+                        return 0  # When i == 2, all 3 channels have been tested and met the requirements
+                    continue
+                else:
+                    break  # One of all 3 channels hasn't move to target, need to wait for more time
+            time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
+        return 0
+
 
 
 if __name__ == '__main__':
@@ -227,9 +279,7 @@ if __name__ == '__main__':
     device = xmt.scan_devices()
     xmt.open_devices(nmb_of_device=device)
     xmt.check_all_status(num_of_device=device)
-    xmt.move_position_single(channel=1, location=0.524621)
-    xmt.move_position_single(channel=2, location=50.498746513)
-    xmt.move_position_single(channel=4, location=30.14684135)
+    xmt.move_position_all(location=(5.456545, 2.548253, 51))
     time.sleep(0.1)
     old_location = xmt.read_position_all()
     print(old_location)

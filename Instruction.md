@@ -6,3 +6,5 @@ use
 
 use `conda env create -n env_name -f environment.yaml` and `pip install -r requirement.txt` to create the same environment on the new setup. 
 
+The environment need the support of the following python package:
+- numpy
