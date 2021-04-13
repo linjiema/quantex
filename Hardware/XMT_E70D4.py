@@ -276,9 +276,12 @@ class XMT():
 
         # Check if the input is inside the moving range
         status_temp = 0
-        status_temp += self.move_position_single(channel=1, location=location[0], check=False, num_of_device=num_of_device)
-        status_temp += self.move_position_single(channel=2, location=location[1], check=False, num_of_device=num_of_device)
-        status_temp += self.move_position_single(channel=4, location=location[2], check=False, num_of_device=num_of_device)
+        status_temp += self.move_position_single(channel=1, location=location[0], check=False,
+                                                 num_of_device=num_of_device)
+        status_temp += self.move_position_single(channel=2, location=location[1], check=False,
+                                                 num_of_device=num_of_device)
+        status_temp += self.move_position_single(channel=4, location=location[2], check=False,
+                                                 num_of_device=num_of_device)
         if not status_temp == 0:
             return 1
 
@@ -295,22 +298,27 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def scan(self):
+    def move_define(self):
         pass
 
+    def scanning(self):
+        pass
 
 if __name__ == '__main__':
     xmt = XMT()
     device = xmt.scan_devices()
     xmt.open_devices(nmb_of_device=device)
     xmt.check_all_status(num_of_device=device)
+
+
+    '''
     xmt.move_position_all(location=(5.456545, 2.548253, 1.253656))
     old_location = xmt.read_position_all()
     print(old_location)
     xmt.clear()
     new_location = xmt.read_position_all()
     print(new_location)
-
+    '''
 
 '''
     xmt.move_position_single(channel=1, location=0.524621)
