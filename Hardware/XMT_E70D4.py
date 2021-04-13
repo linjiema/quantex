@@ -246,16 +246,19 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def clear(self, num_of_device=0):
+    def clear(self, check=True, num_of_device=0):
         # Move the position to [0,0,0]
         # Set Voltage of Channel 3 to 150V
-        # Do not have waiting time now
+        # Wait for 0.1s
         # Return 0 means fine
 
         self.set_voltage(num_of_device=num_of_device)
         self.move_position_single(channel=1, num_of_device=num_of_device)
         self.move_position_single(channel=2, num_of_device=num_of_device)
         self.move_position_single(channel=4, num_of_device=num_of_device)
+
+        time.sleep(0.1)
+
         return 0
 
     def move_position_all(self, location=(0.000, 0.000, 0.000), accuracy=0.005, check=True, num_of_device=0):
@@ -305,7 +308,6 @@ if __name__ == '__main__':
     old_location = xmt.read_position_all()
     print(old_location)
     xmt.clear()
-    time.sleep(0.1)
     new_location = xmt.read_position_all()
     print(new_location)
 
