@@ -298,8 +298,21 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def scanning(self):
-        pass
+    def scanning(self, fast_channel=1, slow_channel=2, num_of_device=0):
+        command_b4 = 0
+        fast_channel_num = fast_channel - 1
+        slow_channel_num = slow_channel - 1
+        self.xmt_dll.XMT_COMMAND_SaveDataArrToMCU(ctypes.c_int(num_of_device),
+                                                  ctypes.c_char(1),  # Address of controller(always 1)
+                                                  ctypes.c_char(70),  # Command_b3, 70 for send custom wave form data
+                                                  ctypes.c_char(0),  # command b4
+                                                  ctypes.c_char(3),  # channel
+                                                  ctypes.c_char(0),  # f/B
+                                                  ctypes.byref(waveform),
+                                                  ctypes.c_char(5),
+                                                  ctypes.c_float(50.0),
+                                                  ctypes.c_float(0.0)
+                                                  )
 
     def scan_set_test(self, waveforminput):
         a = ctypes.c_float * 5
@@ -333,7 +346,7 @@ class XMT():
                                                   )
         for i in range(100):
             location = self.read_position_single(channel=4)
-            print('test time', i+1, ':', location)
+            print('test time', i + 1, ':', location)
             time.sleep(0.001)
 
     def send(self):
@@ -349,7 +362,7 @@ class XMT():
                                                  )
         for i in range(100):
             location = self.read_position_single(channel=1)
-            print('test time', i+1, ':', location)
+            print('test time', i + 1, ':', location)
             time.sleep(0.002)
 
     def sendstop(self):
@@ -376,13 +389,10 @@ if __name__ == '__main__':
     print(new_location)
     '''
 
-
-
     arr = [10, 20, 30, 40, 50]
     xmt.scan_set_test(arr)
     xmt.scan_state_test(state=83)
     xmt.scan_state_test(state=ord('P'))
-
 
 '''
     xmt.move_position_all(location=(80, 80, 50))
