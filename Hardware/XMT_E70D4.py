@@ -113,7 +113,7 @@ class XMT():
                                                     ctypes.c_char(18),  # Command_b3, 18 for loop type
                                                     ctypes.c_char(command_b4),
                                                     ctypes.c_char(channel_num),
-                                                    ctypes.c_char('O')
+                                                    ctypes.c_char(ord('O'))
                                                     )
         else:
             self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
@@ -121,7 +121,7 @@ class XMT():
                                                     ctypes.c_char(18),  # Command_b3, 18 for loop type
                                                     ctypes.c_char(command_b4),
                                                     ctypes.c_char(channel_num),
-                                                    ctypes.c_char('C')
+                                                    ctypes.c_char(ord('C'))
                                                     )
 
         # The type of signal (Digital or Analog)
@@ -130,7 +130,7 @@ class XMT():
                                                               ctypes.c_char(20),  # Command_b3, 20 for signal type
                                                               ctypes.c_char(command_b4),
                                                               ctypes.c_char(channel_num),
-                                                              ctypes.c_char('D')
+                                                              ctypes.c_char(ord('D'))
                                                               )
 
         # The type of I/O (Input or Output)
@@ -139,7 +139,7 @@ class XMT():
                                                           ctypes.c_char(22),  # Command_b3, 22 for I/O type
                                                           ctypes.c_char(command_b4),
                                                           ctypes.c_char(channel_num),
-                                                          ctypes.c_char('O')
+                                                          ctypes.c_char(ord('O'))
                                                           )
 
     def set_all_status(self, num_of_device=0):
@@ -253,9 +253,9 @@ class XMT():
         # Return 0 means fine
 
         self.set_voltage(num_of_device=num_of_device)
-        self.move_position_single(channel=1, num_of_device=num_of_device)
-        self.move_position_single(channel=2, num_of_device=num_of_device)
-        self.move_position_single(channel=4, num_of_device=num_of_device)
+        self.move_position_single(channel=1, num_of_device=num_of_device, check=False)
+        self.move_position_single(channel=2, num_of_device=num_of_device, check=False)
+        self.move_position_single(channel=4, num_of_device=num_of_device, check=False)
 
         time.sleep(0.1)
 
@@ -298,24 +298,67 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def move_define(self):
-        pass
-
     def scanning(self):
         pass
 
-    def scan_test(self, waveforminput):
-        a = ctypes.c_double * 48
+    def scan_set_test(self, waveforminput):
+        a = ctypes.c_float * 5
         waveform = a(*waveforminput)
-        temp = self.xmt_dll.XMT_COMMAND_SaveDataArrToMCU(ctypes.c_int(0),
-                                                         ctypes.c_char(1),
-                                                         ctypes.c_char(70),  # command b3
-                                                         ctypes.c_char(0),  # command b4
-                                                         ctypes.c_char(0),  # channel
-                                                         ctypes.c_char(0),  # f/B
-                                                         ctypes.c_double(waveform)
+        self.xmt_dll.XMT_COMMAND_SaveDataArrToMCU(ctypes.c_int(0),
+                                                  ctypes.c_char(1),
+                                                  ctypes.c_char(70),  # command b3
+                                                  ctypes.c_char(0),  # command b4
+                                                  ctypes.c_char(3),  # channel
+                                                  ctypes.c_char(0),  # f/B
+                                                  ctypes.byref(waveform),
+                                                  ctypes.c_char(5),
+                                                  ctypes.c_float(50.0),
+                                                  ctypes.c_float(0.0)
+                                                  )
+        self.xmt_dll.XMT_COMMAND_SetMCUSendDataTimer(ctypes.c_int(0),
+                                                     ctypes.c_char(1),
+                                                     ctypes.c_char(71),
+                                                     ctypes.c_char(0),
+                                                     ctypes.c_char(3),
+                                                     ctypes.c_float(20)
+                                                     )
 
-                                                         )
+    def scan_state_test(self, state):
+        self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(0),
+                                                  ctypes.c_char(1),
+                                                  ctypes.c_char(72),
+                                                  ctypes.c_char(0),
+                                                  ctypes.c_char(3),
+                                                  ctypes.c_char(state)
+                                                  )
+        for i in range(100):
+            location = self.read_position_single(channel=4)
+            print('test time', i+1, ':', location)
+            time.sleep(0.001)
+
+    def send(self):
+        self.xmt_dll.XMT_COMMAND_WaveSetMultWave(ctypes.c_int(0),
+                                                 ctypes.c_char(1),
+                                                 ctypes.c_char(16),
+                                                 ctypes.c_char(0),
+                                                 ctypes.c_char(0),
+                                                 ctypes.c_char(ord('Z')),
+                                                 ctypes.c_double(10),
+                                                 ctypes.c_double(10),
+                                                 ctypes.c_double(10)
+                                                 )
+        for i in range(100):
+            location = self.read_position_single(channel=1)
+            print('test time', i+1, ':', location)
+            time.sleep(0.002)
+
+    def sendstop(self):
+        self.xmt_dll.XMT_COMMAND_WaveSetMultWaveStop(ctypes.c_int(0),
+                                                     ctypes.c_char(1),
+                                                     ctypes.c_char(17),
+                                                     ctypes.c_char(0),
+                                                     ctypes.c_char(0)
+                                                     )
 
 
 if __name__ == '__main__':
@@ -324,15 +367,32 @@ if __name__ == '__main__':
     xmt.open_devices(nmb_of_device=device)
     xmt.check_all_status(num_of_device=device)
 
-
     '''
-    xmt.move_position_all(location=(5.456545, 2.548253, 1.253656))
-    old_location = xmt.read_position_all()
-    print(old_location)
-    xmt.clear()
+    xmt.send()
+    time.sleep(1)
+    xmt.sendstop()
+    time.sleep(1)
     new_location = xmt.read_position_all()
     print(new_location)
     '''
+
+
+
+    arr = [10, 20, 30, 40, 50]
+    xmt.scan_set_test(arr)
+    xmt.scan_state_test(state=83)
+    xmt.scan_state_test(state=ord('P'))
+
+
+'''
+    xmt.move_position_all(location=(80, 80, 50))
+    old_location = xmt.read_position_all()
+    print(old_location)
+    time.sleep(2)
+    xmt.clear()
+    new_location = xmt.read_position_all()
+    print(new_location)
+'''
 
 '''
     xmt.move_position_single(channel=1, location=0.524621)
