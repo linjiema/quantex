@@ -304,6 +304,20 @@ class XMT():
     def scanning(self):
         pass
 
+    def scan_test(self, waveforminput):
+        a = ctypes.c_double * 48
+        waveform = a(*waveforminput)
+        temp = self.xmt_dll.XMT_COMMAND_SaveDataArrToMCU(ctypes.c_int(0),
+                                                         ctypes.c_char(1),
+                                                         ctypes.c_char(70),  # command b3
+                                                         ctypes.c_char(0),  # command b4
+                                                         ctypes.c_char(0),  # channel
+                                                         ctypes.c_char(0),  # f/B
+                                                         ctypes.c_double(waveform)
+
+                                                         )
+
+
 if __name__ == '__main__':
     xmt = XMT()
     device = xmt.scan_devices()
