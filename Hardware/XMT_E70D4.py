@@ -10,7 +10,7 @@ import time
 import numpy as np
 
 
-class XMT():
+class XMT:
     def __init__(self):
 
         dll = os.path.dirname(__file__) + '/DLL/XMT_DLL_USB.dll'  # Give the path of dll file
@@ -124,23 +124,23 @@ class XMT():
                                                     ctypes.c_char(ord('C'))
                                                     )
 
-        # The type of signal (Digital or Analog)
-        signal_type = self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
-                                                              ctypes.c_char(1),  # Address of controller(always 1)
-                                                              ctypes.c_char(20),  # Command_b3, 20 for signal type
-                                                              ctypes.c_char(command_b4),
-                                                              ctypes.c_char(channel_num),
-                                                              ctypes.c_char(ord('D'))
-                                                              )
+            # The type of signal (Digital or Analog)
+            self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
+                                                    ctypes.c_char(1),  # Address of controller(always 1)
+                                                    ctypes.c_char(20),  # Command_b3, 20 for signal type
+                                                    ctypes.c_char(command_b4),
+                                                    ctypes.c_char(channel_num),
+                                                    ctypes.c_char(ord('D'))
+                                                    )
 
-        # The type of I/O (Input or Output)
-        io_type = self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
-                                                          ctypes.c_char(1),  # Address of controller(always 1)
-                                                          ctypes.c_char(22),  # Command_b3, 22 for I/O type
-                                                          ctypes.c_char(command_b4),
-                                                          ctypes.c_char(channel_num),
-                                                          ctypes.c_char(ord('O'))
-                                                          )
+            # The type of I/O (Input or Output)
+            self.xmt_dll.XMT_COMMAND_Assist_SetFlag(ctypes.c_int(nmb_of_device),
+                                                    ctypes.c_char(1),  # Address of controller(always 1)
+                                                    ctypes.c_char(22),  # Command_b3, 22 for I/O type
+                                                    ctypes.c_char(command_b4),
+                                                    ctypes.c_char(channel_num),
+                                                    ctypes.c_char(ord('O'))
+                                                    )
 
     def set_all_status(self, num_of_device=0):
         # Set all the channel of device to close loop, digital and output
@@ -246,7 +246,7 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def clear(self, check=True, num_of_device=0):
+    def clear(self, num_of_device=0):
         # Move the position to [0,0,0]
         # Set Voltage of Channel 3 to 150V
         # Wait for 0.1s
@@ -298,22 +298,113 @@ class XMT():
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def scanning(self, fast_channel=1, slow_channel=2, num_of_device=0):
+    def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
+        # Scan one line
+        # 48 points. First 40 define a line, last 8 stay at endpoint to make sure it reach the set point
+        # Unit is um and ms
+        # The maximum for channel 1 and 2 is 100um, for channel 4 is 50um
+        # Return 0 means fine
+        # Return 1 means scan size out of range
+        # Return 2 means try to use channel 3 to scan
+
         command_b4 = 0
-        fast_channel_num = fast_channel - 1
-        slow_channel_num = slow_channel - 1
+        channel_num = channel - 1
+
+        # Set the scan limit based on channel
+        min_limit = 0.0
+        if channel == 4:
+            max_limit = 50.0
+        else:
+            max_limit = 100.0
+
+        if channel == 3:
+            print('Warning: The channel 3 can not scan!')
+            return 2
+
+        # Check the scan size
+        if start_point < min_limit or end_point > max_limit:
+            print('Warning: Scan size out of range!')
+            return 1
+
+        # Create the wave form array
+        wave_temp = np.linspace(start_point, end_point, 40)
+        wave = wave_temp.tolist()
+        for i in range(8):
+            wave.append(end_point)
+
+        # Define the 'point' of the array
+        type_def = ctypes.c_float * 48
+        waveform = type_def(*wave)
+
+        # Send the wave form data to controller
         self.xmt_dll.XMT_COMMAND_SaveDataArrToMCU(ctypes.c_int(num_of_device),
                                                   ctypes.c_char(1),  # Address of controller(always 1)
                                                   ctypes.c_char(70),  # Command_b3, 70 for send custom wave form data
-                                                  ctypes.c_char(0),  # command b4
-                                                  ctypes.c_char(3),  # channel
-                                                  ctypes.c_char(0),  # f/B
-                                                  ctypes.byref(waveform),
-                                                  ctypes.c_char(5),
-                                                  ctypes.c_float(50.0),
-                                                  ctypes.c_float(0.0)
+                                                  ctypes.c_char(command_b4),
+                                                  ctypes.c_char(channel_num),
+                                                  ctypes.c_char(0),  # 0 for forward, 1 for back
+                                                  ctypes.byref(waveform),  # The self_defined wave form
+                                                  ctypes.c_char(48),  # Send 48 points
+                                                  ctypes.c_float(max_limit),  # The limit for the maximum input
+                                                  ctypes.c_float(min_limit)  # The limit for the minimum input
                                                   )
 
+        # Define the scanning time for single line
+        time_interval = 1000.0 / (line_rate * 48.0)
+
+        # Send the time setting to controller
+        self.xmt_dll.XMT_COMMAND_SetMCUSendDataTimer(ctypes.c_int(num_of_device),
+                                                     ctypes.c_char(1),  # Address of controller(always 1)
+                                                     ctypes.c_char(71),  # Command_b3, 71 for send time setting
+                                                     ctypes.c_char(command_b4),
+                                                     ctypes.c_char(channel_num),
+                                                     ctypes.c_float(time_interval)  # The time interval between 2
+                                                     # locations
+                                                     )
+        return 0
+
+    def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, num_of_device=0):
+        # Do a single line scan for channel
+        # Return to the start point when finish a single line scanning
+        # 'S' for start, 'T' for stop, 'P' for pause
+        # Return 0 means fine
+        # Return 1 means try to scan on channel 3
+
+        command_b4 = 0
+        channel_num = channel - 1
+
+        if channel == 3:
+            print('Warning: Channel 3 can not scan!')
+            return 1
+
+        self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(num_of_device),
+                                                  ctypes.c_char(1),  # Address of controller(always 1)
+                                                  ctypes.c_char(72),  # Command_b3, 72 for start/stop scan
+                                                  ctypes.c_char(command_b4),
+                                                  ctypes.c_char(channel_num),
+                                                  ctypes.c_char(ord('S'))  # Start to scan
+                                                  )
+
+        # Check if the stage move to the target position
+        while True:
+            temp_location = self.read_position_single(channel=channel)  # Get current location from the build-in sensor
+            if abs(end_point - temp_location) < accuracy:  # Check if the current location satisfy the accuracy
+                break  # If satisfy the requirement, end the function
+            time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
+
+        # If move to the target position, stop scanning
+        self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(num_of_device),
+                                                  ctypes.c_char(1),  # Address of controller(always 1)
+                                                  ctypes.c_char(72),  # Command_b3, 72 for start/stop scan
+                                                  ctypes.c_char(command_b4),
+                                                  ctypes.c_char(channel_num),
+                                                  ctypes.c_char(ord('T'))  # Stop scan
+                                                  )
+
+        # Move back to the start point
+        self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
+        return 0
+    '''
     def scan_set_test(self, waveforminput):
         a = ctypes.c_float * 5
         waveform = a(*waveforminput)
@@ -348,31 +439,7 @@ class XMT():
             location = self.read_position_single(channel=4)
             print('test time', i + 1, ':', location)
             time.sleep(0.001)
-
-    def send(self):
-        self.xmt_dll.XMT_COMMAND_WaveSetMultWave(ctypes.c_int(0),
-                                                 ctypes.c_char(1),
-                                                 ctypes.c_char(16),
-                                                 ctypes.c_char(0),
-                                                 ctypes.c_char(0),
-                                                 ctypes.c_char(ord('Z')),
-                                                 ctypes.c_double(10),
-                                                 ctypes.c_double(10),
-                                                 ctypes.c_double(10)
-                                                 )
-        for i in range(100):
-            location = self.read_position_single(channel=1)
-            print('test time', i + 1, ':', location)
-            time.sleep(0.002)
-
-    def sendstop(self):
-        self.xmt_dll.XMT_COMMAND_WaveSetMultWaveStop(ctypes.c_int(0),
-                                                     ctypes.c_char(1),
-                                                     ctypes.c_char(17),
-                                                     ctypes.c_char(0),
-                                                     ctypes.c_char(0)
-                                                     )
-
+    '''
 
 if __name__ == '__main__':
     xmt = XMT()
@@ -388,11 +455,6 @@ if __name__ == '__main__':
     new_location = xmt.read_position_all()
     print(new_location)
     '''
-
-    arr = [10, 20, 30, 40, 50]
-    xmt.scan_set_test(arr)
-    xmt.scan_state_test(state=83)
-    xmt.scan_state_test(state=ord('P'))
 
 '''
     xmt.move_position_all(location=(80, 80, 50))
