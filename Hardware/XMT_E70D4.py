@@ -19,36 +19,54 @@ class XMT:
         self.xmt_dll = ctypes.cdll.LoadLibrary(dll)
 
     def scan_devices(self):
-        # Scan the devices before using it
-        # Print the number of connected devices
-        # Return the number of connected devices
+        """
+        Scan the devices before using it
+
+        Print the number of connected devices
+
+        Return the number of connected devices
+        """
 
         nmb_of_device = self.xmt_dll.ScanUsbDevice()
         print('%d device has connected.' % nmb_of_device)
         return nmb_of_device - 1
 
     def open_devices(self, nmb_of_device=0):
-        # Open the device of nmb_of_device
-        # If not open successfully, print 'Fail to open ...'
-        # nmb_of_device start from 0
-        # Return 0 means fine
-        # Return 1 means fail to open the device
+        """
+        Open the device of nmb_of_device
+
+        If not open successfully, print 'Fail to open ...'
+
+        nmb_of_device starts from 0
+
+        Return 0 means fine
+
+        Return 1 means fail to open the device
+        """
+
         if not self.xmt_dll.OpenUsbPython(ctypes.c_int(nmb_of_device)):
             print('Warning: Failed to open device %d!' % nmb_of_device)
             return 1
         return 0
 
     def close_devices(self, nmb_of_device=0):
-        # Close the device of nmb_of_device
-        # If not Close successfully, print 'Fail to open ...'
-        # nmb_of_device start from 0
+        """
+        Close the device of nmb_of_device
+
+        If not Close successfully, print 'Fail to open ...'
+
+        nmb_of_device start from 0
+        """
 
         if not self.xmt_dll.CloseUsbNumOfDevice(ctypes.c_int(nmb_of_device)):
             print('Warning: Failed to close device %d!' % nmb_of_device)
 
     def read_status(self, channel, nmb_of_device=0):
-        # Read the status of the single channel
-        # Return three values: Loop type, Signal Type, I/O type
+        """
+        Read the status of the single channel
+
+        Return three values: Loop type, Signal Type, I/O type
+        """
 
         command_b4 = 0  # Define command_b4(always 0, have no meaning)
         channel_num = channel - 1
@@ -82,9 +100,13 @@ class XMT:
         return loop_type, signal_type, io_type
 
     def check_all_status(self, num_of_device=0):
-        # Check if all the channel of device is close loop, digital and output
-        # Return 0 means fine
-        # Return 1 means something is wrong
+        """
+        Check if all the channel of device is close loop, digital and output
+
+        Return 0 means fine
+
+        Return 1 means something is wrong
+        """
 
         for i in range(4):
             loop_status, signal_status, io_type = self.read_status(channel=(i + 1), nmb_of_device=num_of_device)
@@ -100,9 +122,14 @@ class XMT:
         return 0
 
     def set_status(self, channel, nmb_of_device=0):
-        # Set the status of the single channel
-        # Set three values: Loop type, Signal Type, I/O type
-        # The status will be set as Close Loop, Digital, Output
+        """
+        Set the status of the single channel
+
+        Set three values: Loop type, Signal Type, I/O type
+
+        The status will be set as Close Loop, Digital, Output
+        """
+
         command_b4 = 0  # Define command_b4(always 0, have no meaning)
         channel_num = channel - 1
 
@@ -143,15 +170,23 @@ class XMT:
                                                     )
 
     def set_all_status(self, num_of_device=0):
-        # Set all the channel of device to close loop, digital and output
+        """
+        Set all the channel of device to close loop, digital and output
+        """
+
         for i in range(4):
             self.set_status(channel=(i + 1), nmb_of_device=num_of_device)
 
     def set_voltage(self, channel=3, voltage=150.0, num_of_device=0):
-        # Set the voltage for single channel
-        # Default voltage for channel 3 is 150V
-        # Return 0 means fine
-        # Return 1 means try to give a non-150V voltage to Channel 3
+        """
+        Set the voltage for single channel
+
+        Default voltage for channel 3 is 150V
+
+        Return 0 means fine
+
+        Return 1 means try to give a non-150V voltage to Channel 3
+        """
 
         command_b4 = 0
         channel_nmm = channel - 1
@@ -170,10 +205,15 @@ class XMT:
         return 0
 
     def read_position_single(self, channel, num_of_device=0):
-        # Read the position of Channel n
-        # Channel 3 do not have location information
-        # Return the location of selected channel ()
-        # Return 1 means try to return the location of channel 3 which only have constant 150 V Voltage
+        """
+        Read the position of Channel n
+
+        Channel 3 do not have location information
+
+        Return the location of selected channel ()
+
+        Return 1 means try to return the location of channel 3 which only have constant 150 V Voltage
+        """
 
         command_b4 = 0  # Define command_b4(always 0, have no meaning)
         channel_num = channel - 1
@@ -197,8 +237,11 @@ class XMT:
         return location
 
     def read_position_all(self):
-        # Read the location of all 3 channels
-        # Return an array of [x, y, z]
+        """
+        Read the location of all 3 channels
+
+        Return an array of [x, y, z]
+        """
 
         location_x = self.read_position_single(channel=1)
         location_y = self.read_position_single(channel=2)
@@ -206,13 +249,21 @@ class XMT:
         return location_x, location_y, location_z
 
     def move_position_single(self, channel, location=0.000, accuracy=0.005, check=True, num_of_device=0):
-        # Move the position for single channel
-        # Channel 3 can not move location, must be 150V
-        # The unit of position is um
-        # The default accuracy is 5nm, check the accuracy by default setting.
-        # Return 0 means good
-        # Return 1 means try to send location to channel 3
-        # Return 2 means input out of range
+        """
+        Move the position for single channel
+
+        Channel 3 can not move location, must be 150V
+
+        The unit of position is um
+
+        The default accuracy is 5nm, check the accuracy by default setting.
+
+        Return 0 means good
+
+        Return 1 means try to send location to channel 3
+
+        Return 2 means input out of range
+        """
 
         command_b4 = 0
         channel_num = channel - 1
@@ -247,10 +298,15 @@ class XMT:
         return 0
 
     def clear(self, num_of_device=0):
-        # Move the position to [0,0,0]
-        # Set Voltage of Channel 3 to 150V
-        # Wait for 0.1s
-        # Return 0 means fine
+        """
+        Move the position to [0,0,0]
+
+        Set Voltage of Channel 3 to 150V
+
+        Wait for 0.1s
+
+        Return 0 means fine
+        """
 
         self.set_voltage(num_of_device=num_of_device)
         self.move_position_single(channel=1, num_of_device=num_of_device, check=False)
@@ -262,12 +318,19 @@ class XMT:
         return 0
 
     def move_position_all(self, location=(0.000, 0.000, 0.000), accuracy=0.005, check=True, num_of_device=0):
-        # Move the stage to a new position(3 axis)
-        # The input should be in the form of (X, Y, Z)
-        # The input can not out of moving range
-        # Return 0 means fine
-        # Return -1 means input form is wrong
-        # Return 1 means input out of range
+        """
+        Move the stage to a new position(3 axis)
+
+        The input should be in the form of (X, Y, Z)
+
+        The input can not out of moving range
+
+        Return 0 means fine
+
+        Return -1 means input form is wrong
+
+        Return 1 means input out of range
+        """
 
         # Check if the input position data is in right form
         if not np.size(location) == 3:
@@ -299,13 +362,21 @@ class XMT:
         return 0
 
     def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
-        # Scan one line
-        # 48 points. First 40 define a line, last 8 stay at endpoint to make sure it reach the set point
-        # Unit is um and ms
-        # The maximum for channel 1 and 2 is 100um, for channel 4 is 50um
-        # Return 0 means fine
-        # Return 1 means scan size out of range
-        # Return 2 means try to use channel 3 to scan
+        """
+        Scan one line
+
+        48 points. First 40 define a line, last 8 stay at endpoint to make sure it reach the set point
+
+        Unit is um and ms
+
+        The maximum for channel 1 and 2 is 100um, for channel 4 is 50um
+
+        Return 0 means fine
+
+        Return 1 means scan size out of range
+
+        Return 2 means try to use channel 3 to scan
+        """
 
         command_b4 = 0
         channel_num = channel - 1
@@ -364,11 +435,17 @@ class XMT:
         return 0
 
     def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, num_of_device=0):
-        # Do a single line scan for channel
-        # Return to the start point when finish a single line scanning
-        # 'S' for start, 'T' for stop, 'P' for pause
-        # Return 0 means fine
-        # Return 1 means try to scan on channel 3
+        """
+        Do a single line scan for channel
+
+        Return to the start point when finish a single line scanning
+
+        'S' for start, 'T' for stop, 'P' for pause
+
+        Return 0 means fine
+
+        Return 1 means try to scan on channel 3
+        """
 
         command_b4 = 0
         channel_num = channel - 1
