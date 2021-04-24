@@ -29,7 +29,7 @@ class Nontrigger_location_sensor():
                                                              )
 
         self.location_sensor.timing.cfg_samp_clk_timing(rate=1000,
-                                                        source='',   # need to set the terminal
+                                                        source='',  # need to set the terminal
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                         samps_per_chan=1000)
@@ -80,6 +80,29 @@ class TriggeredCounter():
         # May need to change the size of the list we get
         # (the processing will decrease the size by 1)
         # maybe need to get 1 more data
+
+
+class HardwareTimer():
+    def __init__(self):
+        self.count_freq = 1000
+
+    def init_task(self):
+        self.counter_out = nidaqmx.Task()
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='',  # need to set the terminal
+                                                            name_to_assign_to_channel="",
+                                                            units=nidaqmx.constants.FrequencyUnits.HZ,
+                                                            idle_state=nidaqmx.constants.Level.LOW,
+                                                            initial_delay=0.0,
+                                                            freq=self.count_freq,
+                                                            duty_cycle=0.5
+                                                            )
+        self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                    samps_per_chan=1000)
+
+    def change_freq(self, new_freq):
+        self.count_freq = new_freq
+        self.counter_out.close()
+        self.init_task()
 
 
 if __name__ == '__main__':
