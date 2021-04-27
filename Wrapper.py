@@ -12,4 +12,4 @@ from collections import deque
 
 from GUI.GUI import Ui_MainWindow
 from Threads import ConfocalScanThread
-from Hardware import All
+from Hardware import AllHardware
