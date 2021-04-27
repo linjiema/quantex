@@ -1,6 +1,18 @@
 certifi==2020.12.5
+click==7.1.2
 mkl-fft==1.3.0
 mkl-random==1.1.1
 mkl-service==2.3.0
-numpy @ file:///opt/concourse/worker/volumes/live/a1b5ea96-b05c-40ba-5dfb-4542ece1c186/volume/numpy_and_numpy_base_1603491228242/work
-six @ file:///opt/concourse/worker/volumes/live/f983ba11-c9fe-4dff-7ce7-d89b95b09771/volume/six_1605205318156/work
+nidaqmx==1.0.0.dev0
+numpy @ file:///C:/ci/numpy_and_numpy_base_1603468620949/work
+PyQt5==5.15.2
+pyqt5-plugins==5.15.2.2.1.0
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.8.1
+pyqt5-tools==5.15.2.3.0.2
+python-dotenv==0.17.0
+qt5-applications==5.15.2.2.1
+qt5-tools==5.15.2.1.0.1
+QtPy==1.9.0
+six @ file:///C:/ci/six_1605205426665/work
+wincertstore==0.2
