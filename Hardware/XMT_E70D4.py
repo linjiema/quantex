@@ -4,9 +4,7 @@ This file is the functions for CoreTomorrow E70.4 4 channel controller
 
 """
 import ctypes
-import os
-import sys
-import time
+import os, sys, time
 import numpy as np
 
 
