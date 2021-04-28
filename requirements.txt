@@ -24,3 +24,6 @@ QtPy==1.9.0
 six @ file:///C:/ci/six_1605205426665/work
 tornado @ file:///C:/ci/tornado_1606935947090/work
 wincertstore==0.2
+
+numpy~=1.19.2
+matplotlib~=3.3.4
