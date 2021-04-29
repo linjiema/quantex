@@ -10,8 +10,9 @@ from Hardware.NI_PCIe_6321 import HardwareTimer
 class AllHardware():
     def __init__(self):
         self.mover = XMT()
-        self.location_sensor = TriggeredLocationSensor
+        self.triggered_location_sensor = TriggeredLocationSensor
         self.triggered_counter = TriggeredCounter
+        self.timer = HardwareTimer
 
     def cleanup(self):
         pass

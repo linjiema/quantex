@@ -17,7 +17,7 @@ class TriggeredLocationSensor():
     def __init__(self):
         pass
 
-    def init_location_sensing_task(self):
+    def init_task(self):
         self.location_sensor = nidaqmx.Task()
         self.location_sensor.ai_channels.add_ai_voltage_chan(physical_channel='Dev1/ai5',
                                                              name_to_assign_to_channel="",
@@ -52,7 +52,7 @@ class TriggeredCounter():
     def __init__(self):
         pass
 
-    def init_tasks(self):
+    def init_task(self):
         self.counter = nidaqmx.Task()
         self.counter.ci_channels.add_ci_count_edges_chan(counter='',
                                                          name_to_assign_to_channel="",
@@ -103,6 +103,9 @@ class HardwareTimer():
         self.count_freq = new_freq
         self.counter_out.close()
         self.init_task()
+
+    def start_timer(self):
+        self.counter_out.start()
 
 
 if __name__ == '__main__':
