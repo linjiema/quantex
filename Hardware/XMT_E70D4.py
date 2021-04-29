@@ -432,6 +432,51 @@ class XMT:
                                                      )
         return 0
 
+    def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, line_rate=4, num_of_device=0):
+        """
+        Do a single line scan for channel
+
+        Return to the start point when finish a single line scanning
+
+        'S' for start, 'T' for stop, 'P' for pause
+
+        Return 0 means fine
+
+        Return 1 means try to scan on channel 3
+        """
+
+        command_b4 = 0
+        channel_num = channel - 1
+
+        if channel == 3:
+            print('Warning: Channel 3 can not scan!')
+            return 1
+
+        self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(num_of_device),
+                                                  ctypes.c_char(1),  # Address of controller(always 1)
+                                                  ctypes.c_char(72),  # Command_b3, 72 for start/stop scan
+                                                  ctypes.c_char(command_b4),
+                                                  ctypes.c_char(channel_num),
+                                                  ctypes.c_char(ord('S'))  # Start to scan
+                                                  )
+
+        time.sleep(2 / (3 * line_rate))  # Wait for 1.5 T
+
+        # If move to the target position, stop scanning
+        self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(num_of_device),
+                                                  ctypes.c_char(1),  # Address of controller(always 1)
+                                                  ctypes.c_char(72),  # Command_b3, 72 for start/stop scan
+                                                  ctypes.c_char(command_b4),
+                                                  ctypes.c_char(channel_num),
+                                                  ctypes.c_char(ord('T'))  # Stop scan
+                                                  )
+
+        # Move back to the start point
+        self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
+        return 0
+
+
+'''
     def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, num_of_device=0):
         """
         Do a single line scan for channel
@@ -479,7 +524,9 @@ class XMT:
         # Move back to the start point
         self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
         return 0
-    '''
+'''
+
+'''
     def scan_set_test(self, waveforminput):
         a = ctypes.c_float * 5
         waveform = a(*waveforminput)
@@ -514,7 +561,7 @@ class XMT:
             location = self.read_position_single(channel=4)
             print('test time', i + 1, ':', location)
             time.sleep(0.001)
-    '''
+'''
 
 if __name__ == '__main__':
     xmt = XMT()
