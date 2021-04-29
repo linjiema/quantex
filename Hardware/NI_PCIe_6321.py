@@ -1,6 +1,5 @@
 """
 This file is the functions for NI PCIe-6321 DAQ
-
 """
 import collections
 import ctypes
@@ -104,7 +103,7 @@ class HardwareTimer():
         self.counter_out.close()
         self.init_task()
 
-    def start_timer(self):
+    def start_count(self):
         self.counter_out.start()
 
 
