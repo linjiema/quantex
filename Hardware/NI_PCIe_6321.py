@@ -13,7 +13,7 @@ import numpy as np
 import nidaqmx
 
 
-class Triggered_location_sensor():
+class TriggeredLocationSensor():
     def __init__(self):
         pass
 
