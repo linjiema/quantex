@@ -18,4 +18,7 @@ class MoveThread(QtCore.QThread):
 
     def __init__(self, hardware=None, parent=None):
         super().__init__(parent)
-        pass
+        self._hardware = hardware
+        self.command = []
+
+
