@@ -3,7 +3,7 @@ This Thread is used to find the point has the max value of counts
 """
 from PyQt5 import QtCore
 import sys
-import numpy
+import numpy as np
 
 
 class MaxThread(QtCore.QThread):
@@ -23,4 +23,28 @@ class MaxThread(QtCore.QThread):
         self.step = 0.1  # Micron
 
     def run(self):
-        self._hardware.
+        self._hardware.one_time_counter.count_freq = self.count_freq
+        self._hardware.one_time_counter.init_task()
+
+        self.scan(__channel=1)
+        self.scan(__channel=2)
+        self.scan(__channel=4)
+
+        self._hardware.one_time_counter.close()
+        self.moved.emit(self._hardware.mover.read_position_single(channel=1), self._hardware.mover.read_position_single(channel=2), self._hardware.mover.read_position_single(channel=4))
+
+    def scan(self, __channel):
+        pos = self._hardware.mover.read_position_single(channel=__channel)
+        pos_list = np.arange(start=pos - 3 * self.step, stop=pos + 3 * self.step, step=self.step)
+        max_cts = 0
+
+        for point in pos_list:
+            self._hardware.mover.move_position_single(channel=__channel, location=point)
+            cts = self._hardware.one_time_counter.count_once()
+            self.counts.emit(cts)
+
+            if cts > max_cts:
+                pos = point
+                max_cts = cts
+
+        self._hardware.mover.move_position_single(channel=__channel, location=pos)
