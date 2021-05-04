@@ -106,6 +106,64 @@ class HardwareTimer():
     def start_count(self):
         self.counter_out.start()
 
+class OneTimeCounter_HardwareTimer():
+    """
+    This class define a counter that counts incoming pulse at a fixe count frequency
+    When finished, call self.close() to clean up.
+    """
+    def __init__(self):
+        self.count_freq = 1
+
+    def init_task(self):
+        # Output as timer
+        self.counter_out = nidaqmx.Task()
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='',  # need to set the terminal
+                                                            name_to_assign_to_channel="",
+                                                            units=nidaqmx.constants.FrequencyUnits.HZ,
+                                                            idle_state=nidaqmx.constants.Level.LOW,
+                                                            initial_delay=0.0,
+                                                            freq=self.count_freq,
+                                                            duty_cycle=0.5
+                                                            )
+        self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                    samps_per_chan=1000)
+        # Input as counter
+        self.counter_in = nidaqmx.Task()
+        self.counter_in.ci_channels.add_ci_count_edges_chan(counter='',
+                                                         name_to_assign_to_channel="",
+                                                         edge=nidaqmx.constants.Edge.RISING,
+                                                         initial_count=0,
+                                                         count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        self.counter_in.timing.cfg_samp_clk_timing(rate=1000,
+                                                source='',  # need to set the terminal
+                                                active_edge=nidaqmx.constants.Edge.RISING,
+                                                sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                samps_per_chan=1000)
+
+    def count_once(self):
+        freq = self.count_freq
+        self.counter_in.start()
+        self.counter_out.start()
+        self.counter_in.wait_until_done()
+        c1, c2 = self.counter_in.read(number_of_samples_per_channel=2, timeout=10.0)
+        self.counter_in.stop()
+        self.counter_out.stop()
+        if c1 > c2:
+            return (c2+0xFFFFFFFF+1-c1) * freq
+        else:
+            return (c2-c1) * freq
+
+    def change_freq(self, new_freq):
+        self.count_freq = new_freq
+        self.counter_out.close()
+        self.init_task()
+
+    def close(self):
+        self.counter_in.close()
+        self.counter_out.close()
+
+
+
 
 if __name__ == '__main__':
     daq = Nontrigger_location_sensor()
