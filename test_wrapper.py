@@ -125,8 +125,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
 
-    # Methods
-
+    # Load default setting
     def load_defaults(self, f_name='defaults.txt'):
         if f_name == 'defaults.txt':
             f = open(os.path.join(os.path.dirname(__file__), f_name), 'r')
@@ -154,72 +153,131 @@ class mainGUI(QtWidgets.QMainWindow):
         for key, value in d.items():
             dic.get(key).setText(value)
 
+    # Methods for QT slots
+    # Hardware Group
     @QtCore.pyqtSlot()
-    def open_defaults(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
-        location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
-        self.load_defaults(location)
+    def init_hardware(self):
+        self.ui.statusbar.showMessage('Initializing Hardware...')
+        # Initialize...
+        try:
+            self.hardware = AllHardware()
+            self.hardware.mover.scan_devices()
+            self.hardware.mover.open_devices()
+
+            self.init_position()
+            # Initialize thread (Need to initialize hardware first!!)
+            self.cThread = CountThread(self.hardware)
+            self.cThread.counts.connect(self.update_counts)
+            self.cThread.finished.connect(self.count_stopped)
+
+            self.mThread = MoveThread(self.hardware)
+            self.mThread.moved.connect(self.gone_to)
+
+            self.sThread = ConfocalScanThread(self.hardware)
+            self.sThread.update.connect(self.scan_data_back)
+            self.sThread.finished.connect(self.scan_stopped)
+
+            self.maxThread = MaxThread(self.hardware)
+            self.maxThread.counts.connect(self.update_counts)
+            self.maxThread.moved.connect(self.gone_to)
+
+            self.dThread = DataThread()
+            self.dThread.update.connect(self.update_image)
+        except BaseException as e:
+            print(e)
+            self.ui.statusbar.showMessage('Hardware Initialization Failed.')
+            return
+        # Set buttons available
+        self.ui.pbCount.setEnabled(True)
+        self.ui.cbCountFreq.setEnabled(True)
+        self.ui.pbGoTo.setEnabled(True)
+        self.ui.pbGoToMid.setEnabled(True)
+        self.ui.pbLaserOn.setEnabled(True)
+        self.ui.pbLaserOff.setEnabled(True)
+        self.ui.pbMax.setEnabled(True)
+        self.ui.pbKeepNV.setEnabled(True)
+        self.ui.pbStart.setEnabled(True)
+        self.ui.pbXleft.setEnabled(True)
+        self.ui.pbXright.setEnabled(True)
+        self.ui.pbYdown.setEnabled(True)
+        self.ui.pbYup.setEnabled(True)
+        self.ui.pbZdown.setEnabled(True)
+        self.ui.pbZup.setEnabled(True)
+        self.ui.pbInitHW.setEnabled(False)
+        self.ui.pbCleanupHW.setEnabled(True)
+
+        self.ui.statusbar.showMessage('Hardware Initialized Successfully.')
+
+        self.stepMoveDic = {'x+': lambda: self.ui.txtXcom.setText(
+            str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
+                            'x-': lambda: self.ui.txtXcom.setText(
+                                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
+                            'y+': lambda: self.ui.txtYcom.setText(
+                                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
+                            'y-': lambda: self.ui.txtYcom.setText(
+                                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
+                            'z+': lambda: self.ui.txtZcom.setText(
+                                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStepZ.text()), 3))),
+                            'z-': lambda: self.ui.txtZcom.setText(
+                                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStepZ.text()), 3)))}
+
+    def init_position(self):
+        x = self.hardware.mover.read_position_single(channel=1)
+        y = self.hardware.mover.read_position_single(channel=2)
+        z = self.hardware.mover.read_position_single(channel=4)
+        self.ui.txtX.setText(str(round(x, 3)))
+        self.ui.txtY.setText(str(round(y, 3)))
+        self.ui.txtZ.setText(str(round(z, 3)))
+        self.ui.pbGetPos.setEnabled(True)
 
     @QtCore.pyqtSlot()
-    def save_defaults(self, fName='defaults.txt'):
-        pairList = []
-        pairList.append(("STARTX", self.ui.txtStartX.text()))
-        pairList.append(("STARTY", self.ui.txtStartY.text()))
-        pairList.append(("ENDX", self.ui.txtEndX.text()))
-        pairList.append(("ENDY", self.ui.txtEndY.text()))
-        pairList.append(("STEPX", self.ui.txtStepX.text()))
-        pairList.append(("STEPY", self.ui.txtStepY.text()))
-        pairList.append(("ZVAL", self.ui.txtZcom.text()))
-        pairList.append(("STEPZ", self.ui.txtStepZ.text()))
-        pairList.append(("CURSORX", self.ui.txtXcom.text()))
-        pairList.append(("CURSORY", self.ui.txtYcom.text()))
-        pairList.append(("RANGE", self.ui.txtRange.text()))
-        ofile = open(os.path.join(os.path.dirname(__file__), fName), 'w')
-        for pair in pairList:
-            ofile.write(pair[0] + "=" + pair[1] + "\n")
-        ofile.close()
+    def cleanup_hardware(self):
+        # Set buttons unavailable
+        self.ui.pbCount.setEnabled(False)
+        self.ui.cbCountFreq.setEnabled(False)
+        self.ui.pbGoTo.setEnabled(False)
+        self.ui.pbGoToMid.setEnabled(False)
+        self.ui.pbGetPos.setEnabled(False)
+        self.ui.pbLaserOn.setEnabled(False)
+        self.ui.pbLaserOff.setEnabled(False)
+        self.ui.pbMax.setEnabled(False)
+        self.ui.pbKeepNV.setEnabled(False)
+        self.ui.pbStart.setEnabled(False)
+        self.ui.pbStop.setEnabled(False)
+        self.ui.pbXleft.setEnabled(False)
+        self.ui.pbXright.setEnabled(False)
+        self.ui.pbYdown.setEnabled(False)
+        self.ui.pbYup.setEnabled(False)
+        self.ui.pbZdown.setEnabled(False)
+        self.ui.pbZup.setEnabled(False)
+
+        self.hardware.cleanup()
+        if True:
+            self.ui.statusbar.showMessage('Hardware Reset Successfully.')
+            self.hardware = None
+        else:
+            self.ui.statusbar.showMessage('Hardware Reset Failed.')
+        self.ui.pbInitHW.setEnabled(True)
+        self.ui.pbCleanupHW.setEnabled(False)
+
+    # Laser Group
+    @QtCore.pyqtSlot()
+    def laser_on(self):
+        pass
 
     @QtCore.pyqtSlot()
-    def show_cursor(self):
-        if self.cursor:
-            self.cursor.disconnect_events()
-            self.cursor = None
-        self.curh.set_visible(True)
-        self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
-        self.curv.set_visible(True)
-        self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
-        self.ui.mplMap.draw()
-        self.ui.pbShowCursor.setEnabled(False)
-        self.ui.pbHideCursor.setEnabled(True)
+    def laser_off(self):
+        pass
 
+    # Scan Group
     @QtCore.pyqtSlot()
-    def hide_cursor(self):
-        self.cur_vis = False
-        self.curh.set_visible(False)
-        self.curv.set_visible(False)
-        self.ui.mplMap.draw()
-        self.ui.pbShowCursor.setEnabled(True)
-        self.ui.pbHideCursor.setEnabled(False)
-
-    @QtCore.pyqtSlot()
-    def new_cursor(self):
-        self.hide_cursor()
-        self.cursor = Cursor(self.ui.mplMap.axes, useblit=True, color='red', linewidth=1)
-        self.cursor.connect_event('button_press_event', self.new_cursor_marked)
-        self.ui.mplMap.draw()
-
-    @QtCore.pyqtSlot()
-    def new_cursor_marked(self, event):
-        if event.inaxes and event.x < 330:
-            x = round(event.xdata, 3)
-            y = round(event.ydata, 3)
-            self.ui.txtXcom.setText(str(x))
-            self.ui.txtYcom.setText(str(y))
-            self.cursor.disconnect_events()
-            self.curh.set_ydata((y, y))
-            self.curv.set_xdata((x, x))
-            self.show_cursor()
-            self.cursor = None
+    def set_full_range(self):
+        self.ui.txtStartX.setText('0')
+        self.ui.txtEndX.setText('100')
+        self.ui.txtStepX.setText('1')
+        self.ui.txtStartY.setText('0')
+        self.ui.txtEndY.setText('100')
+        self.ui.txtStepY.setText('1')
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -290,125 +348,6 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.mplMap.mpl_disconnect(cid)
 
     @QtCore.pyqtSlot()
-    def init_hardware(self):
-        self.ui.statusbar.showMessage('Initializing Hardware...')
-        # Initialize...
-        try:
-            self.hardware = AllHardware()
-            self.hardware.mover.connect()
-            # Takes time...
-            # Done!
-            self.initPosition()
-
-            # Initialize thread (Need to initialize hardware first!!)
-            self.cThread = CountThread(self.hardware)
-            self.cThread.counts.connect(self.update_counts)
-            self.cThread.finished.connect(self.count_stopped)
-
-            self.mThread = MoveThread(self.hardware)
-            self.mThread.moved.connect(self.gone_to)
-
-            self.sThread = ConfocalScanThread(self.hardware)
-            self.sThread.update.connect(self.scan_data_back)
-            self.sThread.finished.connect(self.scan_stopped)
-
-            self.maxThread = MaxThread(self.hardware)
-            self.maxThread.counts.connect(self.update_counts)
-            self.maxThread.moved.connect(self.gone_to)
-
-            self.dThread = DataThread()
-            self.dThread.update.connect(self.update_image)
-        except BaseException as e:
-            print(e)
-            self.ui.statusbar.showMessage('Hardware Initialization Failed.')
-            return
-        self.ui.pbCount.setEnabled(True)
-        self.ui.cbCountFreq.setEnabled(True)
-        self.ui.pbGoTo.setEnabled(True)
-        self.ui.pbGoToMid.setEnabled(True)
-        self.ui.pbLaserOn.setEnabled(True)
-        self.ui.pbLaserOff.setEnabled(True)
-        self.ui.pbMax.setEnabled(True)
-        self.ui.pbKeepNV.setEnabled(True)
-        self.ui.pbStart.setEnabled(True)
-        self.ui.pbXleft.setEnabled(True)
-        self.ui.pbXright.setEnabled(True)
-        self.ui.pbYdown.setEnabled(True)
-        self.ui.pbYup.setEnabled(True)
-        self.ui.pbZdown.setEnabled(True)
-        self.ui.pbZup.setEnabled(True)
-        self.ui.pbInitHW.setEnabled(False)
-        self.ui.pbCleanupHW.setEnabled(True)
-        self.ui.statusbar.showMessage('Hardware Initialized Successfully.')
-
-        self.stepMoveDic = {'x+': lambda: self.ui.txtXcom.setText(
-            str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
-                            'x-': lambda: self.ui.txtXcom.setText(
-                                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
-                            'y+': lambda: self.ui.txtYcom.setText(
-                                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
-                            'y-': lambda: self.ui.txtYcom.setText(
-                                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
-                            'z+': lambda: self.ui.txtZcom.setText(
-                                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStepZ.text()), 3))),
-                            'z-': lambda: self.ui.txtZcom.setText(
-                                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStepZ.text()), 3)))}
-
-    def initPosition(self):
-        x, y, z = self.hardware.mover.read_pos('1'), self.hardware.mover.read_pos('2'), self.hardware.mover.read_pos(
-            '3')
-        self.ui.txtX.setText(str(round(x, 3)))
-        self.ui.txtY.setText(str(round(y, 3)))
-        self.ui.txtZ.setText(str(round(z, 3)))
-        self.ui.pbGetPos.setEnabled(True)
-
-    @QtCore.pyqtSlot()
-    def cleanup_hardware(self):
-        self.ui.pbCount.setEnabled(False)
-        self.ui.cbCountFreq.setEnabled(False)
-        self.ui.pbGoTo.setEnabled(False)
-        self.ui.pbGoToMid.setEnabled(False)
-        self.ui.pbGetPos.setEnabled(False)
-        self.ui.pbLaserOn.setEnabled(False)
-        self.ui.pbLaserOff.setEnabled(False)
-        self.ui.pbMax.setEnabled(False)
-        self.ui.pbKeepNV.setEnabled(False)
-        self.ui.pbStart.setEnabled(False)
-        self.ui.pbStop.setEnabled(False)
-        self.ui.pbXleft.setEnabled(False)
-        self.ui.pbXright.setEnabled(False)
-        self.ui.pbYdown.setEnabled(False)
-        self.ui.pbYup.setEnabled(False)
-        self.ui.pbZdown.setEnabled(False)
-        self.ui.pbZup.setEnabled(False)
-
-        self.hardware.cleanup()
-        if True:
-            self.ui.statusbar.showMessage('Hardware Reset Successfully.')
-            self.hardware = None
-        else:
-            self.ui.statusbar.showMessage('Hardware Reset Failed.')
-        self.ui.pbInitHW.setEnabled(True)
-        self.ui.pbCleanupHW.setEnabled(False)
-
-    @QtCore.pyqtSlot()
-    def laser_on(self):
-        pass
-
-    @QtCore.pyqtSlot()
-    def laser_off(self):
-        pass
-
-    @QtCore.pyqtSlot()
-    def set_full_range(self):
-        self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('200')
-        self.ui.txtStepX.setText('2')
-        self.ui.txtStartY.setText('0')
-        self.ui.txtEndY.setText('200')
-        self.ui.txtStepY.setText('2')
-
-    @QtCore.pyqtSlot()
     def set_center_range(self):
         xval = round(float(self.ui.txtXcom.text()), 1)
         yval = round(float(self.ui.txtYcom.text()), 1)
@@ -465,6 +404,93 @@ class mainGUI(QtWidgets.QMainWindow):
         self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
         self.sThread.start()
 
+    @QtCore.pyqtSlot()
+    def scan_stop(self):
+        self.ui.statusbar.showMessage('Scan stopping...')
+        self.ui.pbStop.setEnabled(False)
+        # Stop the process
+        self.sThread.running = False
+
+    # Cursor Group
+    # Move Group
+    # Counts Group
+    # Plot Group
+    # Load and Save defaults
+
+
+
+
+
+
+
+
+    @QtCore.pyqtSlot()
+    def open_defaults(self):
+        directory = os.path.dirname(os.path.abspath(__file__))
+        location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
+        self.load_defaults(location)
+
+    @QtCore.pyqtSlot()
+    def save_defaults(self, fName='defaults.txt'):
+        pairList = []
+        pairList.append(("STARTX", self.ui.txtStartX.text()))
+        pairList.append(("STARTY", self.ui.txtStartY.text()))
+        pairList.append(("ENDX", self.ui.txtEndX.text()))
+        pairList.append(("ENDY", self.ui.txtEndY.text()))
+        pairList.append(("STEPX", self.ui.txtStepX.text()))
+        pairList.append(("STEPY", self.ui.txtStepY.text()))
+        pairList.append(("ZVAL", self.ui.txtZcom.text()))
+        pairList.append(("STEPZ", self.ui.txtStepZ.text()))
+        pairList.append(("CURSORX", self.ui.txtXcom.text()))
+        pairList.append(("CURSORY", self.ui.txtYcom.text()))
+        pairList.append(("RANGE", self.ui.txtRange.text()))
+        ofile = open(os.path.join(os.path.dirname(__file__), fName), 'w')
+        for pair in pairList:
+            ofile.write(pair[0] + "=" + pair[1] + "\n")
+        ofile.close()
+
+    @QtCore.pyqtSlot()
+    def show_cursor(self):
+        if self.cursor:
+            self.cursor.disconnect_events()
+            self.cursor = None
+        self.curh.set_visible(True)
+        self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
+        self.curv.set_visible(True)
+        self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+        self.ui.mplMap.draw()
+        self.ui.pbShowCursor.setEnabled(False)
+        self.ui.pbHideCursor.setEnabled(True)
+
+    @QtCore.pyqtSlot()
+    def hide_cursor(self):
+        self.cur_vis = False
+        self.curh.set_visible(False)
+        self.curv.set_visible(False)
+        self.ui.mplMap.draw()
+        self.ui.pbShowCursor.setEnabled(True)
+        self.ui.pbHideCursor.setEnabled(False)
+
+    @QtCore.pyqtSlot()
+    def new_cursor(self):
+        self.hide_cursor()
+        self.cursor = Cursor(self.ui.mplMap.axes, useblit=True, color='red', linewidth=1)
+        self.cursor.connect_event('button_press_event', self.new_cursor_marked)
+        self.ui.mplMap.draw()
+
+    @QtCore.pyqtSlot()
+    def new_cursor_marked(self, event):
+        if event.inaxes and event.x < 330:
+            x = round(event.xdata, 3)
+            y = round(event.ydata, 3)
+            self.ui.txtXcom.setText(str(x))
+            self.ui.txtYcom.setText(str(y))
+            self.cursor.disconnect_events()
+            self.curh.set_ydata((y, y))
+            self.curv.set_xdata((x, x))
+            self.show_cursor()
+            self.cursor = None
+
     @QtCore.pyqtSlot(float, list, list)
     def scan_data_back(self, y, posData, countsData):
         self.dThread.y = y
@@ -490,12 +516,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.image.set_clim(0, self.map.max())
         self.ui.mplMap.draw()
 
-    @QtCore.pyqtSlot()
-    def scan_stop(self):
-        self.ui.statusbar.showMessage('Scan stopping...')
-        self.ui.pbStop.setEnabled(False)
-        # Stop the process
-        self.sThread.running = False
+
 
     @QtCore.pyqtSlot()
     def scan_stopped(self):
