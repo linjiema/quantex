@@ -127,11 +127,11 @@ class mainGUI(QtWidgets.QMainWindow):
 
     # Methods
 
-    def load_defaults(self, fName='defaults.txt'):
-        if fName == 'defaults.txt':
-            f = open(os.path.join(os.path.dirname(__file__), fName), 'r')
+    def load_defaults(self, f_name='defaults.txt'):
+        if f_name == 'defaults.txt':
+            f = open(os.path.join(os.path.dirname(__file__), f_name), 'r')
         else:
-            f = open(fName, 'r')
+            f = open(f_name, 'r')
         d = {}
         for line in f.readlines():
             if line[-1] == '\n':
