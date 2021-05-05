@@ -3,11 +3,14 @@ Confocal Microscope Program
 Created on 2020-04-07
 '''
 
-import sys, os.path, numpy, time
+import sys
+import os.path
+import time
+import numpy
 from GUI.GUI import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
-    NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.widgets import Cursor
 from matplotlib import cm
@@ -29,6 +32,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplMap.setParent(self.ui.wMpl)
         self.ui.mplMap.axes = fig.add_subplot(111)
         self.ui.mplMap.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMpl.size()))
+
         # Toolbar widget for image
         self.ui.mplToolbar = NavigationToolbar(self.ui.mplMap, self.ui.wToolbar)
         self.ui.mplToolbar.setGeometry(QtCore.QRect(0, 0, self.ui.wToolbar.size().width(), 31))
@@ -51,12 +55,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.map[30][40] = 100000
 
         # Initialize Map
-        self.mapColor = 'gist_earth'  # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
+        self.mapColor = 'gist_earth'
+        # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
         self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
                                                 interpolation='nearest',
-                                                origin='lower')  # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+                                                origin='lower')
+        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
         self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
         self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
         self.cbar = self.ui.mplMap.figure.colorbar(self.image)
@@ -72,44 +78,54 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Counts Data
         self.countsX = deque(numpy.arange(10).tolist())
         self.countsY = deque(numpy.zeros(10, dtype=int).tolist())
+
         # Initialize counts plot
         self.countPlot, = self.ui.mplPlot.axes.plot(self.countsX, self.countsY)
-
         self.ui.mplPlot.axes.set_xlabel('time (s)')
         self.ui.mplPlot.figure.subplots_adjust(top=0.95, bottom=0.3, right=0.99)
 
         # Connect to qt Slots
-        self.ui.pbShowCursor.clicked.connect(self.show_cursor)
-        self.ui.pbHideCursor.clicked.connect(self.hide_cursor)
-        self.ui.pbNewCursor.clicked.connect(self.new_cursor)
-        self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
-        self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
+        # Hardware Group
         self.ui.pbInitHW.clicked.connect(self.init_hardware)
         self.ui.pbCleanupHW.clicked.connect(self.cleanup_hardware)
+        # Laser Group
         self.ui.pbLaserOn.clicked.connect(self.laser_on)
         self.ui.pbLaserOff.clicked.connect(self.laser_off)
+        # Scan Group
         self.ui.pbFullRange.clicked.connect(self.set_full_range)
         self.ui.pbSelectRange.clicked.connect(self.select_range)
         self.ui.pbCenter.clicked.connect(self.set_center_range)
         self.ui.pbStart.clicked.connect(self.scan_start)
         self.ui.pbStop.clicked.connect(self.scan_stop)
-        self.ui.vsMax.sliderMoved.connect(self.modify_image)
-        self.ui.vsMin.sliderMoved.connect(self.modify_image)
-        self.ui.pbReplot.clicked.connect(self.replot_image)
-        self.ui.pbSaveData.clicked.connect(self.save_data)
-        self.ui.pbCount.clicked.connect(self.count_start)
-        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_rate)
-        self.ui.pbMax.clicked.connect(self.maximize)
-
-        self.ui.pbGetPos.clicked.connect(self.mark_current_position)
-        self.ui.pbGoTo.clicked.connect(self.go_to)
+        # Cursor Group
+        self.ui.pbNewCursor.clicked.connect(self.new_cursor)
+        self.ui.pbShowCursor.clicked.connect(self.show_cursor)
+        self.ui.pbHideCursor.clicked.connect(self.hide_cursor)
         self.ui.pbGoToMid.clicked.connect(self.go_to_mid)
+        self.ui.pbGoTo.clicked.connect(self.go_to)
+        self.ui.pbGetPos.clicked.connect(self.mark_current_position)
+        # Move Group
         self.ui.pbXleft.clicked.connect(lambda: self.go_to('x-'))
         self.ui.pbXright.clicked.connect(lambda: self.go_to('x+'))
         self.ui.pbYdown.clicked.connect(lambda: self.go_to('y-'))
         self.ui.pbYup.clicked.connect(lambda: self.go_to('y+'))
         self.ui.pbZdown.clicked.connect(lambda: self.go_to('z-'))
         self.ui.pbZup.clicked.connect(lambda: self.go_to('z+'))
+        '''missing keep NV'''
+        # Counts Group
+        self.ui.pbCount.clicked.connect(self.count_start)
+        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_rate)
+        self.ui.pbMax.clicked.connect(self.maximize)
+        # Plot Group
+        self.ui.pbSaveData.clicked.connect(self.save_data)
+        self.ui.pbReplot.clicked.connect(self.replot_image)
+        self.ui.vsMax.sliderMoved.connect(self.modify_image)
+        self.ui.vsMin.sliderMoved.connect(self.modify_image)
+        # Load and Save defaults
+        self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
+        self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
+
+    # Methods
 
     def load_defaults(self, fName='defaults.txt'):
         if fName == 'defaults.txt':
