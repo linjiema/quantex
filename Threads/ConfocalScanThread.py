@@ -10,7 +10,7 @@ import time
 
 class ConfocalScanThread(QtCore.QThread):
     """
-    Confocal Scaning module as a thread, based on PyQt5.QtCore.QThread
+    Confocal Scanning module as a thread, based on PyQt5.QtCore.QThread
 
     """
     SIGNAL_update = QtCore.pyqtSignal(float, list, list, name='update')
