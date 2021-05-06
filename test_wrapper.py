@@ -465,9 +465,9 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def go_to_mid(self):
-        self.ui.txtXcom.setText('100')
-        self.ui.txtYcom.setText('100')
-        self.ui.txtZcom.setText('100')
+        self.ui.txtXcom.setText('50')
+        self.ui.txtYcom.setText('50')
+        self.ui.txtZcom.setText('25')
         self.go_to()
 
     @QtCore.pyqtSlot()
@@ -539,6 +539,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZdown.setEnabled(False)
         self.ui.pbZup.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
+
         self.maxThread.start()
 
     # Plot Group
@@ -565,11 +566,15 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.ui.mplMap.figure.clear()
         self.ui.mplMap.axes = self.ui.mplMap.figure.add_subplot(111)
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+        self.image = self.ui.mplMap.axes.imshow(self.map,
+                                                cmap=cm.get_cmap(self.mapColor),
+                                                vmin=0, vmax=self.map.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
                                                 interpolation='nearest',
-                                                origin='lower')  # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+                                                origin='lower')
+        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+
         self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
         self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
         self.cbar = self.ui.mplMap.figure.colorbar(self.image)
@@ -619,14 +624,34 @@ class mainGUI(QtWidgets.QMainWindow):
             o_file.write(pair[0] + "=" + pair[1] + "\n")
         o_file.close()
 
-    # Others
-    @QtCore.pyqtSlot(float, list, list)
-    def scan_data_back(self, y, posData, countsData):
-        self.dThread.y = y
-        self.dThread.xData = posData
-        self.dThread.countsData = countsData
-        self.dThread.start()
+    # Thread methods
+    # cThread
+    # Run when signal 'counts' emit
+    @QtCore.pyqtSlot(int)
+    def update_counts(self, data):
+        self.ui.lcdNumber.display(int(data))
+        self.countsY.append(data)
+        self.countsY.popleft()
+        a = numpy.array(self.countsY)
+        yBot = a.min() * 0.7
+        yTop = (a.max() + 1) * 1.1
+        self.countPlot.set_ydata(self.countsY)
+        self.ui.mplPlot.axes.set_ylim(bottom=yBot, top=yTop)
+        self.ui.mplPlot.draw()
 
+    # Run when finish
+    @QtCore.pyqtSlot()
+    def count_stopped(self):
+        self.ui.statusbar.clearMessage()
+        self.ui.pbMax.setEnabled(True)
+        self.ui.pbKeepNV.setEnabled(True)
+        self.ui.pbStart.setEnabled(True)
+        self.ui.pbCount.setText('On')
+        self.ui.pbCount.clicked.disconnect()
+        self.ui.pbCount.clicked.connect(self.count_start)
+
+    # mThread
+    # Run when signal 'moved' emit
     @QtCore.pyqtSlot(float, float, float)
     def gone_to(self, x, y, z):
         self.ui.txtX.setText(str(round(x, 3)))
@@ -645,45 +670,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(True)
         self.ui.pbCount.setEnabled(True)
 
-    @QtCore.pyqtSlot(numpy.ndarray)
-    def update_image(self, map_array):
-        print('updating...', time.perf_counter())
-        self.map = map_array
-        self.image.set_data(self.map)
-        self.image.set_extent(
-            [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartY.text()),
-             float(self.ui.txtEndY.text())])
-
-        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
-        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
-
-        self.ui.vsMax.setValue(59)
-        self.ui.vsMin.setValue(0)
-
-        self.image.set_clim(0, self.map.max())
-        self.ui.mplMap.draw()
-
-    @QtCore.pyqtSlot(int)
-    def update_counts(self, data):
-        self.ui.lcdNumber.display(int(data))
-        self.countsY.append(data)
-        self.countsY.popleft()
-        a = numpy.array(self.countsY)
-        yBot = a.min() * 0.7
-        yTop = (a.max() + 1) * 1.1
-        self.countPlot.set_ydata(self.countsY)
-        self.ui.mplPlot.axes.set_ylim(bottom=yBot, top=yTop)
-        self.ui.mplPlot.draw()
-
-    @QtCore.pyqtSlot()
-    def count_stopped(self):
-        self.ui.statusbar.clearMessage()
-        self.ui.pbMax.setEnabled(True)
-        self.ui.pbKeepNV.setEnabled(True)
-        self.ui.pbStart.setEnabled(True)
-        self.ui.pbCount.setText('On')
-        self.ui.pbCount.clicked.disconnect()
-        self.ui.pbCount.clicked.connect(self.count_start)
+    # sThread
+    # Run when signal 'update' emit
+    @QtCore.pyqtSlot(float, list, list)
+    def scan_data_back(self, y, posData, countsData):
+        self.dThread.y = y
+        self.dThread.xData = posData
+        self.dThread.countsData = countsData
+        self.dThread.start()
 
     @QtCore.pyqtSlot()
     def scan_stopped(self):
@@ -711,6 +705,27 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
 
+    # dThread
+    # Run when signal 'update' emit
+    @QtCore.pyqtSlot(numpy.ndarray)
+    def update_image(self, map_array):
+        print('updating...', time.perf_counter())
+        self.map = map_array
+        self.image.set_data(self.map)
+        self.image.set_extent(
+            [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartY.text()),
+             float(self.ui.txtEndY.text())])
+
+        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
+        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+
+        self.ui.vsMax.setValue(59)
+        self.ui.vsMin.setValue(0)
+
+        self.image.set_clim(0, self.map.max())
+        self.ui.mplMap.draw()
+
+    # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
         quit_msg = "Are you sure you want to exit the program?"
