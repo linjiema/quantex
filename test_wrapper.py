@@ -412,42 +412,25 @@ class mainGUI(QtWidgets.QMainWindow):
         self.sThread.running = False
 
     # Cursor Group
-    # Move Group
-    # Counts Group
-    # Plot Group
-    # Load and Save defaults
-
-
-
-
-
-
-
+    @QtCore.pyqtSlot()
+    def new_cursor(self):
+        self.hide_cursor()
+        self.cursor = Cursor(self.ui.mplMap.axes, useblit=True, color='red', linewidth=1)
+        self.cursor.connect_event('button_press_event', self.new_cursor_marked)
+        self.ui.mplMap.draw()
 
     @QtCore.pyqtSlot()
-    def open_defaults(self):
-        directory = os.path.dirname(os.path.abspath(__file__))
-        location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
-        self.load_defaults(location)
-
-    @QtCore.pyqtSlot()
-    def save_defaults(self, fName='defaults.txt'):
-        pairList = []
-        pairList.append(("STARTX", self.ui.txtStartX.text()))
-        pairList.append(("STARTY", self.ui.txtStartY.text()))
-        pairList.append(("ENDX", self.ui.txtEndX.text()))
-        pairList.append(("ENDY", self.ui.txtEndY.text()))
-        pairList.append(("STEPX", self.ui.txtStepX.text()))
-        pairList.append(("STEPY", self.ui.txtStepY.text()))
-        pairList.append(("ZVAL", self.ui.txtZcom.text()))
-        pairList.append(("STEPZ", self.ui.txtStepZ.text()))
-        pairList.append(("CURSORX", self.ui.txtXcom.text()))
-        pairList.append(("CURSORY", self.ui.txtYcom.text()))
-        pairList.append(("RANGE", self.ui.txtRange.text()))
-        ofile = open(os.path.join(os.path.dirname(__file__), fName), 'w')
-        for pair in pairList:
-            ofile.write(pair[0] + "=" + pair[1] + "\n")
-        ofile.close()
+    def new_cursor_marked(self, event):
+        if event.inaxes and event.x < 330:
+            x = round(event.xdata, 3)
+            y = round(event.ydata, 3)
+            self.ui.txtXcom.setText(str(x))
+            self.ui.txtYcom.setText(str(y))
+            self.cursor.disconnect_events()
+            self.curh.set_ydata((y, y))
+            self.curv.set_xdata((x, x))
+            self.show_cursor()
+            self.cursor = None
 
     @QtCore.pyqtSlot()
     def show_cursor(self):
@@ -472,31 +455,186 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbHideCursor.setEnabled(False)
 
     @QtCore.pyqtSlot()
-    def new_cursor(self):
-        self.hide_cursor()
-        self.cursor = Cursor(self.ui.mplMap.axes, useblit=True, color='red', linewidth=1)
-        self.cursor.connect_event('button_press_event', self.new_cursor_marked)
-        self.ui.mplMap.draw()
+    def go_to_mid(self):
+        self.ui.txtXcom.setText('100')
+        self.ui.txtYcom.setText('100')
+        self.ui.txtZcom.setText('100')
+        self.go_to()
 
     @QtCore.pyqtSlot()
-    def new_cursor_marked(self, event):
-        if event.inaxes and event.x < 330:
-            x = round(event.xdata, 3)
-            y = round(event.ydata, 3)
-            self.ui.txtXcom.setText(str(x))
-            self.ui.txtYcom.setText(str(y))
-            self.cursor.disconnect_events()
-            self.curh.set_ydata((y, y))
-            self.curv.set_xdata((x, x))
-            self.show_cursor()
-            self.cursor = None
+    def go_to(self, *args):
+        self.ui.pbStart.setEnabled(False)
+        self.ui.pbMax.setEnabled(False)
+        self.ui.pbGoToMid.setEnabled(False)
+        self.ui.pbGoTo.setEnabled(False)
+        self.ui.pbXleft.setEnabled(False)
+        self.ui.pbXright.setEnabled(False)
+        self.ui.pbYdown.setEnabled(False)
+        self.ui.pbYup.setEnabled(False)
+        self.ui.pbZdown.setEnabled(False)
+        self.ui.pbZup.setEnabled(False)
 
+        if args:
+            self.stepMoveDic.get(args[0], lambda: 0)()
+        if not self.ui.pbShowCursor.isEnabled() or self.cursor:
+            self.show_cursor()
+        self.mThread.command = self.cursorPosition
+
+        self.mThread.start()
+
+    @QtCore.pyqtSlot()
+    def mark_current_position(self):
+        self.ui.txtXcom.setText(self.ui.txtX.text())
+        self.ui.txtYcom.setText(self.ui.txtY.text())
+        self.ui.txtZcom.setText(self.ui.txtZ.text())
+
+    @property
+    def cursorPosition(self):
+        return [float(self.ui.txtXcom.text()), float(self.ui.txtYcom.text()), float(self.ui.txtZcom.text())]
+
+    # Move Group
+
+    # Counts Group
+    @QtCore.pyqtSlot()
+    def count_start(self):
+        self.ui.statusbar.showMessage('Counting...')
+        self.ui.pbMax.setEnabled(False)
+        self.ui.pbKeepNV.setEnabled(False)
+        self.ui.pbStart.setEnabled(False)
+        self.ui.pbCount.setText('Off')
+
+        self.cThread.start()
+        self.ui.pbCount.clicked.disconnect()
+        self.ui.pbCount.clicked.connect(self.count_stop)
+
+    @QtCore.pyqtSlot()
+    def count_stop(self):
+        self.cThread.running = False
+
+    @QtCore.pyqtSlot(str)
+    def change_rate(self, s):
+        new_rate = eval(s)
+        self.cThread.count_rate = new_rate
+        self.cThread.count_rate_changed = True
+
+    @QtCore.pyqtSlot()
+    def maximize(self):
+        self.ui.pbStart.setEnabled(False)
+        self.ui.pbMax.setEnabled(False)
+        self.ui.pbGoToMid.setEnabled(False)
+        self.ui.pbGoTo.setEnabled(False)
+        self.ui.pbXleft.setEnabled(False)
+        self.ui.pbXright.setEnabled(False)
+        self.ui.pbYdown.setEnabled(False)
+        self.ui.pbYup.setEnabled(False)
+        self.ui.pbZdown.setEnabled(False)
+        self.ui.pbZup.setEnabled(False)
+        self.ui.pbCount.setEnabled(False)
+        self.maxThread.start()
+
+    # Plot Group
+    @QtCore.pyqtSlot()
+    def save_data(self):
+        try:
+            self.actualData = self.dThread.raw
+        except:
+            sys.stderr.write('No data to be saved!\n')
+            return
+
+        directory = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', "", "Text (*.txt)")
+        directory = str(directory[0].replace('/', '\\'))
+        if directory != '':
+            f = open(directory, 'w')
+            for each_datapoint in self.actualData:
+                f.write(str(each_datapoint[0]) + '\t' + str(each_datapoint[1]) + '\t' + str(each_datapoint[2]) + '\n')
+            f.close()
+        else:
+            sys.stderr.write('No file selected\n')
+
+    @QtCore.pyqtSlot()
+    def replot_image(self):
+
+        self.ui.mplMap.figure.clear()
+        self.ui.mplMap.axes = self.ui.mplMap.figure.add_subplot(111)
+        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
+                                                        float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
+                                                interpolation='nearest',
+                                                origin='lower')  # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
+        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+        self.cbar = self.ui.mplMap.figure.colorbar(self.image)
+        self.ui.mplMap.figure.tight_layout()
+
+        self.cursor = None
+        self.curh = self.ui.mplMap.axes.axhline(color='red', linewidth=1, visible=False)
+        self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
+        self.curv = self.ui.mplMap.axes.axvline(color='red', linewidth=1, visible=False)
+        self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+
+        self.modify_image()
+
+    @QtCore.pyqtSlot()
+    def modify_image(self):
+        val_max = self.ui.vsMax.value()
+        val_min = self.ui.vsMin.value()
+        vmax = self.map.max() * (10 ** ((val_max + 1) / 20)) / 1000
+        vmin = min(self.map.mean(), vmax) * val_min / 100
+
+        self.image.set_clim(vmin, vmax)
+        self.ui.mplMap.draw()
+
+    # Load and Save defaults
+    @QtCore.pyqtSlot()
+    def open_defaults(self):
+        directory = os.path.dirname(os.path.abspath(__file__))
+        location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
+        self.load_defaults(location)
+
+    @QtCore.pyqtSlot()
+    def save_defaults(self, f_ame='defaults.txt'):
+        pair_list = []
+        pair_list.append(("STARTX", self.ui.txtStartX.text()))
+        pair_list.append(("STARTY", self.ui.txtStartY.text()))
+        pair_list.append(("ENDX", self.ui.txtEndX.text()))
+        pair_list.append(("ENDY", self.ui.txtEndY.text()))
+        pair_list.append(("STEPX", self.ui.txtStepX.text()))
+        pair_list.append(("STEPY", self.ui.txtStepY.text()))
+        pair_list.append(("ZVAL", self.ui.txtZcom.text()))
+        pair_list.append(("STEPZ", self.ui.txtStepZ.text()))
+        pair_list.append(("CURSORX", self.ui.txtXcom.text()))
+        pair_list.append(("CURSORY", self.ui.txtYcom.text()))
+        pair_list.append(("RANGE", self.ui.txtRange.text()))
+        o_file = open(os.path.join(os.path.dirname(__file__), f_ame), 'w')
+        for pair in pair_list:
+            o_file.write(pair[0] + "=" + pair[1] + "\n")
+        o_file.close()
+
+    # Others
     @QtCore.pyqtSlot(float, list, list)
     def scan_data_back(self, y, posData, countsData):
         self.dThread.y = y
         self.dThread.xData = posData
         self.dThread.countsData = countsData
         self.dThread.start()
+
+    @QtCore.pyqtSlot(float, float, float)
+    def gone_to(self, x, y, z):
+        self.ui.txtX.setText(str(round(x, 3)))
+        self.ui.txtY.setText(str(round(y, 3)))
+        self.ui.txtZ.setText(str(round(z, 3)))
+        if not self.cThread.running:
+            self.ui.pbStart.setEnabled(True)
+        self.ui.pbMax.setEnabled(True)
+        self.ui.pbGoTo.setEnabled(True)
+        self.ui.pbGoToMid.setEnabled(True)
+        self.ui.pbXleft.setEnabled(True)
+        self.ui.pbXright.setEnabled(True)
+        self.ui.pbYdown.setEnabled(True)
+        self.ui.pbYup.setEnabled(True)
+        self.ui.pbZdown.setEnabled(True)
+        self.ui.pbZup.setEnabled(True)
+        self.ui.pbCount.setEnabled(True)
 
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image(self, map_array):
@@ -516,7 +654,27 @@ class mainGUI(QtWidgets.QMainWindow):
         self.image.set_clim(0, self.map.max())
         self.ui.mplMap.draw()
 
+    @QtCore.pyqtSlot(int)
+    def update_counts(self, data):
+        self.ui.lcdNumber.display(int(data))
+        self.countsY.append(data)
+        self.countsY.popleft()
+        a = numpy.array(self.countsY)
+        yBot = a.min() * 0.7
+        yTop = (a.max() + 1) * 1.1
+        self.countPlot.set_ydata(self.countsY)
+        self.ui.mplPlot.axes.set_ylim(bottom=yBot, top=yTop)
+        self.ui.mplPlot.draw()
 
+    @QtCore.pyqtSlot()
+    def count_stopped(self):
+        self.ui.statusbar.clearMessage()
+        self.ui.pbMax.setEnabled(True)
+        self.ui.pbKeepNV.setEnabled(True)
+        self.ui.pbStart.setEnabled(True)
+        self.ui.pbCount.setText('On')
+        self.ui.pbCount.clicked.disconnect()
+        self.ui.pbCount.clicked.connect(self.count_start)
 
     @QtCore.pyqtSlot()
     def scan_stopped(self):
@@ -543,172 +701,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
-
-    @QtCore.pyqtSlot()
-    def modify_image(self):
-        val_max = self.ui.vsMax.value()
-        val_min = self.ui.vsMin.value()
-        vmax = self.map.max() * (10 ** ((val_max + 1) / 20)) / 1000
-        vmin = min(self.map.mean(), vmax) * val_min / 100
-
-        self.image.set_clim(vmin, vmax)
-        self.ui.mplMap.draw()
-
-    @QtCore.pyqtSlot()
-    def replot_image(self):
-
-        self.ui.mplMap.figure.clear()
-        self.ui.mplMap.axes = self.ui.mplMap.figure.add_subplot(111)
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
-                                                interpolation='nearest',
-                                                origin='lower')  # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
-        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
-        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
-        self.cbar = self.ui.mplMap.figure.colorbar(self.image)
-        self.ui.mplMap.figure.tight_layout()
-
-        self.cursor = None
-        self.curh = self.ui.mplMap.axes.axhline(color='red', linewidth=1, visible=False)
-        self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
-        self.curv = self.ui.mplMap.axes.axvline(color='red', linewidth=1, visible=False)
-        self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
-
-        self.modify_image()
-
-    @QtCore.pyqtSlot()
-    def save_data(self):
-        try:
-            self.actualData = self.dThread.raw
-        except:
-            sys.stderr.write('No data to be saved!\n')
-            return
-
-        directory = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', "", "Text (*.txt)")
-        directory = str(directory[0].replace('/', '\\'))
-        if directory != '':
-            f = open(directory, 'w')
-            for each_datapoint in self.actualData:
-                f.write(str(each_datapoint[0]) + '\t' + str(each_datapoint[1]) + '\t' + str(each_datapoint[2]) + '\n')
-            f.close()
-        else:
-            sys.stderr.write('No file selected\n')
-
-    @QtCore.pyqtSlot()
-    def count_start(self):
-        self.ui.statusbar.showMessage('Counting...')
-        self.ui.pbMax.setEnabled(False)
-        self.ui.pbKeepNV.setEnabled(False)
-        self.ui.pbStart.setEnabled(False)
-        self.ui.pbCount.setText('Off')
-
-        self.cThread.start()
-        self.ui.pbCount.clicked.disconnect()
-        self.ui.pbCount.clicked.connect(self.count_stop)
-
-    @QtCore.pyqtSlot()
-    def count_stop(self):
-        self.cThread.running = False
-
-    @QtCore.pyqtSlot(int)
-    def update_counts(self, data):
-        self.ui.lcdNumber.display(int(data))
-        self.countsY.append(data)
-        self.countsY.popleft()
-        a = numpy.array(self.countsY)
-        yBot = a.min() * 0.7
-        yTop = (a.max() + 1) * 1.1
-        self.countPlot.set_ydata(self.countsY)
-        self.ui.mplPlot.axes.set_ylim(bottom=yBot, top=yTop)
-        self.ui.mplPlot.draw()
-
-    @QtCore.pyqtSlot()
-    def count_stopped(self):
-        self.ui.statusbar.clearMessage()
-        self.ui.pbMax.setEnabled(True)
-        self.ui.pbKeepNV.setEnabled(True)
-        self.ui.pbStart.setEnabled(True)
-        self.ui.pbCount.setText('On')
-        self.ui.pbCount.clicked.disconnect()
-        self.ui.pbCount.clicked.connect(self.count_start)
-
-    @QtCore.pyqtSlot(str)
-    def change_rate(self, s):
-        new_rate = eval(s)
-        self.cThread.count_rate = new_rate
-        self.cThread.count_rate_changed = True
-
-    @property
-    def cursorPosition(self):
-        return [float(self.ui.txtXcom.text()), float(self.ui.txtYcom.text()), float(self.ui.txtZcom.text())]
-
-    @QtCore.pyqtSlot()
-    def mark_current_position(self):
-        self.ui.txtXcom.setText(self.ui.txtX.text())
-        self.ui.txtYcom.setText(self.ui.txtY.text())
-        self.ui.txtZcom.setText(self.ui.txtZ.text())
-
-    @QtCore.pyqtSlot()
-    def go_to(self, *args):
-        self.ui.pbStart.setEnabled(False)
-        self.ui.pbMax.setEnabled(False)
-        self.ui.pbGoToMid.setEnabled(False)
-        self.ui.pbGoTo.setEnabled(False)
-        self.ui.pbXleft.setEnabled(False)
-        self.ui.pbXright.setEnabled(False)
-        self.ui.pbYdown.setEnabled(False)
-        self.ui.pbYup.setEnabled(False)
-        self.ui.pbZdown.setEnabled(False)
-        self.ui.pbZup.setEnabled(False)
-
-        if args:
-            self.stepMoveDic.get(args[0], lambda: 0)()
-        if not self.ui.pbShowCursor.isEnabled() or self.cursor:
-            self.show_cursor()
-        self.mThread.command = self.cursorPosition
-
-        self.mThread.start()
-
-    @QtCore.pyqtSlot()
-    def go_to_mid(self):
-        self.ui.txtXcom.setText('100')
-        self.ui.txtYcom.setText('100')
-        self.ui.txtZcom.setText('100')
-        self.go_to()
-
-    @QtCore.pyqtSlot(float, float, float)
-    def gone_to(self, x, y, z):
-        self.ui.txtX.setText(str(round(x, 3)))
-        self.ui.txtY.setText(str(round(y, 3)))
-        self.ui.txtZ.setText(str(round(z, 3)))
-        if not self.cThread.running:
-            self.ui.pbStart.setEnabled(True)
-        self.ui.pbMax.setEnabled(True)
-        self.ui.pbGoTo.setEnabled(True)
-        self.ui.pbGoToMid.setEnabled(True)
-        self.ui.pbXleft.setEnabled(True)
-        self.ui.pbXright.setEnabled(True)
-        self.ui.pbYdown.setEnabled(True)
-        self.ui.pbYup.setEnabled(True)
-        self.ui.pbZdown.setEnabled(True)
-        self.ui.pbZup.setEnabled(True)
-        self.ui.pbCount.setEnabled(True)
-
-    @QtCore.pyqtSlot()
-    def maximize(self):
-        self.ui.pbStart.setEnabled(False)
-        self.ui.pbMax.setEnabled(False)
-        self.ui.pbGoToMid.setEnabled(False)
-        self.ui.pbGoTo.setEnabled(False)
-        self.ui.pbXleft.setEnabled(False)
-        self.ui.pbXright.setEnabled(False)
-        self.ui.pbYdown.setEnabled(False)
-        self.ui.pbYup.setEnabled(False)
-        self.ui.pbZdown.setEnabled(False)
-        self.ui.pbZup.setEnabled(False)
-        self.ui.pbCount.setEnabled(False)
-        self.maxThread.start()
 
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
