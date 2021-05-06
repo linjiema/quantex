@@ -31,7 +31,9 @@ class MaxThread(QtCore.QThread):
         self.scan(__channel=4)
 
         self._hardware.one_time_counter.close()
-        self.moved.emit(self._hardware.mover.read_position_single(channel=1), self._hardware.mover.read_position_single(channel=2), self._hardware.mover.read_position_single(channel=4))
+        self.moved.emit(self._hardware.mover.read_position_single(channel=1),
+                        self._hardware.mover.read_position_single(channel=2),
+                        self._hardware.mover.read_position_single(channel=4))
 
     def scan(self, __channel):
         pos = self._hardware.mover.read_position_single(channel=__channel)
