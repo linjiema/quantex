@@ -1,7 +1,7 @@
-'''
+"""
 Confocal Microscope Program
 Created on 2020-04-07
-'''
+"""
 
 import sys
 import os.path
@@ -166,23 +166,25 @@ class mainGUI(QtWidgets.QMainWindow):
 
             self.init_position()
             # Initialize thread (Need to initialize hardware first!!)
+            # Initialize Count Thread
             self.cThread = CountThread(self.hardware)
             self.cThread.counts.connect(self.update_counts)
             self.cThread.finished.connect(self.count_stopped)
-
+            # Initialize Move Thread
             self.mThread = MoveThread(self.hardware)
             self.mThread.moved.connect(self.gone_to)
-
+            # Initialize Confocal Scan Thread
             self.sThread = ConfocalScanThread(self.hardware)
             self.sThread.update.connect(self.scan_data_back)
             self.sThread.finished.connect(self.scan_stopped)
-
+            # Initialize Max Thread
             self.maxThread = MaxThread(self.hardware)
             self.maxThread.counts.connect(self.update_counts)
             self.maxThread.moved.connect(self.gone_to)
-
+            # Initialize Data Thread
             self.dThread = DataThread()
             self.dThread.update.connect(self.update_image)
+
         except BaseException as e:
             print(e)
             self.ui.statusbar.showMessage('Hardware Initialization Failed.')
@@ -208,18 +210,24 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.ui.statusbar.showMessage('Hardware Initialized Successfully.')
 
-        self.stepMoveDic = {'x+': lambda: self.ui.txtXcom.setText(
-            str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
-                            'x-': lambda: self.ui.txtXcom.setText(
-                                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
-                            'y+': lambda: self.ui.txtYcom.setText(
-                                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
-                            'y-': lambda: self.ui.txtYcom.setText(
-                                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
-                            'z+': lambda: self.ui.txtZcom.setText(
-                                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStepZ.text()), 3))),
-                            'z-': lambda: self.ui.txtZcom.setText(
-                                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStepZ.text()), 3)))}
+        self.stepMoveDic = {
+            'x+': lambda: self.ui.txtXcom.setText(
+                str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
+
+            'x-': lambda: self.ui.txtXcom.setText(
+                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
+
+            'y+': lambda: self.ui.txtYcom.setText(
+                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
+
+            'y-': lambda: self.ui.txtYcom.setText(
+                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
+
+            'z+': lambda: self.ui.txtZcom.setText(
+                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStepZ.text()), 3))),
+
+            'z-': lambda: self.ui.txtZcom.setText(
+                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStepZ.text()), 3)))}
 
     def init_position(self):
         x = self.hardware.mover.read_position_single(channel=1)
@@ -251,14 +259,15 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZdown.setEnabled(False)
         self.ui.pbZup.setEnabled(False)
 
-        self.hardware.cleanup()
-        if True:
+        __status = self.hardware.cleanup()
+        if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
             self.hardware = None
+            # Set button
+            self.ui.pbInitHW.setEnabled(True)
+            self.ui.pbCleanupHW.setEnabled(False)
         else:
             self.ui.statusbar.showMessage('Hardware Reset Failed.')
-        self.ui.pbInitHW.setEnabled(True)
-        self.ui.pbCleanupHW.setEnabled(False)
 
     # Laser Group
     @QtCore.pyqtSlot()
@@ -349,13 +358,13 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def set_center_range(self):
-        xval = round(float(self.ui.txtXcom.text()), 1)
-        yval = round(float(self.ui.txtYcom.text()), 1)
+        x_val = round(float(self.ui.txtXcom.text()), 1)
+        y_val = round(float(self.ui.txtYcom.text()), 1)
         d = float(self.ui.txtRange.text())
-        self.ui.txtStartX.setText(str(xval - d / 2))
-        self.ui.txtStartY.setText(str(yval - d / 2))
-        self.ui.txtEndX.setText(str(xval + d / 2))
-        self.ui.txtEndY.setText(str(yval + d / 2))
+        self.ui.txtStartX.setText(str(x_val - d / 2))
+        self.ui.txtStartY.setText(str(y_val - d / 2))
+        self.ui.txtEndX.setText(str(x_val + d / 2))
+        self.ui.txtEndY.setText(str(y_val + d / 2))
         self.ui.txtStepX.setText(str(d / 100))
         self.ui.txtStepY.setText(str(d / 100))
 
