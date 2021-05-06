@@ -18,4 +18,4 @@ class AllHardware():
         self.one_time_counter = OneTimeCounter_HardwareTimer
 
     def cleanup(self):
-        pass
+        return 0
