@@ -22,5 +22,15 @@ class DataThread(QtCore.QThread):
     """
 
     SIGNAL_update = QtCore.pyqtSignal(np.ndarray, name='update')
-    pass
+
+    def __init__(self, parent=None):
+        self.lastUpdateTime = time.perf_counter()
+        super().__init__(parent)
+        self.raw = None
+        self.running = False
+        self.XArr = True
+        self.yArr = []
+        self.map = None
+
+
 
