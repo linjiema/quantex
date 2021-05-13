@@ -53,7 +53,7 @@ class TriggeredCounter():
 
     def init_task(self):
         self.counter = nidaqmx.Task()
-        self.counter.ci_channels.add_ci_count_edges_chan(counter='',
+        self.counter.ci_channels.add_ci_count_edges_chan(counter='/Dev1/ctr0',
                                                          name_to_assign_to_channel="",
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
@@ -87,7 +87,7 @@ class HardwareTimer():
 
     def init_task(self):
         self.counter_out = nidaqmx.Task()
-        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='',  # need to set the terminal
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',  # need to set the terminal
                                                             name_to_assign_to_channel="",
                                                             units=nidaqmx.constants.FrequencyUnits.HZ,
                                                             idle_state=nidaqmx.constants.Level.LOW,
@@ -117,7 +117,7 @@ class OneTimeCounter_HardwareTimer():
     def init_task(self):
         # Output as timer
         self.counter_out = nidaqmx.Task()
-        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='',  # need to set the terminal
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',  # need to set the terminal
                                                             name_to_assign_to_channel="",
                                                             units=nidaqmx.constants.FrequencyUnits.HZ,
                                                             idle_state=nidaqmx.constants.Level.LOW,
@@ -129,7 +129,7 @@ class OneTimeCounter_HardwareTimer():
                                                     samps_per_chan=1000)
         # Input as counter
         self.counter_in = nidaqmx.Task()
-        self.counter_in.ci_channels.add_ci_count_edges_chan(counter='',
+        self.counter_in.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr0',
                                                          name_to_assign_to_channel="",
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
