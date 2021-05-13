@@ -59,7 +59,7 @@ class TriggeredCounter():
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter.timing.cfg_samp_clk_timing(rate=1000,
-                                                source='',  # need to set the terminal
+                                                source='Dev1/PFI14',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                 samps_per_chan=1000)
@@ -87,7 +87,7 @@ class HardwareTimer():
 
     def init_task(self):
         self.counter_out = nidaqmx.Task()
-        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',  # need to set the terminal
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',
                                                             name_to_assign_to_channel="",
                                                             units=nidaqmx.constants.FrequencyUnits.HZ,
                                                             idle_state=nidaqmx.constants.Level.LOW,
@@ -117,7 +117,7 @@ class OneTimeCounter_HardwareTimer():
     def init_task(self):
         # Output as timer
         self.counter_out = nidaqmx.Task()
-        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',  # need to set the terminal
+        self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',
                                                             name_to_assign_to_channel="",
                                                             units=nidaqmx.constants.FrequencyUnits.HZ,
                                                             idle_state=nidaqmx.constants.Level.LOW,
@@ -135,7 +135,7 @@ class OneTimeCounter_HardwareTimer():
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter_in.timing.cfg_samp_clk_timing(rate=1000,
-                                                source='',  # need to set the terminal
+                                                source='Dev1/PFI14',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                 samps_per_chan=1000)
