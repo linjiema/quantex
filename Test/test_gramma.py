@@ -1,6 +1,3 @@
-a = 1,2,3
-x, y, z,  = a
+import numpy as np
+a = np.array([2] * 3)
 print(a)
-print(x)
-print(y)
-print(z)
