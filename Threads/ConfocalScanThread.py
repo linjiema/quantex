@@ -43,7 +43,7 @@ class ConfocalScanThread(QtCore.QThread):
         # Scanning process
         for y_points in y_axis:
             if self.running:
-                self._hardware.mover.move_position_single(channel=2, location=y_start)  # Move to one location
+                self._hardware.mover.move_position_single(channel=2, location=y_points)  # Move to one location
                 self._hardware.mover.move_position_single(channel=1, location=x_start)
                 while True:
                     try:
