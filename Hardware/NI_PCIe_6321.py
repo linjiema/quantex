@@ -41,6 +41,11 @@ class TriggeredLocationSensor():
 
         return location_raw
 
+    def get_location_data(self):
+        raw_location_data = self.get_location_raw_data()
+        location_data = raw_location_data * 10  # Transform voltage data to position data
+        return location_data
+
 
 class TriggeredCounter():
     """
