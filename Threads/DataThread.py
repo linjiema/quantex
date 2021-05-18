@@ -28,9 +28,50 @@ class DataThread(QtCore.QThread):
         super().__init__(parent)
         self.raw = None
         self.running = False
-        self.XArr = True
+        self.xArr = []
         self.yArr = []
         self.map = None
+        self.sample_rate = 1000
+
+    def run(self):
+        self.running = True
+
+        # Because the first data in counts data is not good, we delete it
+        # Cause self.xData has one more data point than self.countsData
+        # Deal with this first
+        x1 = deque(self.xData)
+        x2 = deque(self.xData)
+        x1.pop()
+        x2.popleft()
+
+        new_xData = (np.asarray(x1) + np.asarray(x2)) / 2
+        self.xData = new_xData
+
+        # Create count data array
+
+        picked_counts = []
+
+        for x_pos in self.xArr:
+            # Search self.xData for the closest value
+            each_x_arr = np.array([x_pos] * np.size(self.xData))
+            diff_arr = list(np.abs(self.xData - each_x_arr))
+            closest_index = diff_arr.index(min(diff_arr))
+
+            cts_temp = self.countsData[closest_index]
+
+            picked_counts.append(cts_temp * self.sample_rate)
+
+        # Find the location in y axis
+        y_index = list(self.yArr).index(self.y)
+        # Put it into the image martix
+        self.map[y_index] = np.asarray(picked_counts)
+
+        # Save the raw data
+        y_len = [self.y] * len(self.xData)
+        line_raw = np.transpose
+
+
+
 
 
 
