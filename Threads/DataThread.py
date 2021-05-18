@@ -15,7 +15,7 @@ class DataThread(QtCore.QThread):
     Use to handle line data and put it into image matrix.
     Needs:
     self.xArr: list of x command positions (100 points)
-    self.y: x command position for the line
+    self.y: y command position for the line
     self.yArr: list of y command positions (100 points)
     self.xData: position data
     self.countsData: photon count data
@@ -67,8 +67,20 @@ class DataThread(QtCore.QThread):
         self.map[y_index] = np.asarray(picked_counts)
 
         # Save the raw data
-        y_len = [self.y] * len(self.xData)
-        line_raw = np.transpose
+        y_arr = [self.y] * len(self.xData)
+        line_raw = np.transpose(np.asarray([self.xData, y_arr, self.countsData]))
+        if self.raw is None:
+            self.raw = line_raw
+        else:
+            self.raw = np.append(self.raw, line_raw, axis=0)
+
+        # Update the image with 1 second interval
+        t = time.perf_counter()
+        if t - self.lastUpdateTime > 1:
+            self.update.emit(self.map)
+            self.lastUpdateTime = t
+
+        self.running = False
 
 
 
