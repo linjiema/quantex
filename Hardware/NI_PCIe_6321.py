@@ -46,6 +46,9 @@ class TriggeredLocationSensor():
         location_data = raw_location_data * 10  # Transform voltage data to position data
         return location_data
 
+    def close(self):
+        self.location_sensor.close()
+
 
 class TriggeredCounter():
     """
@@ -85,6 +88,9 @@ class TriggeredCounter():
         # (the processing will decrease the size by 1)
         # maybe need to get 1 more data
 
+    def close(self):
+        self.counter.close()
+
 
 class HardwareTimer():
     def __init__(self):
@@ -110,6 +116,9 @@ class HardwareTimer():
 
     def start_count(self):
         self.counter_out.start()
+
+    def close(self):
+        self.counter_out.close()
 
 
 class OneTimeCounter_HardwareTimer():
