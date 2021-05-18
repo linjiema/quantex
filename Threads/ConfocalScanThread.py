@@ -63,7 +63,9 @@ class ConfocalScanThread(QtCore.QThread):
                         ctsArr = self._hardware.triggered_counter.get_counts_array()
                     except BaseException as e:
                         print(e, y_points)
-                        # self._hardware.trigger_counter.counter.close()
+                        self._hardware.triggered_location_sensor.close()
+                        self._hardware.trigger_counter.close()
+                        self._hardware.timer.close()
                         continue
                     break
 
