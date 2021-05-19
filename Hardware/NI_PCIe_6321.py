@@ -6,8 +6,6 @@ import ctypes
 import os
 import sys
 import time
-
-import numpy
 import numpy as np
 import nidaqmx
 
@@ -81,7 +79,7 @@ class TriggeredCounter():
         deq = collections.deque(cts_arr_raw)
         deq.pop()
         deq.appendleft(0)
-        cts_arr = numpy.asarray(cts_arr_raw) - numpy.asarray(deq)
+        cts_arr = np.asarray(cts_arr_raw) - np.asarray(deq)
 
         return cts_arr.tolist()[1:]
         # May need to change the size of the list we get
@@ -180,7 +178,6 @@ class OneTimeCounter_HardwareTimer():
 
 
 if __name__ == '__main__':
-    # daq = Nontrigger_location_sensor()
     counter = OneTimeCounter_HardwareTimer()
     counter.init_task()
     print(counter.count_once())
