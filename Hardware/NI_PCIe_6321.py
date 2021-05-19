@@ -59,13 +59,13 @@ class TriggeredCounter():
 
     def init_task(self):
         self.counter = nidaqmx.Task()
-        self.counter.ci_channels.add_ci_count_edges_chan(counter='/Dev1/ctr0',
+        self.counter.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr0',
                                                          name_to_assign_to_channel="",
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter.timing.cfg_samp_clk_timing(rate=1000,
-                                                source='Dev1/PFI14',
+                                                source='/Dev1/PFI14',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                 samps_per_chan=1000)
