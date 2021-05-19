@@ -12,10 +12,10 @@ from Hardware.NI_PCIe_6321 import OneTimeCounter_HardwareTimer
 class AllHardware():
     def __init__(self):
         self.mover = XMT()
-        self.triggered_location_sensor = TriggeredLocationSensor
-        self.triggered_counter = TriggeredCounter
-        self.timer = HardwareTimer
-        self.one_time_counter = OneTimeCounter_HardwareTimer
+        self.triggered_location_sensor = TriggeredLocationSensor()
+        self.triggered_counter = TriggeredCounter()
+        self.timer = HardwareTimer()
+        self.one_time_counter = OneTimeCounter_HardwareTimer()
 
     def cleanup(self):
         return 0
