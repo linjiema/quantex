@@ -151,7 +151,7 @@ class OneTimeCounter_HardwareTimer():
                                                             initial_count=0,
                                                             count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter_in.timing.cfg_samp_clk_timing(rate=self.count_freq,
-                                                   source='Dev1/PFI14',
+                                                   source='/Dev1/PFI14',
                                                    active_edge=nidaqmx.constants.Edge.RISING,
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                    samps_per_chan=2)
@@ -180,4 +180,7 @@ class OneTimeCounter_HardwareTimer():
 
 
 if __name__ == '__main__':
-    daq = Nontrigger_location_sensor()
+    # daq = Nontrigger_location_sensor()
+    counter = OneTimeCounter_HardwareTimer()
+    counter.init_task()
+    print(counter.count_once())
