@@ -150,11 +150,11 @@ class OneTimeCounter_HardwareTimer():
                                                             edge=nidaqmx.constants.Edge.RISING,
                                                             initial_count=0,
                                                             count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
-        self.counter_in.timing.cfg_samp_clk_timing(rate=1000,
+        self.counter_in.timing.cfg_samp_clk_timing(rate=self.count_freq,
                                                    source='Dev1/PFI14',
                                                    active_edge=nidaqmx.constants.Edge.RISING,
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                   samps_per_chan=1000)
+                                                   samps_per_chan=2)
 
     def count_once(self):
         freq = self.count_freq
