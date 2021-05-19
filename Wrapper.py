@@ -520,9 +520,9 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(str)
     def change_rate(self, s):
-        new_rate = eval(s)
-        self.cThread.count_rate = new_rate
-        self.cThread.count_rate_changed = True
+        new_freq = eval(s)
+        self.cThread.count_freq = new_freq
+        self.cThread.count_freq_changed = True
 
     @QtCore.pyqtSlot()
     def maximize(self):
