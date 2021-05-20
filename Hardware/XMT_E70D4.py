@@ -273,11 +273,11 @@ class XMT:
 
         # Check the input range
         if channel == 1 or channel == 2:
-            if location > 100.0:
-                print('Warning: Input out of Range! The movement for X/Y axis is out of range(0.0~150.0um).')
+            if location > 100.0 or location < 0.0:
+                print('Warning: Input out of Range! The movement for X/Y axis is out of range(0.0~100.0um).')
                 return 2
         else:
-            if location > 50.0:
+            if location > 50.0 or location < 0.0:
                 print('Warning: Input out of Range! The movement for Z axis is out of range(0.0~50.0um).')
                 return 2
 
