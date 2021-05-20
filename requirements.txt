@@ -1,21 +1,34 @@
+atomicwrites==1.4.0
+attrs @ file:///tmp/build/80754af9/attrs_1620827162558/work
 certifi==2020.12.5
 click @ file:///home/linux1/recipes/ci/click_1610990599742/work
+colorama @ file:///tmp/build/80754af9/colorama_1607707115595/work
 cycler==0.10.0
+importlib-metadata @ file:///C:/ci/importlib-metadata_1617877486026/work
+iniconfig @ file:///home/linux1/recipes/ci/iniconfig_1610983019677/work
 kiwisolver @ file:///C:/ci/kiwisolver_1612282618948/work
 matplotlib @ file:///C:/ci/matplotlib-suite_1613408055530/work
 mkl-fft==1.3.0
 mkl-random==1.1.1
 mkl-service==2.3.0
+more-itertools @ file:///tmp/build/80754af9/more-itertools_1613676688952/work
 nidaqmx==1.0.0.dev0
 numpy @ file:///C:/ci/numpy_and_numpy_base_1603468620949/work
 olefile==0.46
+packaging @ file:///tmp/build/80754af9/packaging_1611952188834/work
 Pillow @ file:///C:/ci/pillow_1617386319301/work
+pluggy @ file:///C:/ci/pluggy_1615976530170/work
+py @ file:///tmp/build/80754af9/py_1607971587848/work
 pyparsing @ file:///home/linux1/recipes/ci/pyparsing_1610983426697/work
 PyQt5==5.15.4
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.9.0
+pytest==6.2.3
 python-dateutil @ file:///home/ktietz/src/ci/python-dateutil_1611928101742/work
 QtPy==1.9.0
 six @ file:///C:/ci/six_1605205426665/work
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
 tornado @ file:///C:/ci/tornado_1606935947090/work
+typing-extensions @ file:///home/ktietz/src/ci_mi/typing_extensions_1612808209620/work
 wincertstore==0.2
+zipp @ file:///tmp/build/80754af9/zipp_1615904174917/work
