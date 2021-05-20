@@ -112,7 +112,7 @@ class HardwareTimer():
         self.counter_out.close()
         self.init_task()
 
-    def start_count(self):
+    def start_timer(self):
         self.counter_out.start()
 
     def close(self):
