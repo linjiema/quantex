@@ -413,7 +413,7 @@ class XMT:
                                                   ctypes.c_char(channel_num),
                                                   ctypes.c_char(0),  # 0 for forward, 1 for back
                                                   ctypes.byref(waveform),  # The self_defined wave form
-                                                  ctypes.c_char(48),  # Send 48 points
+                                                  ctypes.c_char(47),  # Send 48 points
                                                   ctypes.c_float(max_limit),  # The limit for the maximum input
                                                   ctypes.c_float(min_limit)  # The limit for the minimum input
                                                   )
