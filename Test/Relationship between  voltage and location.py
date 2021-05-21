@@ -11,20 +11,25 @@ x_end = 100.0
 x_arr = list(np.arange(0.0, 100.0, 1.0))
 x_arr.append(100.0)
 
+
 vol_mean = []
 vol_std = []
 
-for x_points in x_arr:
-    AllHardware.mover.move_position_single(channel=1, location=x_points)
+hardware = AllHardware()
+hardware.mover.scan_devices()
+hardware.mover.open_devices()
 
-    AllHardware.triggered_location_sensor.init_task()
-    AllHardware.timer.init_task()
+for x_points in x_arr:
+    hardware.mover.move_position_single(channel=1, location=x_points)
+
+    hardware.triggered_location_sensor.init_task()
+    hardware.timer.init_task()
 
     time.sleep(0.5)
 
-    AllHardware.timer.start_timer()
+    hardware.timer.start_timer()
 
-    temp_location_arr = AllHardware.triggered_location_sensor.get_location_raw_data()
+    temp_location_arr = hardware.triggered_location_sensor.get_location_raw_data()
     print('Finish sample location', x_points)
 
     mean_temp = np.mean(temp_location_arr)
