@@ -59,7 +59,7 @@ class ConfocalScanThread(QtCore.QThread):
                                                                   )
 
                         # Processing the data
-                        posArr = self._hardware.triggered_location_sensor.get_location_raw_data()
+                        posArr = self._hardware.triggered_location_sensor.get_location_data()
                         ctsArr = self._hardware.triggered_counter.get_counts_array()
                     except BaseException as e:
                         print(e, y_points)
