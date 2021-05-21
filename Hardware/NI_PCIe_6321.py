@@ -114,6 +114,8 @@ class HardwareTimer():
 
     def start_timer(self):
         self.counter_out.start()
+        self.counter_out.wait_until_done()
+        self.counter_out.close()
 
     def close(self):
         self.counter_out.close()
