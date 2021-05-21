@@ -5,6 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from Hardware import AllHardware
+import scipy.optimize
 
 x_start = 0.0
 x_end = 100.0
@@ -25,7 +26,7 @@ for x_points in x_arr:
     hardware.triggered_location_sensor.init_task()
     hardware.timer.init_task()
 
-    time.sleep(0.5)
+    time.sleep(0.1)
 
     hardware.timer.start_timer()
 
@@ -42,7 +43,13 @@ print('location: ', x_arr)
 print('Voltage: ', vol_mean)
 print('Std: ', vol_std)
 
+def func(x,a,b):
+    return a*x + b
+p0=[np.max(x_arr)/np.max(vol_mean), 0]
+val, cov = scipy.optimize.curve_fit(func,vol_mean,x_arr,p0)
+print(val)
+
 plt.title('Relation of Position-Voltage')
-plt.bar(x_arr, vol_mean, yerr=vol_std)
+plt.errorbar(x_arr, vol_mean, yerr=vol_std)
 plt.show()
 #AllHardware.mover.move_position_single(channel=1, location=x_start)
