@@ -159,10 +159,13 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize...
         try:
             self.hardware = AllHardware()
-            self.hardware.mover.scan_devices()
-            self.hardware.mover.open_devices()
+            status = self.hardware.mover.scan_devices()
+            if status == 0:
+                self.hardware.mover.open_devices()
+                self.init_position()
+            else:
+                print('Warning: Piezo stage hasn\'t been connected!')
 
-            self.init_position()
             # Initialize thread (Need to initialize hardware first!!)
             # Initialize Count Thread
             self.cThread = CountThread(self.hardware)
