@@ -35,3 +35,4 @@ zipp @ file:///tmp/build/80754af9/zipp_1615904174917/work
 
 numpy~=1.19.2
 matplotlib~=3.3.4
+scipy~=1.6.2
