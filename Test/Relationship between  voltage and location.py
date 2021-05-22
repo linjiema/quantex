@@ -31,6 +31,8 @@ for x_points in x_arr:
     hardware.timer.start_timer()
 
     temp_location_arr = hardware.triggered_location_sensor.get_location_raw_data()
+    hardware.timer.recycle_timer()
+
     print('Finish sample location', x_points)
 
     mean_temp = np.mean(temp_location_arr)
