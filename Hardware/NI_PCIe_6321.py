@@ -26,7 +26,7 @@ class TriggeredLocationSensor():
                                                              )
 
         self.location_sensor.timing.cfg_samp_clk_timing(rate=1000,
-                                                        source='',  # need to set the terminal
+                                                        source='/Dev1/PFI15',  # need to set the terminal
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                         samps_per_chan=1000)
