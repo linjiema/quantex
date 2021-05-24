@@ -52,7 +52,7 @@ print('val = ', val)
 write_list = []
 for i in range(np.size(x_arr)):
     write_list.append((x_arr[i], vol_mean[i], vol_std[i]))
-os.chdir(os.path.dirname(__file__))
+os.chdir(os.path.dirname(__file__) + '/Results')
 f = open("location_voltage_table.txt", "w")
 f.write('The fitted function is' + 'y = ' + str(val[0]) + 'x + ' + str(val[1]) + '\n')
 f.write('location(um) \t voltage_mean(V) \t voltage_std(V) \n')
