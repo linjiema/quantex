@@ -387,10 +387,12 @@ class XMT:
             return 1
 
         # Create the wave form
-        wave_forward_move = np.linspace(start_point, end_point, int(4000 / line_rate))
-        wave_forward_hold = np.zeros(int(1000 / line_rate)) * end_point
-        wave_back_move = np.linspace(end_point, start_point, int(4000 / line_rate))
-        wave_back_hold = np.zeros(int(1000 / line_rate)) * start_point
+        move_coefficient = int(7500 / line_rate)
+        hold_coefficient = int(move_coefficient / 4)
+        wave_forward_move = np.linspace(start_point, end_point, move_coefficient)
+        wave_forward_hold = np.ones(hold_coefficient) * end_point
+        wave_back_move = np.linspace(end_point, start_point, move_coefficient)
+        wave_back_hold = np.ones(hold_coefficient) * start_point
         wave_forward = list(np.append(wave_forward_move, wave_forward_hold))
         wave_back = list(np.append(wave_back_move, wave_back_hold))
         return wave_forward, wave_back
@@ -403,8 +405,6 @@ class XMT:
         :param num_of_device: The number of the device( 0 for default)
         :return: Return 1 means try to scan on channel 3
         """
-        channel_num = channel - 1
-
         # Check the channel number
         if channel == 3:
             print('Warning: Channel 3 can not scan!')
@@ -412,7 +412,7 @@ class XMT:
 
         # Do the scanning
         for points in waveform:
-            self.move_position_single(channel=channel_num, location=points, check=False, num_of_device=num_of_device)
+            self.move_position_single(channel=channel, location=points, check=False, num_of_device=num_of_device)
 
     '''
     def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
