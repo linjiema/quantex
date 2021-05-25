@@ -361,6 +361,72 @@ class XMT:
 
     def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
         """
+        :param channel: channel of the scanning, can be 1,2,4
+        :param start_point: the start of the scanning (um)
+        :param end_point: the end of the scanning (um)
+        :param line_rate: the scan rage for line, default 4
+        :param num_of_device: 0
+        :return: 0 means fine, 1 means scan size out of range, 2 means try to use channel 3 to scan
+        """
+
+        # command_b4 = 0
+        # channel_num = channel - 1
+        #
+        # # Set the scan limit based on channel
+        # min_limit = 0.0
+        # if channel == 4:
+        #     max_limit = 50.0
+        # else:
+        #     max_limit = 100.0
+        #
+        # if channel == 3:
+        #     print('Warning: The channel 3 can not scan!')
+        #     return 2
+        #
+        # # Check the scan size
+        # if start_point < min_limit or end_point > max_limit:
+        #     print('Warning: Scan size out of range!')
+        #     return 1
+        pass
+
+    def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, line_rate=4, num_of_device=0):
+        command_b4 = 0
+        channel_num = channel - 1
+
+        if channel == 3:
+            print('Warning: Channel 3 can not scan!')
+            return 1
+
+        pp_value = end_point - start_point
+        offset = (start_point + end_point) / 2
+
+        self.xmt_dll.XMT_COMMAND_WaveSetHighSingle(ctypes.c_int(num_of_device),
+                                                   ctypes.c_char(1),  # Address of controller(always 1)
+                                                   ctypes.c_char(12),  # Command_b3, 72 for start/stop scan
+                                                   ctypes.c_char(command_b4),
+                                                   ctypes.c_char(channel_num),
+                                                   ctypes.c_char(ord('Z')),
+                                                   ctypes.c_double(pp_value),
+                                                   ctypes.c_double(line_rate),
+                                                   ctypes.c_double(offset)
+                                                   )
+
+        time.sleep(9 / (10 * line_rate))  # Wait for 0.9 T
+
+        # If move to the target position, stop scanning
+        self.xmt_dll.XMT_COMMAND_WaveSetHighSingleStop(ctypes.c_int(num_of_device),
+                                                       ctypes.c_char(1),  # Address of controller(always 1)
+                                                       ctypes.c_char(14),  # Command_b3, 72 for start/stop scan
+                                                       ctypes.c_char(command_b4)
+                                                       )
+
+        # Move back to the start point
+        self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
+        return 0
+
+    '''
+    def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
+        """
         Scan one line
 
         48 points. First 40 define a line, last 8 stay at endpoint to make sure it reach the set point
@@ -431,7 +497,9 @@ class XMT:
                                                      # locations
                                                      )
         return 0
+    '''
 
+    '''
     def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, line_rate=4, num_of_device=0):
         """
         Do a single line scan for channel
@@ -474,9 +542,9 @@ class XMT:
         # Move back to the start point
         self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
         return 0
+    '''
 
-
-'''
+    '''
     def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, num_of_device=0):
         """
         Do a single line scan for channel
@@ -524,9 +592,9 @@ class XMT:
         # Move back to the start point
         self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
         return 0
-'''
+    '''
 
-'''
+    '''
     def scan_set_test(self, waveforminput):
         a = ctypes.c_float * 5
         waveform = a(*waveforminput)
@@ -561,7 +629,8 @@ class XMT:
             location = self.read_position_single(channel=4)
             print('test time', i + 1, ':', location)
             time.sleep(0.001)
-'''
+    '''
+
 
 if __name__ == '__main__':
     xmt = XMT()
