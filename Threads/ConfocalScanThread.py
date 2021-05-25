@@ -46,7 +46,6 @@ class ConfocalScanThread(QtCore.QThread):
         for y_points in y_axis:
             if self.running:
                 self._hardware.mover.move_position_single(channel=2, location=y_points)  # Move to one location
-                self._hardware.mover.move_position_single(channel=1, location=x_start)
                 while True:
                     try:
                         # Init all counting hardware
@@ -56,9 +55,11 @@ class ConfocalScanThread(QtCore.QThread):
 
                         # Start scanning
                         if forward_back_status:
+                            self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)
                         else:
+                            self._hardware.mover.move_position_single(channel=1, location=wave_back[0])
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
                         # Processing the data
