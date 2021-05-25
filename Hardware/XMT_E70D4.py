@@ -460,7 +460,7 @@ class XMT:
                                                   ctypes.c_char(ord('S'))  # Start to scan
                                                   )
 
-        time.sleep(3 / (2 * line_rate))  # Wait for 1.5 T
+        time.sleep(9 / (10 * line_rate))  # Wait for 0.9 T
 
         # If move to the target position, stop scanning
         self.xmt_dll.XMT_COMMAND_SetMCU_BeginSend(ctypes.c_int(num_of_device),
