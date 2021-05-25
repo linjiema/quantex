@@ -35,12 +35,14 @@ class ConfocalScanThread(QtCore.QThread):
         y_axis = np.arange(y_start, y_end, y_step)
 
         # Send the scanning parameter to stage
-        self._hardware.mover.scanning_setting(channel=1,
-                                              start_point=x_start, end_point=x_end,
-                                              line_rate=4
-                                              )
+        wave_forward, wave_back = self._hardware.mover.generating_scan_array(channel=1,
+                                                                             start_point=x_start,
+                                                                             end_point=x_end,
+                                                                             line_rate=4
+                                                                             )
 
         # Scanning process
+        forward_back_status = True
         for y_points in y_axis:
             if self.running:
                 self._hardware.mover.move_position_single(channel=2, location=y_points)  # Move to one location
@@ -53,15 +55,17 @@ class ConfocalScanThread(QtCore.QThread):
                         self._hardware.timer.init_task()
 
                         # Start scanning
-                        self._hardware.timer.start_timer()
-                        self._hardware.mover.scanning_single_line(channel=1,
-                                                                  start_point=x_start, end_point=x_end,
-                                                                  )
-
+                        if forward_back_status:
+                            self._hardware.timer.start_timer()
+                            self._hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)
+                        else:
+                            self._hardware.timer.start_timer()
+                            self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
                         # Processing the data
                         posArr = self._hardware.triggered_location_sensor.get_location_data()
                         ctsArr = self._hardware.triggered_counter.get_counts_array()
                         self._hardware.timer.recycle_timer()
+                        forward_back_status = bool(1 - forward_back_status)
                     except BaseException as e:
                         print(e, y_points)
                         self._hardware.triggered_location_sensor.close()

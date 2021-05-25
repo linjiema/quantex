@@ -359,70 +359,60 @@ class XMT:
             time.sleep(0.002)  # If it doesn't satisfy the requirement, wait for 2ms and check again
         return 0
 
-    def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
+    def generating_scan_array(self, channel, start_point, end_point, line_rate=4):
         """
-        :param channel: channel of the scanning, can be 1,2,4
-        :param start_point: the start of the scanning (um)
-        :param end_point: the end of the scanning (um)
-        :param line_rate: the scan rage for line, default 4
-        :param num_of_device: 0
-        :return: 0 means fine, 1 means scan size out of range, 2 means try to use channel 3 to scan
+        This methods will generate the list that used for movement of the piezo_stage
+        :param channel: The channel for scan. Used for prevent out of limit
+        :param start_point: The start point of the movement (um)
+        :param end_point: The end point of the movement (um)
+        :param line_rate: The line rate of the scanning (Hz)
+        :return: list for move forward, list for move back.
+        Return 1 means scan size out of range.
+        Return 2 means try to use channel 3 to scan.
         """
+        # Set the scan limit based on channel
+        min_limit = 0.0
+        if channel == 4:
+            max_limit = 50.0
+        else:
+            max_limit = 100.0
 
-        # command_b4 = 0
-        # channel_num = channel - 1
-        #
-        # # Set the scan limit based on channel
-        # min_limit = 0.0
-        # if channel == 4:
-        #     max_limit = 50.0
-        # else:
-        #     max_limit = 100.0
-        #
-        # if channel == 3:
-        #     print('Warning: The channel 3 can not scan!')
-        #     return 2
-        #
-        # # Check the scan size
-        # if start_point < min_limit or end_point > max_limit:
-        #     print('Warning: Scan size out of range!')
-        #     return 1
-        pass
+        if channel == 3:
+            print('Warning: The channel 3 can not scan!')
+            return 2
 
-    def scanning_single_line(self, channel, start_point, end_point, accuracy=0.005, line_rate=4, num_of_device=0):
-        command_b4 = 0
+        # Check the scan size
+        if start_point < min_limit or end_point > max_limit:
+            print('Warning: Scan size out of range!')
+            return 1
+
+        # Create the wave form
+        wave_forward_move = np.linspace(start_point, end_point, int(4000 / line_rate))
+        wave_forward_hold = np.zeros(int(1000 / line_rate)) * end_point
+        wave_back_move = np.linspace(end_point, start_point, int(4000 / line_rate))
+        wave_back_hold = np.zeros(int(1000 / line_rate)) * start_point
+        wave_forward = list(np.append(wave_forward_move, wave_forward_hold))
+        wave_back = list(np.append(wave_back_move, wave_back_hold))
+        return wave_forward, wave_back
+
+    def scanning_single_line(self, channel, waveform, num_of_device=0):
+        """
+        This methods do the single line scanning based on the given waveform
+        :param channel: The Channel used to scanning, 1, 2, 4
+        :param waveform: The self_defined waveform for control piezo stage movement
+        :param num_of_device: The number of the device( 0 for default)
+        :return: Return 1 means try to scan on channel 3
+        """
         channel_num = channel - 1
 
+        # Check the channel number
         if channel == 3:
             print('Warning: Channel 3 can not scan!')
             return 1
 
-        pp_value = end_point - start_point
-        offset = (start_point + end_point) / 2
-
-        self.xmt_dll.XMT_COMMAND_WaveSetHighSingle(ctypes.c_int(num_of_device),
-                                                   ctypes.c_char(1),  # Address of controller(always 1)
-                                                   ctypes.c_char(12),  # Command_b3, 72 for start/stop scan
-                                                   ctypes.c_char(command_b4),
-                                                   ctypes.c_char(channel_num),
-                                                   ctypes.c_char(ord('Z')),
-                                                   ctypes.c_double(pp_value),
-                                                   ctypes.c_double(line_rate),
-                                                   ctypes.c_double(offset)
-                                                   )
-
-        time.sleep(9 / (10 * line_rate))  # Wait for 0.9 T
-
-        # If move to the target position, stop scanning
-        self.xmt_dll.XMT_COMMAND_WaveSetHighSingleStop(ctypes.c_int(num_of_device),
-                                                       ctypes.c_char(1),  # Address of controller(always 1)
-                                                       ctypes.c_char(14),  # Command_b3, 72 for start/stop scan
-                                                       ctypes.c_char(command_b4)
-                                                       )
-
-        # Move back to the start point
-        self.move_position_single(channel=channel, location=start_point, accuracy=accuracy, num_of_device=num_of_device)
-        return 0
+        # Do the scanning
+        for points in waveform:
+            self.move_position_single(channel=channel_num, location=points, check=False, num_of_device=num_of_device)
 
     '''
     def scanning_setting(self, channel, start_point, end_point, line_rate=4, num_of_device=0):
