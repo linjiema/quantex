@@ -26,22 +26,22 @@ class MaxThread(QtCore.QThread):
         self._hardware.one_time_counter.count_freq = self.count_freq
         self._hardware.one_time_counter.init_task()
 
-        self.scan(__channel=1)
-        self.scan(__channel=2)
-        self.scan(__channel=4)
+        self.scan(_channel=1)
+        self.scan(_channel=2)
+        self.scan(_channel=4)
 
         self._hardware.one_time_counter.close()
         self.moved.emit(self._hardware.mover.read_position_single(channel=1),
                         self._hardware.mover.read_position_single(channel=2),
                         self._hardware.mover.read_position_single(channel=4))
 
-    def scan(self, __channel):
-        pos = self._hardware.mover.read_position_single(channel=__channel)
+    def scan(self, _channel):
+        pos = self._hardware.mover.read_position_single(channel=_channel)
         pos_list = np.arange(start=pos - 3 * self.step, stop=pos + 3 * self.step, step=self.step)
         max_cts = 0
 
         for point in pos_list:
-            self._hardware.mover.move_position_single(channel=__channel, location=point)
+            self._hardware.mover.move_position_single(channel=_channel, location=point)
             cts = self._hardware.one_time_counter.count_once()
             self.counts.emit(cts)
 
@@ -49,4 +49,4 @@ class MaxThread(QtCore.QThread):
                 pos = point
                 max_cts = cts
 
-        self._hardware.mover.move_position_single(channel=__channel, location=pos)
+        self._hardware.mover.move_position_single(channel=_channel, location=pos)
