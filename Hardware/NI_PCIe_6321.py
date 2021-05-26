@@ -25,16 +25,16 @@ class TriggeredLocationSensor():
                                                              custom_scale_name=""
                                                              )
 
-        self.location_sensor.timing.cfg_samp_clk_timing(rate=1000,
+        self.location_sensor.timing.cfg_samp_clk_timing(rate=200,
                                                         source='/Dev1/PFI15',  # need to set the terminal
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                        samps_per_chan=1000)
+                                                        samps_per_chan=200)
         self.location_sensor.start()
 
     def get_location_raw_data(self):
         self.location_sensor.wait_until_done()
-        location_raw = self.location_sensor.read(number_of_samples_per_channel=1000)
+        location_raw = self.location_sensor.read(number_of_samples_per_channel=200)
         self.location_sensor.close()
 
         return location_raw
@@ -65,16 +65,16 @@ class TriggeredCounter():
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
-        self.counter.timing.cfg_samp_clk_timing(rate=1000,
+        self.counter.timing.cfg_samp_clk_timing(rate=200,
                                                 source='/Dev1/PFI14',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                samps_per_chan=1000)
+                                                samps_per_chan=200)
         self.counter.start()
 
     def get_counts_array(self):
         self.counter.wait_until_done()
-        cts_arr_raw = self.counter.read(number_of_samples_per_channel=1000)
+        cts_arr_raw = self.counter.read(number_of_samples_per_channel=200)
         self.counter.close()
 
         deq = collections.deque(cts_arr_raw)
@@ -93,7 +93,7 @@ class TriggeredCounter():
 
 class HardwareTimer():
     def __init__(self):
-        self.count_freq = 1000
+        self.count_freq = 200
 
     def init_task(self):
         self.counter_out = nidaqmx.Task()
@@ -106,7 +106,7 @@ class HardwareTimer():
                                                             duty_cycle=0.5
                                                             )
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=1000)
+                                                    samps_per_chan=200)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq

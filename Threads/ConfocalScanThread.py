@@ -38,7 +38,7 @@ class ConfocalScanThread(QtCore.QThread):
         wave_forward, wave_back = self._hardware.mover.generating_scan_array(channel=1,
                                                                              start_point=x_start,
                                                                              end_point=x_end,
-                                                                             line_rate=4
+                                                                             line_rate=1
                                                                              )
 
         # Scanning process

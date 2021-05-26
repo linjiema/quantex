@@ -31,7 +31,7 @@ class DataThread(QtCore.QThread):
         self.xArr = []
         self.yArr = []
         self.map = None
-        self.sample_rate = 1000
+        self.sample_rate = 200
 
     def run(self):
         self.running = True
