@@ -145,7 +145,7 @@ class OneTimeCounter_HardwareTimer():
                                                             duty_cycle=0.5
                                                             )
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=1000)
+                                                    samps_per_chan=2)
         # Input as counter
         self.counter_in = nidaqmx.Task()
         self.counter_in.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr0',
@@ -164,13 +164,14 @@ class OneTimeCounter_HardwareTimer():
         self.counter_in.start()
         self.counter_out.start()
         self.counter_in.wait_until_done()
-        c1, c2 = self.counter_in.read(number_of_samples_per_channel=2, timeout=10.0)
+        self.counter_out.wait_until_done()
+        cts_arr = self.counter_in.read(number_of_samples_per_channel=2, timeout=10.0)
         self.counter_in.stop()
         self.counter_out.stop()
-        if c1 > c2:
-            return (c2 + 0xFFFFFFFF + 1 - c1) * freq
+        if cts_arr[0] > cts_arr[1]:
+            return (cts_arr[1] + 0xFFFFFFFF + 1 - cts_arr[0]) * freq
         else:
-            return (c2 - c1) * freq
+            return (cts_arr[1] - cts_arr[0]) * freq
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
