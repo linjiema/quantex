@@ -36,7 +36,7 @@ class DataThread(QtCore.QThread):
     def run(self):
         self.running = True
 
-        # Because the first data in counts data is not good, we delete it
+        # Because the first data in counts do not have meaning, we delete it in the ConfocalScanThread
         # Cause self.xData has one more data point than self.countsData
         # Deal with this first
         x1 = deque(self.xData)
@@ -63,10 +63,10 @@ class DataThread(QtCore.QThread):
 
         # Find the location in y axis
         y_index = list(self.yArr).index(self.y)
-        # Put it into the image martix
+        # Put it into the image matrix
         self.map[y_index] = np.asarray(picked_counts)
 
-        # Save the raw data
+        # Save the raw data: original_xData, original_y, Counts data
         y_arr = [self.y] * len(self.xData)
         line_raw = np.transpose(np.asarray([self.xData, y_arr, self.countsData]))
         if self.raw is None:

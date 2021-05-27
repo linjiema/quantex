@@ -83,9 +83,7 @@ class TriggeredCounter():
         cts_arr = np.asarray(cts_arr_raw) - np.asarray(deq)
 
         return cts_arr.tolist()[1:]
-        # May need to change the size of the list we get
-        # (the processing will decrease the size by 1)
-        # maybe need to get 1 more data
+        # The processing will decrease the size by 1)
 
     def close(self):
         self.counter.close()
