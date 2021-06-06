@@ -7,6 +7,7 @@ from Hardware.NI_PCIe_6321 import TriggeredLocationSensor
 from Hardware.NI_PCIe_6321 import TriggeredCounter
 from Hardware.NI_PCIe_6321 import HardwareTimer
 from Hardware.NI_PCIe_6321 import OneTimeCounter_HardwareTimer
+from Hardware.SynthUSB3 import SynthUSB3
 
 
 class AllHardware():
@@ -16,6 +17,7 @@ class AllHardware():
         self.triggered_counter = TriggeredCounter()
         self.timer = HardwareTimer()
         self.one_time_counter = OneTimeCounter_HardwareTimer()
+        self.mw_source = SynthUSB3
 
     def cleanup(self):
         return 0
