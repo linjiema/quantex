@@ -28,7 +28,10 @@ with open(path, 'r') as file_raw_data:
         x_arr.append(round(float(data_arr[0]), 3))
         y_arr.append(round(float(data_arr[1]), 3))
         count_arr.append(float(data_arr[2]))
-
+# The raw data is:
+# x_arr
+# y_arr
+# count_arr
 # Split the data based on Y value
 diff_y = np.diff(y_arr)
 temp = np.where(diff_y)[0]
@@ -55,7 +58,7 @@ for x_line, counts_line in zip(x_2d_arr, counts_2d_arr):
     x_min = min(x_line)
     x_max = max(x_line)
 
-    x_reshape_temp = np.arange(x_min, x_max, (x_max - x_min) / 100)
+    x_reshape_temp = np.linspace(x_min, x_max, 100)
     x_reshape = np.append(x_reshape_temp, x_max)
 
     # Select counts based on new x_arr
