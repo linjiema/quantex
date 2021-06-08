@@ -31,8 +31,8 @@ class ConfocalScanThread(QtCore.QThread):
 
         # Define the parameters
         x_start, x_end, x_step, y_start, y_end, y_step = self.parameters[:6]
-        x_axis = np.linspace(x_start, x_end, 100)
-        y_axis = np.linspace(y_start, y_end, 100)
+        x_axis = np.arange(x_start, x_end, x_step)
+        y_axis = np.arange(y_start, y_end, y_step)
 
         # Send the scanning parameter to stage
         wave_forward, wave_back = self._hardware.mover.generating_scan_array(channel=1,
@@ -54,6 +54,12 @@ class ConfocalScanThread(QtCore.QThread):
                         self._hardware.timer.init_task()
 
                         # Start scanning
+                        '''
+                        self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
+                        self._hardware.timer.start_timer()
+                        self._hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)
+                        self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
+                        '''
                         if forward_back_status:
                             self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
                             self._hardware.timer.start_timer()
