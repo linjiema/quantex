@@ -11,11 +11,12 @@ import numpy as np
 
 class XMT:
     def __init__(self):
-
+        origin_path = os.getcwd()
         dll = os.path.dirname(__file__) + '/DLL/XMT_DLL_USB.dll'  # Give the path of dll file
         path = os.path.dirname(__file__) + '/DLL'
         os.chdir(path)
         self.xmt_dll = ctypes.cdll.LoadLibrary(dll)
+        os.chdir(origin_path)
 
     def scan_devices(self):
         """
