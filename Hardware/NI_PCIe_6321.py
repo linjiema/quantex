@@ -66,7 +66,7 @@ class TriggeredCounter():
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter.timing.cfg_samp_clk_timing(rate=200,
-                                                source='/Dev1/PFI14',
+                                                source='/Dev1/PFI10',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                 samps_per_chan=200)
@@ -152,7 +152,7 @@ class OneTimeCounter_HardwareTimer():
                                                             initial_count=0,
                                                             count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter_in.timing.cfg_samp_clk_timing(rate=self.count_freq,
-                                                   source='/Dev1/PFI14',
+                                                   source='/Dev1/PFI10',
                                                    active_edge=nidaqmx.constants.Edge.RISING,
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                    samps_per_chan=2)
