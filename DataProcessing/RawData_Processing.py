@@ -58,13 +58,12 @@ for x_line, counts_line in zip(x_2d_arr, counts_2d_arr):
     x_min = min(x_line)
     x_max = max(x_line)
 
-    x_reshape_temp = np.linspace(x_min, x_max, 100)
-    x_reshape = np.append(x_reshape_temp, x_max)
+    x_reshape = np.linspace(x_min, x_max, 101)
 
     # Select counts based on new x_arr
     counts_arr_plot_line = []
     counts_line_arr = np.array(counts_line)
-    for index in range(np.size(x_reshape_temp)):
+    for index in range(np.size(x_reshape) - 1):
         selected_counts = counts_line_arr[np.where((x_line >= x_reshape[index]) & (x_line <= x_reshape[index + 1]))]
         if np.size(selected_counts) == 0:
             counts_norm = 0
@@ -80,8 +79,7 @@ for x_line, counts_line in zip(x_2d_arr, counts_2d_arr):
 x_min = np.average(x_min_arr)
 x_max = np.average(x_max_arr)
 
-x_arr_plot_temp = np.arange(x_min, x_max, (x_max - x_min) / 99)
-x_arr_plot = np.append(x_arr_plot_temp, x_max)
+x_arr_plot = np.linspace(x_min, x_max, 100)
 
 # Create the y_arr used for plot
 y_arr_plot = np.array(y_2d_arr)[:, 0]
