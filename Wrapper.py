@@ -196,7 +196,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbGoTo.setEnabled(True)
         self.ui.pbGoToMid.setEnabled(True)
         self.ui.pbLaserOn.setEnabled(True)
-        self.ui.pbLaserOff.setEnabled(True)
+        self.ui.pbLaserOff.setEnabled(False)
         self.ui.pbMax.setEnabled(True)
         self.ui.pbKeepNV.setEnabled(True)
         self.ui.pbStart.setEnabled(True)
@@ -273,11 +273,15 @@ class mainGUI(QtWidgets.QMainWindow):
     # Laser Group
     @QtCore.pyqtSlot()
     def laser_on(self):
-        pass
+        self.hardware.pulser.laser_on()
+        self.ui.pbLaserOn.setEnabled(False)
+        self.ui.pbLaserOff.setEnabled(True)
 
     @QtCore.pyqtSlot()
     def laser_off(self):
-        pass
+        self.hardware.pulser.laser_off()
+        self.ui.pbLaserOn.setEnabled(True)
+        self.ui.pbLaserOff.setEnabled(False)
 
     # Scan Group
     @QtCore.pyqtSlot()
