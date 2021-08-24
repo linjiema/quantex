@@ -14,7 +14,7 @@ from matplotlib.widgets import Cursor
 from matplotlib import cm
 from collections import deque
 
-from Threads import CountThread, MoveThread, ConfocalScanThread, MaxThread, DataThread
+from Threads import CountThread, MoveThread, XZScanThread, MaxThread, DataThread
 from Hardware import AllHardware
 
 
@@ -124,8 +124,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
 
     # Load default setting
-    def load_defaults(self, f_name='defaults.txt'):
-        if f_name == 'defaults.txt':
+    def load_defaults(self, f_name='xzdefaults.txt'):
+        if f_name == 'xzdefaults.txt':
             f = open(os.path.join(os.path.dirname(__file__), f_name), 'r')
         else:
             f = open(f_name, 'r')
@@ -175,7 +175,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.mThread = MoveThread(self.hardware)
             self.mThread.moved.connect(self.gone_to)
             # Initialize Confocal Scan Thread
-            self.sThread = ConfocalScanThread(self.hardware)
+            self.sThread = XZScanThread(self.hardware)
             self.sThread.update.connect(self.scan_data_back)
             self.sThread.finished.connect(self.scan_stopped)
             # Initialize Max Thread

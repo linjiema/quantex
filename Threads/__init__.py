@@ -7,3 +7,4 @@ from Threads.CountThread import CountThread
 from Threads.DataThread import DataThread
 from Threads.MaxThread import MaxThread
 from Threads.MoveThread import MoveThread
+from Threads.XZScanThread import XZScanThread
