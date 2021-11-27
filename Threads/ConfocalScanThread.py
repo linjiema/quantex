@@ -19,7 +19,7 @@ class ConfocalScanThread(QtCore.QThread):
         self._hardware = hardware
         super().__init__(parent)  # Inherit the init method of parent class
         self.running = False
-        self.parameters = [0, 100, 1, 0, 100, 1, 0, 0]
+        self.parameters = [0, 65, 0.65, 0, 65, 0.65, 0, 0]
         # [X_Start, X_End, X_Step, Y_Start, Y_End, Y_Step, Z_Position, Line_Frequency]
 
     def run(self):

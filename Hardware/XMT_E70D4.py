@@ -177,22 +177,22 @@ class XMT:
         for i in range(4):
             self.set_status(channel=(i + 1), nmb_of_device=num_of_device)
 
-    def set_voltage(self, channel=3, voltage=150.0, num_of_device=0):
+    def set_voltage(self, channel=3, voltage=100.0, num_of_device=0):
         """
         Set the voltage for single channel
 
-        Default voltage for channel 3 is 150V
+        Default voltage for channel 3 is 100V
 
         Return 0 means fine
 
-        Return 1 means try to give a non-150V voltage to Channel 3
+        Return 1 means try to give a non-100V voltage to Channel 3
         """
 
         command_b4 = 0
         channel_nmm = channel - 1
         if channel_nmm == 2:
-            if not voltage == 150.0:
-                print('Warning: Channel 3 must be 150V!')
+            if not voltage == 100.0:
+                print('Warning: Channel 3 must be 100V!')
                 return 1
 
         self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
@@ -212,7 +212,7 @@ class XMT:
 
         Return the location of selected channel ()
 
-        Return 1 means try to return the location of channel 3 which only have constant 150 V Voltage
+        Return 1 means try to return the location of channel 3 which only have constant 100 V Voltage
         """
 
         command_b4 = 0  # Define command_b4(always 0, have no meaning)
@@ -252,7 +252,7 @@ class XMT:
         """
         Move the position for single channel
 
-        Channel 3 can not move location, must be 150V
+        Channel 3 can not move location, must be 100V
 
         The unit of position is um
 
@@ -268,19 +268,19 @@ class XMT:
         command_b4 = 0
         channel_num = channel - 1
 
-        # The channel 3 need to be given a 150V constant voltage, not position
+        # The channel 3 need to be given a 100V constant voltage, not position
         if channel == 3:
-            print('Warning: Can not send position to channel 3! Channel 3 must be 150V.')
+            print('Warning: Can not send position to channel 3! Channel 3 must be 100V.')
             return 1
 
         # Check the input range
         if channel == 1 or channel == 2:
-            if location > 100.0 or location < 0.0:
-                print('Warning: Input out of Range! The movement for X/Y axis is out of range(0.0~100.0um).')
+            if location > 65.0 or location < 0.0:
+                print('Warning: Input out of Range! The movement for X/Y axis is out of range(0.0~65.0um).')
                 return 2
         else:
-            if location > 50.0 or location < 0.0:
-                print('Warning: Input out of Range! The movement for Z axis is out of range(0.0~50.0um).')
+            if location > 35.0 or location < 0.0:
+                print('Warning: Input out of Range! The movement for Z axis is out of range(0.0~35.0um).')
                 return 2
 
         self.xmt_dll.XMT_COMMAND_SinglePoint(ctypes.c_int(num_of_device),
@@ -301,7 +301,7 @@ class XMT:
         """
         Move the position to [0,0,0]
 
-        Set Voltage of Channel 3 to 150V
+        Set Voltage of Channel 3 to 100V
 
         Wait for 0.1s
 
@@ -375,9 +375,9 @@ class XMT:
         # Set the scan limit based on channel
         min_limit = 0.0
         if channel == 4:
-            max_limit = 50.0
+            max_limit = 35.0
         else:
-            max_limit = 100.0
+            max_limit = 65.0
 
         if channel == 3:
             print('Warning: The channel 3 can not scan!')
@@ -425,7 +425,7 @@ class XMT:
 
         Unit is um and ms
 
-        The maximum for channel 1 and 2 is 100um, for channel 4 is 50um
+        The maximum for channel 1 and 2 is 65um, for channel 4 is 35um
 
         Return 0 means fine
 
@@ -440,9 +440,9 @@ class XMT:
         # Set the scan limit based on channel
         min_limit = 0.0
         if channel == 4:
-            max_limit = 50.0
+            max_limit = 35.0
         else:
-            max_limit = 100.0
+            max_limit = 65.0
 
         if channel == 3:
             print('Warning: The channel 3 can not scan!')
@@ -598,7 +598,7 @@ class XMT:
                                                   ctypes.c_char(0),  # f/B
                                                   ctypes.byref(waveform),
                                                   ctypes.c_char(5),
-                                                  ctypes.c_float(50.0),
+                                                  ctypes.c_float(35.0),
                                                   ctypes.c_float(0.0)
                                                   )
         self.xmt_dll.XMT_COMMAND_SetMCUSendDataTimer(ctypes.c_int(0),
@@ -640,7 +640,7 @@ if __name__ == '__main__':
     '''
 
 '''
-    xmt.move_position_all(location=(80, 80, 50))
+    xmt.move_position_all(location=(80, 80, 35))
     old_location = xmt.read_position_all()
     print(old_location)
     time.sleep(2)

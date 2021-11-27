@@ -287,11 +287,11 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def set_full_range(self):
         self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('100')
-        self.ui.txtStepX.setText('1')
+        self.ui.txtEndX.setText('65')
+        self.ui.txtStepX.setText('0.65')
         self.ui.txtStartY.setText('0')
-        self.ui.txtEndY.setText('100')
-        self.ui.txtStepY.setText('1')
+        self.ui.txtEndY.setText('65')
+        self.ui.txtStepY.setText('0.65')
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -470,9 +470,9 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def go_to_mid(self):
-        self.ui.txtXcom.setText('50')
-        self.ui.txtYcom.setText('50')
-        self.ui.txtZcom.setText('25')
+        self.ui.txtXcom.setText('32.5')
+        self.ui.txtYcom.setText('32.5')
+        self.ui.txtZcom.setText('17.5')
         self.go_to()
 
     @QtCore.pyqtSlot()
