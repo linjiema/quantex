@@ -18,21 +18,32 @@ class XMT:
         self.xmt_dll = ctypes.cdll.LoadLibrary(dll)
         os.chdir(origin_path)
 
-    def scan_devices(self):
-        """
-        Scan the devices before using it
-
-        Print the number of connected devices
-
-        Return the number of connected devices
+    def scan_devices(self, port_num='COM3'):
         """
 
-        state = self.xmt_dll.EntryXMT("3", 9600, "NULL")
-        return state
+        :param port_num: A string represents the COM port of the Controller, e.g. 'COM3'
+        :return: 0 means connect to the device
 
-    def open_devices(self, nmb_of_device=0):
+        The EntryXMT() Function will return 3 when the assigned COM port has device.
         """
-        Open the device of nmb_of_device
+
+        status = self.xmt_dll.EntryXMT(ctypes.c_wchar_p(port_num), ctypes.c_long(9600), ctypes.c_int(0)) - 3
+        return status
+
+    def read_voltage_test(self, channel_num=2):
+
+        command_b4 = 0
+        self.xmt_dll.XMT_COMMAND_ReadData.restype = ctypes.c_double
+        temp_data = self.xmt_dll.XMT_COMMAND_ReadData(ctypes.c_char(1),  # Address of controller(always 1)
+                                                      ctypes.c_char(5),  # Command_b3, 33 for voltage limit
+                                                      ctypes.c_char(0),
+                                                      ctypes.c_char(channel_num)
+                                                      )
+        print('The voltage is:', temp_data)
+
+    def open_devices(self, port_num='COM3', baud_rate=19200):
+        """
+        Open the device of given port_num and baud_rate
 
         If not open successfully, print 'Fail to open ...'
 
@@ -42,6 +53,7 @@ class XMT:
 
         Return 1 means fail to open the device
         """
+        self.xmt_dll.EntryXMT(port_num, baud_rate, 'NULL')
 
         if not self.xmt_dll.OpenUsbPython(ctypes.c_int(nmb_of_device)):
             print('Warning: Failed to open device %d!' % nmb_of_device)
@@ -415,9 +427,14 @@ class XMT:
         for points in waveform:
             self.move_position_single(channel=channel, location=points, check=False, num_of_device=num_of_device)
 
+
 if __name__ == '__main__':
     xmt = XMT()
     device = xmt.scan_devices()
     print(device)
+    xmt.read_voltage_test()
+
+
+    print(xmt.xmt_dll.CloseSer())
     # xmt.open_devices(nmb_of_device=device)
     # xmt.check_all_status(num_of_device=device)
