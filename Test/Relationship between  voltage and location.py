@@ -8,8 +8,8 @@ from Hardware import AllHardware
 import scipy.optimize
 
 x_start = 0.0
-x_end = 100.0
-x_arr = list(np.arange(0.0, 100.0, 0.1))
+x_end = 65.0
+x_arr = list(np.arange(0.0, 65.0, 0.1))
 x_arr.append(100.0)
 
 
@@ -21,7 +21,8 @@ hardware.mover.scan_devices()
 hardware.mover.open_devices()
 
 for x_points in x_arr:
-    hardware.mover.move_position_single(channel=1, location=x_points)
+    hardware.mover.move_position_single(channel=1, location=x_points, check=False)
+    time.sleep(0.5)
 
     hardware.triggered_location_sensor.init_task()
     hardware.timer.init_task()
