@@ -1,4 +1,3 @@
-# coding=gbk
 """
 This file is the functions for CoreTomorrow E70.4 4 channel controller
 
@@ -38,6 +37,7 @@ class XMT:
                                        ) - 3
         return status
 
+    '''
     def open_devices(self, port_num='COM3', baud_rate=115200):
         """
         Change the baud rate to setting.(default: 115200)
@@ -64,6 +64,10 @@ class XMT:
             return 0
         else:
             return 1
+        '''
+
+    def open_devices(self, port_num='COM3', baud_rate=115200):
+        return 0
 
     def close_devices(self, port_num='COM3'):
         """
@@ -377,7 +381,7 @@ class XMT:
             return 1
 
         # Create the wave form
-        move_coefficient = int(7500 / line_rate)
+        move_coefficient = int(15000 / line_rate)
         hold_coefficient = int(move_coefficient / 4)
         wave_forward_move = np.linspace(start_point, end_point, move_coefficient)
         wave_forward_hold = np.ones(hold_coefficient) * end_point
@@ -407,9 +411,32 @@ class XMT:
 
 if __name__ == '__main__':
     xmt = XMT()
-    device = xmt.scan_devices()
-    print(device)
+    xmt.scan_devices()
+    xmt.open_devices()
+    print('position:', xmt.read_position_all())
 
-    print(xmt.xmt_dll.CloseSer())
+    xmt.move_position_all(location=(20, 30, 20), check=False)
+    time.sleep(1)
+    print('position:', xmt.read_position_all())
+    xmt.move_position_single(channel=1, location=10.0, check=False)
+    time.sleep(0.5)
+    print('position:', xmt.read_position_all())
+
+    # print('Status of channel 1:', xmt.read_status(channel=1))
+    # print('Status of channel 2:', xmt.read_status(channel=2))
+    # print('Status of channel 3:', xmt.read_status(channel=3))
+    # print('Status of channel 4:', xmt.read_status(channel=4))
+    # xmt.move_position_single(channel=1, location=20, check=False)
+    # time.sleep(1)
+    # xmt.clear()
+    xmt.clear()
+    time.sleep(1)
+
+    wave_forward, wave_back = xmt.generating_scan_array(channel=1, start_point=0, end_point=65)
+    xmt.scanning_single_line(channel=1, waveform=wave_forward)
+    time.sleep(1)
+    xmt.clear()
+    xmt.close_devices()
+
     # xmt.open_devices(nmb_of_device=device)
     # xmt.check_all_status(num_of_device=device)

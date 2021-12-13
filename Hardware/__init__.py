@@ -2,7 +2,8 @@
 This file used to list all the hardware we use.
 """
 
-from Hardware.XMT_E70D4 import XMT
+# from Hardware.XMT_E70D4 import XMT
+from Hardware.XMT_E70D4_Ser import XMT
 from Hardware.SynthUSB3 import SynthUSB3
 from Hardware.OpalKelly.API import PulseGenerator
 from Hardware.NI_PCIe_6321 import TriggeredLocationSensor
