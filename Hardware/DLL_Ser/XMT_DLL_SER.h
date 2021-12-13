@@ -1,10 +1,10 @@
-// XMT_DLL_SER.h : XMT_DLL_SER DLL µÄÖ÷Í·ÎÄ¼ş
+// XMT_DLL_SER.h : XMT_DLL_SER DLL çš„ä¸»å¤´æ–‡ä»¶
 //
 
 #pragma once
 
 #ifndef __AFXWIN_H__
-	#error "ÔÚ°üº¬´ËÎÄ¼şÖ®Ç°°üº¬¡°stdafx.h¡±ÒÔÉú³É PCH ÎÄ¼ş"
+	#error "åœ¨åŒ…å«æ­¤æ–‡ä»¶ä¹‹å‰åŒ…å«â€œstdafx.hâ€ä»¥ç”Ÿæˆ PCH æ–‡ä»¶"
 #endif
 //*****
 #define NOPARITY            0
@@ -37,11 +37,11 @@
 #endif
 
 
-#include "resource.h"		// Ö÷·ûºÅ
+#include "resource.h"		// ä¸»ç¬¦å·
 
 
 // CXMT_DLL_SERApp
-// ÓĞ¹Ø´ËÀàÊµÏÖµÄĞÅÏ¢£¬Çë²ÎÔÄ XMT_DLL_SER.cpp
+// æœ‰å…³æ­¤ç±»å®ç°çš„ä¿¡æ¯ï¼Œè¯·å‚é˜… XMT_DLL_SER.cpp
 //
 
 class CXMT_DLL_SERApp : public CWinApp
@@ -49,7 +49,7 @@ class CXMT_DLL_SERApp : public CWinApp
 public:
 	CXMT_DLL_SERApp();
 
-// ÖØĞ´
+// é‡å†™
 public:
 	virtual BOOL InitInstance();
 
@@ -62,42 +62,42 @@ public:
     #ifndef __SOMEFILE_H__
     #define __SOMEFILE_H__
 
-OVERLAPPED m_ov;//ÊÇÒ»¸ö°üº¬ÁËÓÃÓÚÒì²½ÊäÈëÊä³öµÄĞÅÏ¢µÄ½á¹¹Ìå 
-HANDLE hComm,g_hCom;//´®¿ÚµÄ¾ä±ú  
+OVERLAPPED m_ov;//æ˜¯ä¸€ä¸ªåŒ…å«äº†ç”¨äºå¼‚æ­¥è¾“å…¥è¾“å‡ºçš„ä¿¡æ¯çš„ç»“æ„ä½“ 
+HANDLE hComm,g_hCom;//ä¸²å£çš„å¥æŸ„  
 HWND hRbox;
-COMSTAT comstat;//°üº¬´®¿Ú½á¹¹ĞÅÏ¢ 
+COMSTAT comstat;//åŒ…å«ä¸²å£ç»“æ„ä¿¡æ¯ 
 bool DisplayHEX = false;
-unsigned char *tmp_command;//½ÓÊÕµ½µÄÊı¾İ
-bool RxInbool;//1±íÊ¾ÓĞÊı¾İÊäÈëĞèÒª½ÓÊÕÊı¾İ Èç¹ûÃ»ÓĞÔò²»ĞèÒª½ÓÊÕÊı¾İ ¸Ã±äÁ¿ĞèÒªÈË¹¤ÇåÁã¸´Î»ÔÚ ½ÓÊÕÊı¾İºóĞèÒªÈËÎªÉèÖÃÎª 0 ´ıÏÂÒ»¸öÊı¾İÔÙ´ÎÊ¹ÓÃ
+unsigned char *tmp_command;//æ¥æ”¶åˆ°çš„æ•°æ®
+bool RxInbool;//1è¡¨ç¤ºæœ‰æ•°æ®è¾“å…¥éœ€è¦æ¥æ”¶æ•°æ® å¦‚æœæ²¡æœ‰åˆ™ä¸éœ€è¦æ¥æ”¶æ•°æ® è¯¥å˜é‡éœ€è¦äººå·¥æ¸…é›¶å¤ä½åœ¨ æ¥æ”¶æ•°æ®åéœ€è¦äººä¸ºè®¾ç½®ä¸º 0 å¾…ä¸‹ä¸€ä¸ªæ•°æ®å†æ¬¡ä½¿ç”¨
 
-//ÄÚ²¿´¦Àíº¯Êı
-float CalData(unsigned char kk0,unsigned char kk1,unsigned char kk2,unsigned char kk3);//ÓÃÀ´×ª»¯ Õı¸ºÊı
-double XMT_ReDo_pro(unsigned char comand_Arr[]); //¸ù¾İ²»Í¬ÃüÁîÀ´×ö²âÊÔ
-double Res_command_pro(unsigned char T_D_3,unsigned char T_D_4);//½â°üÃüÁî
+//å†…éƒ¨å¤„ç†å‡½æ•°
+float CalData(unsigned char kk0,unsigned char kk1,unsigned char kk2,unsigned char kk3);//ç”¨æ¥è½¬åŒ– æ­£è´Ÿæ•°
+double XMT_ReDo_pro(unsigned char comand_Arr[]); //æ ¹æ®ä¸åŒå‘½ä»¤æ¥åšæµ‹è¯•
+double Res_command_pro(unsigned char T_D_3,unsigned char T_D_4);//è§£åŒ…å‘½ä»¤
     
     #endif
 
 
 unsigned char* DataAnla_Pro(double f,unsigned char kk[4]);
-DLL_XMT_SER_API int EntryXMT(LPCWSTR comname,long int BaudRate,HWND rhbox); //³õÊ¼»¯ ´®¿Ú 
-DLL_XMT_SER_API int EntryXMT_labview(int m_com,long int BaudRate);//1 com1 2 com2 ,1 9600 2 115200 20190723 ¼ÓÈëÊ¹ÓÃlabview¿ØÖÆ·½±ã
+DLL_XMT_SER_API int EntryXMT(LPCWSTR comname,long int BaudRate,HWND rhbox); //åˆå§‹åŒ– ä¸²å£ 
+DLL_XMT_SER_API int EntryXMT_labview(int m_com,long int BaudRate);//1 com1 2 com2 ,1 9600 2 115200 20190723 åŠ å…¥ä½¿ç”¨labviewæ§åˆ¶æ–¹ä¾¿
 
-    //Éè¶¨´®¿ÚÍ¬Ê±´ò¿ª´®¿Ú EntryXMT(_T("COM3"),9600,NULL);//´ò¿ª´®¿Ú3ÉèÖÃ ²¨ÌØÂÊÎª9600 VS2010 
+    //è®¾å®šä¸²å£åŒæ—¶æ‰“å¼€ä¸²å£ EntryXMT(_T("COM3"),9600,NULL);//æ‰“å¼€ä¸²å£3è®¾ç½® æ³¢ç‰¹ç‡ä¸º9600 VS2010 
 
-    //CString strFileName; //Ê¹ÓÃVC++ 6.0
-	//strFileName = "COM5";//Ê¹ÓÃVC++ 6.0
-   // LPCWSTR lpcwStrCOM = strFileName.AllocSysString();//Ê¹ÓÃVC++ 6.0
-	//int i = EntryXMT(lpcwStrCOM,9600,NULL);//Ê¹ÓÃVC++ 6.0
+    //CString strFileName; //ä½¿ç”¨VC++ 6.0
+	//strFileName = "COM5";//ä½¿ç”¨VC++ 6.0
+   // LPCWSTR lpcwStrCOM = strFileName.AllocSysString();//ä½¿ç”¨VC++ 6.0
+	//int i = EntryXMT(lpcwStrCOM,9600,NULL);//ä½¿ç”¨VC++ 6.0
 
-DLL_XMT_SER_API bool WriteArr(unsigned char * m_szWriteBuffer,//·¢ËÍÊı¾İ
-                  unsigned char m_nToSend// ·¢ËÍÊı¾İ³¤¶È
+DLL_XMT_SER_API bool WriteArr(unsigned char * m_szWriteBuffer,//å‘é€æ•°æ®
+                  unsigned char m_nToSend// å‘é€æ•°æ®é•¿åº¦
 				  );
 DWORD WINAPI ThreadSendMsg(LPVOID lpParameter); 
-DLL_XMT_SER_API int ReceiveArr(unsigned char RcBuffArr[],int ReadCharNum); //·µ»ØÊı¾İÒÔ¼°Êä³ö³¤¶È ¶ÁÈ¡µÄÊı¾İ³¤¶ÈReadCharNum
+DLL_XMT_SER_API int ReceiveArr(unsigned char RcBuffArr[],int ReadCharNum); //è¿”å›æ•°æ®ä»¥åŠè¾“å‡ºé•¿åº¦ è¯»å–çš„æ•°æ®é•¿åº¦ReadCharNum
 
-DLL_XMT_SER_API double Res_command_proP(unsigned char T_D_3,unsigned char T_D_4);//½â°üÃüÁî
-DLL_XMT_SER_API int ReceiveArrP(unsigned char RcBuffArr[]); //·µ»ØÊı¾İÒÔ¼°Êä³ö³¤¶È ¶ÁÈ¡µÄÊı¾İ³¤¶ÈReadCharNum
-//¶ÁÊı·¢ËÍ¶ÁÈ¡ÃüÁî
+DLL_XMT_SER_API double Res_command_proP(unsigned char T_D_3,unsigned char T_D_4);//è§£åŒ…å‘½ä»¤
+DLL_XMT_SER_API int ReceiveArrP(unsigned char RcBuffArr[]); //è¿”å›æ•°æ®ä»¥åŠè¾“å‡ºé•¿åº¦ è¯»å–çš„æ•°æ®é•¿åº¦ReadCharNum
+//è¯»æ•°å‘é€è¯»å–å‘½ä»¤
 DLL_XMT_SER_API void XMT_COMMAND_ReadDataP(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -107,15 +107,15 @@ DLL_XMT_SER_API void XMT_COMMAND_ReadDataP(
 
 
 
-DLL_XMT_SER_API  bool openport(LPCWSTR portname); //ÄÚ²¿º¯Êı
-DLL_XMT_SER_API  bool setupdcb(int rate_arg); //ÄÚ²¿º¯Êı
-//¹Ø±Õ´®¿Ú-¶à¸ö´®¿ÚÔõÑùµ÷ÓÃÒÔ¼°¹Ø±Õ£¿
+DLL_XMT_SER_API  bool openport(LPCWSTR portname); //å†…éƒ¨å‡½æ•°
+DLL_XMT_SER_API  bool setupdcb(int rate_arg); //å†…éƒ¨å‡½æ•°
+//å…³é—­ä¸²å£-å¤šä¸ªä¸²å£æ€æ ·è°ƒç”¨ä»¥åŠå…³é—­ï¼Ÿ
 DLL_XMT_SER_API int OpenComWithBit(int com_I,int B_Bound_int);//B_Bound_int 1 9600 2 38400 3 57600 4 115200 
-DLL_XMT_SER_API  bool CloseSer(); //¹Ø±Õ¸Ã´®¿Ú
-/****************Éè±¸¿ØÖÆ¿éµÄÉèÖÃ*********************/ //²ÎÊı ²¨ÌØÂÊrate_arg£º 9600 
-DLL_XMT_SER_API void ClearSer();//Çå¿Õ´®¿Ú
-DLL_XMT_SER_API bool setupdcb_BaudRate(int rate_arg); //ÉèÖÃ²¨ÌØÂÊ 9600
-//·µ»Ø´®¿ÚĞÔÖÊ
+DLL_XMT_SER_API  bool CloseSer(); //å…³é—­è¯¥ä¸²å£
+/****************è®¾å¤‡æ§åˆ¶å—çš„è®¾ç½®*********************/ //å‚æ•° æ³¢ç‰¹ç‡rate_argï¼š 9600 
+DLL_XMT_SER_API void ClearSer();//æ¸…ç©ºä¸²å£
+DLL_XMT_SER_API bool setupdcb_BaudRate(int rate_arg); //è®¾ç½®æ³¢ç‰¹ç‡ 9600
+//è¿”å›ä¸²å£æ€§è´¨
 
 DLL_XMT_SER_API DCB ReSerDBC();
 
@@ -134,24 +134,24 @@ void XMT_ReadMultReal_Do( unsigned char T_D_3,unsigned char T_D_4,
 						double *Data_1,
 						unsigned char *OpenOrCloseFlag_2,
 						double *Data_2
-					);//½«²É¼¯µÄÊı×é½øĞĞ·Ö°ü´¦Àí
-unsigned char XMT_ReDo_pro_Unit(unsigned char comand_Arr[]); //ÓÃÓÚ×ö53¶ÁÈ¡ ÏÂÎ»»ú µ¥Î»Êı¾İ
-unsigned char Res_command_pro_Unit(unsigned char T_D_3,unsigned char T_D_4);//½â°üÃüÁî
-void XMT_ReDo_pro_Arr(unsigned char comand_Arr[],unsigned char arrRec[3]); //¶ÁÈ¡´ø·µ»ØÊı¾İÖµµÃ
+					);//å°†é‡‡é›†çš„æ•°ç»„è¿›è¡Œåˆ†åŒ…å¤„ç†
+unsigned char XMT_ReDo_pro_Unit(unsigned char comand_Arr[]); //ç”¨äºåš53è¯»å– ä¸‹ä½æœº å•ä½æ•°æ®
+unsigned char Res_command_pro_Unit(unsigned char T_D_3,unsigned char T_D_4);//è§£åŒ…å‘½ä»¤
+void XMT_ReDo_pro_Arr(unsigned char comand_Arr[],unsigned char arrRec[3]); //è¯»å–å¸¦è¿”å›æ•°æ®å€¼å¾—
 
-//·¢ËÍÊı¾İ×ª»» ¸¡µãÊı×ª»¯ÎªDA(0-65535)Ö®¼ä×ª»»
-void ChangeDataToDa(unsigned char TmpDa[2],float TmpSendData,float MaxData,float MinData); //½«¸¡µãÊı ×ª»¯ÎªÁ½¸ö[0] ´ú±í¸ß×Ö½Ú ÏÈ·¢ËÍ [1]´ú±íµÍ×Ö½Úºó·¢ËÍ
-DLL_XMT_SER_API void dis_Num100us(int tmpUs_100us);//100usµÄÕûÊı±¶
-DLL_XMT_SER_API void ArrDataSend(unsigned char address,unsigned char Channel_Num,double arr[],int ArrLong,unsigned char flagOpenOrClose,int tmpUs_100us);//·¢ËÍÊı×é ÒÔ¼°Êı×é³¤¶È flagOpenOrClose¿ª±Õ»· Éè¶¨ 'C'±íÊ¾±Õ»· 'O'±íÊ¾¿ª»·,·¢ËÍ¼ä¸ô100Î¢ÃëÕûÊı±¶
-DLL_XMT_SER_API double SendDataAndReadDataFormMcu(unsigned char Address,double SendData,int ChannelFlag,unsigned char OpenAndClose,int Time100Us);//·¢ËÍÖ±½Ó·µ»Ø ·¢ËÍµÄÊı¾İ
-                    // Address µØÖ·
-                    // double SendData ·¢ËÍµÄÊı¾İ
-				    // int ChannelFlag Í¨µÀ 
+//å‘é€æ•°æ®è½¬æ¢ æµ®ç‚¹æ•°è½¬åŒ–ä¸ºDA(0-65535)ä¹‹é—´è½¬æ¢
+void ChangeDataToDa(unsigned char TmpDa[2],float TmpSendData,float MaxData,float MinData); //å°†æµ®ç‚¹æ•° è½¬åŒ–ä¸ºä¸¤ä¸ª[0] ä»£è¡¨é«˜å­—èŠ‚ å…ˆå‘é€ [1]ä»£è¡¨ä½å­—èŠ‚åå‘é€
+DLL_XMT_SER_API void dis_Num100us(int tmpUs_100us);//100usçš„æ•´æ•°å€
+DLL_XMT_SER_API void ArrDataSend(unsigned char address,unsigned char Channel_Num,double arr[],int ArrLong,unsigned char flagOpenOrClose,int tmpUs_100us);//å‘é€æ•°ç»„ ä»¥åŠæ•°ç»„é•¿åº¦ flagOpenOrCloseå¼€é—­ç¯ è®¾å®š 'C'è¡¨ç¤ºé—­ç¯ 'O'è¡¨ç¤ºå¼€ç¯,å‘é€é—´éš”100å¾®ç§’æ•´æ•°å€
+DLL_XMT_SER_API double SendDataAndReadDataFormMcu(unsigned char Address,double SendData,int ChannelFlag,unsigned char OpenAndClose,int Time100Us);//å‘é€ç›´æ¥è¿”å› å‘é€çš„æ•°æ®
+                    // Address åœ°å€
+                    // double SendData å‘é€çš„æ•°æ®
+				    // int ChannelFlag é€šé“ 
                     // unsigned char OpenAndClose
-                    //int Time100Us ·µ»Ø¶ÁÈ¡Ê±¼ä 100Î¢ÃëµÄÕûÊı±¶
+                    //int Time100Us è¿”å›è¯»å–æ—¶é—´ 100å¾®ç§’çš„æ•´æ•°å€
 
 
-//µ¥µãÀà  0 1  
+//å•ç‚¹ç±»  0 1  
 DLL_XMT_SER_API void XMT_COMMAND_SinglePoint(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -159,7 +159,7 @@ DLL_XMT_SER_API void XMT_COMMAND_SinglePoint(
 					unsigned char Channel_Num,
 					double VoltOrMove_Data
 					); //
-//do ¶àÂ·µ¥µãÀà 2 3  
+//do å¤šè·¯å•ç‚¹ç±» 2 3  
  DLL_XMT_SER_API   unsigned char XMT_COMMAND_MultSinglePoint(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -168,13 +168,13 @@ DLL_XMT_SER_API void XMT_COMMAND_SinglePoint(
 					double VoltOrMove_Data_1,
 					double VoltOrMove_Data_2
 					);
- //ÇåÁãÃüÁî 4
+ //æ¸…é›¶å‘½ä»¤ 4
 DLL_XMT_SER_API void 	XMT_COMMAND_SinglePoint_Clear(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-//¶ÁÊı¾İÀà 5 6 
+//è¯»æ•°æ®ç±» 5 6 
 DLL_XMT_SER_API double XMT_COMMAND_ReadData(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -196,14 +196,14 @@ DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_TS_MultChannle(
 					unsigned char Command_B4,
 					unsigned char TimerSet_ms
 					);
-//Í£Ö¹¶ÁÈ¡ 11
+//åœæ­¢è¯»å– 11
 DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_Stop(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-//²¨ĞÎÀà
-//µ¥Â·¸ßËÙ  12 13 
+//æ³¢å½¢ç±»
+//å•è·¯é«˜é€Ÿ  12 13 
 DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetHighSingle(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -215,13 +215,13 @@ DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetHighSingle(
 					double Pianzhi
 					);
 
-//Í£Ö¹·¢ËÍ  14 
+//åœæ­¢å‘é€  14 
 DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetHighSingleStop(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-//¶àÂ·±ê×¼ËÙ¶ÈÄ£Ê½ 15 16 
+//å¤šè·¯æ ‡å‡†é€Ÿåº¦æ¨¡å¼ 15 16 
 DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetMultWave(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -233,7 +233,7 @@ DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetMultWave(
 					double Pianzhi
 					);
 
-//Í£Ö¹·¢ËÍ 17
+//åœæ­¢å‘é€ 17
 DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetMultWaveStop(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -241,8 +241,8 @@ DLL_XMT_SER_API void 	XMT_COMMAND_WaveSetMultWaveStop(
 					unsigned char Channel_Num
 					);
 
-//¸¨ÖúĞ­ÖúÀà
-//ÉèÖÃ  18 20 22 
+//è¾…åŠ©ååŠ©ç±»
+//è®¾ç½®  18 20 22 
 DLL_XMT_SER_API void 	XMT_COMMAND_Assist_SetFlag(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -251,7 +251,7 @@ DLL_XMT_SER_API void 	XMT_COMMAND_Assist_SetFlag(
 					unsigned char SetFlag
 					);
 
-//¶ÁÈ¡flagÊı¾İ 19 21 23 
+//è¯»å–flagæ•°æ® 19 21 23 
 DLL_XMT_SER_API unsigned char XMT_COMMAND_Assist_ReadFlag(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -260,8 +260,8 @@ DLL_XMT_SER_API unsigned char XMT_COMMAND_Assist_ReadFlag(
 					);
 
 
-//±ê¶¨ºÍÅäÖÃÀà
-//Éè¶¨ÏµÍ³Àà  24 26 28 30 32 34 
+//æ ‡å®šå’Œé…ç½®ç±»
+//è®¾å®šç³»ç»Ÿç±»  24 26 28 30 32 34 
 DLL_XMT_SER_API void 	XMT_COMMAND_SetSystemInfo(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -269,14 +269,14 @@ DLL_XMT_SER_API void 	XMT_COMMAND_SetSystemInfo(
                     unsigned char Channel_Num,
 					double SystemInfo
 					);
-//¶ÁÊı¾İÀà 25 27  29
+//è¯»æ•°æ®ç±» 25 27  29
 DLL_XMT_SER_API double XMT_COMMAND_ReadSystemInfo(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channel_Num
 					);
-//Éè¶¨¸ßµÍÏŞ
+//è®¾å®šé«˜ä½é™
 //30 32 34 old
 DLL_XMT_SER_API void 	XMT_COMMAND_SetSystemHL_Limit(
 	                unsigned char address,
@@ -285,62 +285,62 @@ DLL_XMT_SER_API void 	XMT_COMMAND_SetSystemHL_Limit(
 					double SystemInfo
 					);
 
-//¶ÁÈ¡ÏµÍ³¸ßµÍÏŞ 31 33 35 
+//è¯»å–ç³»ç»Ÿé«˜ä½é™ 31 33 35 
 DLL_XMT_SER_API double   XMT_COMMAND_ReadSystemHL_Limit(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channel_Num
 					);
-// 36 ÉèÖÃPID Æô¶¯/Í£Ö¹ 
+// 36 è®¾ç½®PID å¯åŠ¨/åœæ­¢ 
 DLL_XMT_SER_API void 	XMT_COMMAND_SETPID_RorH(
 	                unsigned char address,
 					unsigned char Command_B3,//36
 					unsigned char Command_B4,//0
 					unsigned char Channel_Num,//0,1,2
-					unsigned char PIDSetFlag//Æô¶¯ 'R' Í£Ö¹ 'H'
-					); //Æô¶¯ 'R' Í£Ö¹ 'H'
-//37 ÉèÖÃPID²ÎÊı
+					unsigned char PIDSetFlag//å¯åŠ¨ 'R' åœæ­¢ 'H'
+					); //å¯åŠ¨ 'R' åœæ­¢ 'H'
+//37 è®¾ç½®PIDå‚æ•°
 DLL_XMT_SER_API void SendArray_PID_Channel(
-	                     int address,//µØÖ·Âë
-						 int Command_B3,//Ö¸ÁîÂë
-						 int Command_B4,//Ö¸ÁîÂë
+	                     int address,//åœ°å€ç 
+						 int Command_B3,//æŒ‡ä»¤ç 
+						 int Command_B4,//æŒ‡ä»¤ç 
 						 unsigned char Channel_Num,
 						 float PID_P,
 						 float PID_I,
 						 float PID_D
-						 );//·¢ËÍÊı¾İ
-//38 ¶ÁÈ¡ PID ²ÎÊı 
+						 );//å‘é€æ•°æ®
+//38 è¯»å– PID å‚æ•° 
 DLL_XMT_SER_API void Read_PID_Channel(
-	                     int address,//µØÖ·Âë
-						 int Command_B3,//Ö¸ÁîÂë
-						 int Command_B4,//Ö¸ÁîÂë
+	                     int address,//åœ°å€ç 
+						 int Command_B3,//æŒ‡ä»¤ç 
+						 int Command_B4,//æŒ‡ä»¤ç 
 						 unsigned char Channel_Num,
 						 float PID_Rc[3]
-						 ); //·¢ËÍÊı¾İ
-//38 ¶ÁÈ¡ PID ²ÎÊı 
+						 ); //å‘é€æ•°æ®
+//38 è¯»å– PID å‚æ•° 
 DLL_XMT_SER_API void Read_PID_Channel(
-	                     int address,//µØÖ·Âë
-						 int Command_B3,//Ö¸ÁîÂë
-						 int Command_B4,//Ö¸ÁîÂë
+	                     int address,//åœ°å€ç 
+						 int Command_B3,//æŒ‡ä»¤ç 
+						 int Command_B4,//æŒ‡ä»¤ç 
 						 unsigned char Channel_Num,
 						 float PID_Rc[3]
-						 ); //·¢ËÍÊı¾İ
-//46 Éè¶¨ÏÂÎ»»úµØÖ· ¸ÃÃüÁîÖØ¸´·¢ËÍ10´Î
+						 ); //å‘é€æ•°æ®
+//46 è®¾å®šä¸‹ä½æœºåœ°å€ è¯¥å‘½ä»¤é‡å¤å‘é€10æ¬¡
 DLL_XMT_SER_API void 	XMT_COMMAND_SetMCUAddress(
-	                unsigned char address,//0x00 Õâ¸öÊÇ¹ã²¥µØÖ· ¹Ì¶¨µÄ
+	                unsigned char address,//0x00 è¿™ä¸ªæ˜¯å¹¿æ’­åœ°å€ å›ºå®šçš„
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char SetAddress////Ô¤ÉèµØÖ·
+					unsigned char SetAddress////é¢„è®¾åœ°å€
 					);
-//47 ¶ÁÈ¥ÏÂÎ»»úµØÖ·
+//47 è¯»å»ä¸‹ä½æœºåœ°å€
 DLL_XMT_SER_API unsigned char 	XMT_COMMAND_ReadMCUAddress(
-	                unsigned char address,//0x00 Õâ¸öÊÇ¹ã²¥µØÖ· ¹Ì¶¨µÄ
+	                unsigned char address,//0x00 è¿™ä¸ªæ˜¯å¹¿æ’­åœ°å€ å›ºå®šçš„
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
 //48
-//ÊµÊ±¶ÁÊı¾İ(ÓÉÉÏÎ»»úÖ¸¶¨Ã¿¸öÍ¨µÀ·¢ËÍµçÑ¹»òÎ»ÒÆ)
+//å®æ—¶è¯»æ•°æ®(ç”±ä¸Šä½æœºæŒ‡å®šæ¯ä¸ªé€šé“å‘é€ç”µå‹æˆ–ä½ç§»)
 DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_TS_UpDoPro(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -348,8 +348,8 @@ DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_TS_UpDoPro(
 					unsigned char TimerSet_ms,
 					unsigned char Flag_Channe_OpenOrClose
 					);
-//¶ÁÈ¡ÏµÍ³Àà 49
-//ÊµÊ±¶ÁÊı¾İ(ÓÉÏÂÎ»»ú¸ù¾İ¿ª±Õ»·×´Ì¬È·¶¨Ã¿¸öÍ¨µÀµçÑ¹»òÎ»ÒÆ)
+//è¯»å–ç³»ç»Ÿç±» 49
+//å®æ—¶è¯»æ•°æ®(ç”±ä¸‹ä½æœºæ ¹æ®å¼€é—­ç¯çŠ¶æ€ç¡®å®šæ¯ä¸ªé€šé“ç”µå‹æˆ–ä½ç§»)
 DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_TS_DownDoPro(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -357,16 +357,16 @@ DLL_XMT_SER_API void 	XMT_COMMAND_ReadData_TS_DownDoPro(
 					unsigned char TimerSet_ms
 					);
 
-// 50 ·ù¶ÈĞ£Õı
+// 50 å¹…åº¦æ ¡æ­£
 DLL_XMT_SER_API void XMT_COMMAND_CONTROL_PID(
-	                                  int address_ma,//µØÖ·Âë
-									  int bao_long,  //°ü³¤
-									  int zhilingma_B3,//Ö¸ÁîÂë
-									  int zhilingma_B4,//Ö¸ÁîÂë
-									  unsigned char channel_num,//Í¨µÀÊı
-									  unsigned char FLAG_CLoseOrOpen//¿ªÊ¼½áÊø
+	                                  int address_ma,//åœ°å€ç 
+									  int bao_long,  //åŒ…é•¿
+									  int zhilingma_B3,//æŒ‡ä»¤ç 
+									  int zhilingma_B4,//æŒ‡ä»¤ç 
+									  unsigned char channel_num,//é€šé“æ•°
+									  unsigned char FLAG_CLoseOrOpen//å¼€å§‹ç»“æŸ
 							);
-//51 ¶ÁÈ¡¶àÂ·Î»ÒÆ»òµçÑ¹Êı¾İ
+//51 è¯»å–å¤šè·¯ä½ç§»æˆ–ç”µå‹æ•°æ®
 DLL_XMT_SER_API void 	XMT_COMMAND_ReadMultChannelMoveOrVolt(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -378,7 +378,7 @@ DLL_XMT_SER_API void 	XMT_COMMAND_ReadMultChannelMoveOrVolt(
 					unsigned char *OpenOrCloseFlag_2,
 					double *Data_2
 					);
-//52 ¶ÁÈ¡µçÑ¹Î»ÒÆÏŞÖÆ°Ù·Ö±È
+//52 è¯»å–ç”µå‹ä½ç§»é™åˆ¶ç™¾åˆ†æ¯”
 DLL_XMT_SER_API float 	XMT_COMMAND_ReadSystem_VoltPer(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -390,42 +390,42 @@ DLL_XMT_SER_API unsigned char 	XMT_COMMAND_ReadSystem_Unit(
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-//54 ¶ÁÈ¡ÏÂÎ»»ú²¨ËÙÆôÍ£ËÙ¶È
+//54 è¯»å–ä¸‹ä½æœºæ³¢é€Ÿå¯åœé€Ÿåº¦
 DLL_XMT_SER_API unsigned char  XMT_COMMAND_ReadWaveBeginAndStopSpeed(
-	                int address_ma,//µØÖ·Âë
+	                int address_ma,//åœ°å€ç 
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char channel_num // Í¨µÀÊı 0 1 2 
-					);// 'H'´ú±í¸ßËÙ  'L'´ú±íµÍËÙ 
-//55ÉÏÎ»»úÉèÖÃÄ³Ò»Â·²¨ĞÎÆô¶¯Í£Ö¹ËÙ¶È£¨Æô¶¯Í£Ö¹ËÙ¶ÈÒ»ÖÂ£©
+					unsigned char channel_num // é€šé“æ•° 0 1 2 
+					);// 'H'ä»£è¡¨é«˜é€Ÿ  'L'ä»£è¡¨ä½é€Ÿ 
+//55ä¸Šä½æœºè®¾ç½®æŸä¸€è·¯æ³¢å½¢å¯åŠ¨åœæ­¢é€Ÿåº¦ï¼ˆå¯åŠ¨åœæ­¢é€Ÿåº¦ä¸€è‡´ï¼‰
 DLL_XMT_SER_API void XMT_COMMAND_SetWaveBeginAndStopSpeed(
-	                int address_ma,//µØÖ·Âë
+	                int address_ma,//åœ°å€ç 
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char channel_num, // Í¨µÀÊı 0 1 2 
-					unsigned char WaveBeginAndStopFlag // 'H'´ú±í¸ßËÙ  'L'´ú±íµÍËÙ 
+					unsigned char channel_num, // é€šé“æ•° 0 1 2 
+					unsigned char WaveBeginAndStopFlag // 'H'ä»£è¡¨é«˜é€Ÿ  'L'ä»£è¡¨ä½é€Ÿ 
 					);
 
-//56 ÉÏÎ»»úÉèÖÃÏÂÎ»»úµ¥Î»
+//56 ä¸Šä½æœºè®¾ç½®ä¸‹ä½æœºå•ä½
 DLL_XMT_SER_API void XMT_COMMAND_SetMCUMardOrUm(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char MCUMardOrUm //0 ½Ç¶È 1 Î»ÒÆ
+					unsigned char MCUMardOrUm //0 è§’åº¦ 1 ä½ç§»
 	          );
-//57 ÉÏÎ»»úÉèÖÃÏÂÎ»»ú»úĞÍ
+//57 ä¸Šä½æœºè®¾ç½®ä¸‹ä½æœºæœºå‹
 DLL_XMT_SER_API void XMT_COMMAND_SetMCUE09orOther(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char MCUDoFlag //0 E709 1 E517
 	          );
-//58 Éè¶¨ÏÂÎ»»úµçÑ¹Î»ÒÆÏŞÖÆ°Ù·Ö±È
+//58 è®¾å®šä¸‹ä½æœºç”µå‹ä½ç§»é™åˆ¶ç™¾åˆ†æ¯”
 DLL_XMT_SER_API void XMT_COMMAND_SetMCUVoltOrUmPP(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					float tmpData //0µ½1 µÄĞ¡Êı
+					float tmpData //0åˆ°1 çš„å°æ•°
 	          );
 
 // 59 
@@ -433,38 +433,38 @@ DLL_XMT_SER_API  void  XMT_COMMAND_ReadMCU_PIDFlag(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char ChannelFlag[3]//'Y'ÓĞĞ§ 'N'±íÊ¾ÎŞĞ§  ·µ»ØÊı¾İÖµ
+					unsigned char ChannelFlag[3]//'Y'æœ‰æ•ˆ 'N'è¡¨ç¤ºæ— æ•ˆ  è¿”å›æ•°æ®å€¼
 					);
-// 61 62 ÔÚ¶àÌ¨»úÆ÷ ´®¿Ú422ÏàÁ¬½ÓÊ±ºòÊ¹ÓÃ
+// 61 62 åœ¨å¤šå°æœºå™¨ ä¸²å£422ç›¸è¿æ¥æ—¶å€™ä½¿ç”¨
 // 63 
-//Í¨¹ıusbÍ¨ĞÅ¶Ë¿ÚÉèÖÃÏÂÎ»»ú´®¿ÚÍ¨ĞÅ²¨ÌØÂÊ
+//é€šè¿‡usbé€šä¿¡ç«¯å£è®¾ç½®ä¸‹ä½æœºä¸²å£é€šä¿¡æ³¢ç‰¹ç‡
 DLL_XMT_SER_API void  XMT_COMMAND_SetMCUComBit(		
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char ComBitFlag
 					);
-/* //ÉèÖÃÏÂÎ»»ú²¨ÌØÂÊ
-  ¡®A¡¯9600 ¡®B¡¯19200  ¡®C¡¯38400 ¡®D¡¯57600    
-  ¡®E¡¯76800¡®F¡¯115200 ¡®G¡¯128000¡®H¡¯230400 
-  ¡®I¡¯256000 
+/* //è®¾ç½®ä¸‹ä½æœºæ³¢ç‰¹ç‡
+  â€˜Aâ€™9600 â€˜Bâ€™19200  â€˜Câ€™38400 â€˜Dâ€™57600    
+  â€˜Eâ€™76800â€˜Fâ€™115200 â€˜Gâ€™128000â€˜Hâ€™230400 
+  â€˜Iâ€™256000 
    //20170509
 */
-// 64  AVR×¨ÓÃ¿ªÆôjtag
+// 64  AVRä¸“ç”¨å¼€å¯jtag
 DLL_XMT_SER_API void  XMT_COMMAND_SetMCUJtag(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char AVRFlag //[5]¿ªÆôAVR Jtag¹¦ÄÜ ¡®S¡¯
+					unsigned char AVRFlag //[5]å¼€å¯AVR JtagåŠŸèƒ½ â€˜Sâ€™
 					);
-//65 ´ÓÈÎÒâ½çÃæÌø×ªµ½²É¼¯½çÃæ
+//65 ä»ä»»æ„ç•Œé¢è·³è½¬åˆ°é‡‡é›†ç•Œé¢
 DLL_XMT_SER_API void XMT_COMMAND_LetMCUToReadData(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
 
-//ÏàÎ»½ÇÄ£Ê½Êä³ö 66 67 
+//ç›¸ä½è§’æ¨¡å¼è¾“å‡º 66 67 
 DLL_XMT_SER_API void XMT_COMMAND_WaveSetMultWaveXwj(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -476,18 +476,18 @@ DLL_XMT_SER_API void XMT_COMMAND_WaveSetMultWaveXwj(
 					double Pianzhi,
 					double Xwjiao
 					);
-//MultÊı¾İ 68 
-//[5]Í¨µÀÊı
-//[6]¡®S¡¯Æô¶¯µ±Ç°Â·²¨ĞÎ ¡®T¡¯Í£Ö¹µ±Ç°Â·²¨ĞÎ
+//Multæ•°æ® 68 
+//[5]é€šé“æ•°
+//[6]â€˜Sâ€™å¯åŠ¨å½“å‰è·¯æ³¢å½¢ â€˜Tâ€™åœæ­¢å½“å‰è·¯æ³¢å½¢
 DLL_XMT_SER_API void XMT_COMMAND_XWJ_ChannelDoOrStop(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channel_Num,// 0 1 2 
-                    unsigned char FlagMult //¡®S¡¯Æô¶¯µ±Ç°Â·²¨ĞÎ ¡®T¡¯Í£Ö¹µ±Ç°Â·²¨ĞÎ
+                    unsigned char FlagMult //â€˜Sâ€™å¯åŠ¨å½“å‰è·¯æ³¢å½¢ â€˜Tâ€™åœæ­¢å½“å‰è·¯æ³¢å½¢
 					);
 
-//MultÊı¾İ 69 ¡®S¡¯ÈıÂ·Í¬²½Æô¶¯ 'T'ÈıÂ·Í¬Ê±Í£Ö¹
+//Multæ•°æ® 69 â€˜Sâ€™ä¸‰è·¯åŒæ­¥å¯åŠ¨ 'T'ä¸‰è·¯åŒæ—¶åœæ­¢
 DLL_XMT_SER_API unsigned char XMT_COMMAND_Assist_Flag(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -495,116 +495,116 @@ DLL_XMT_SER_API unsigned char XMT_COMMAND_Assist_Flag(
                     unsigned char FlagMult
 					);
 
-//70 µ¥µã²½½ø´æ´¢
+//70 å•ç‚¹æ­¥è¿›å­˜å‚¨
 DLL_XMT_SER_API unsigned char XMT_COMMAND_SaveDataArrToMCU(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channle_flag,
-                    unsigned char Flag_AheadOrLeg,//0±íÊ¾Ç°48µã 1±íÊ¾ºó48µã
+                    unsigned char Flag_AheadOrLeg,//0è¡¨ç¤ºå‰48ç‚¹ 1è¡¨ç¤ºå48ç‚¹
 					float ArrData[],
-					unsigned char LongArrData,//·¢ËÍµÄÊı¾İµãÊı0µ½48,
-					float MaxData,//×î´óÊı¾İÖµ Èç¹û¿ª»· Ò»°ãÎª150»ò120
-					float MinData//×îĞ¡Êı¾İÖµ ¸ù¾İÊµ¼ÊĞèÒªÀ´×ö¾ö¶¨
+					unsigned char LongArrData,//å‘é€çš„æ•°æ®ç‚¹æ•°0åˆ°48,
+					float MaxData,//æœ€å¤§æ•°æ®å€¼ å¦‚æœå¼€ç¯ ä¸€èˆ¬ä¸º150æˆ–120
+					float MinData//æœ€å°æ•°æ®å€¼ æ ¹æ®å®é™…éœ€è¦æ¥åšå†³å®š
 					);
 
-//71 Éè¶¨·¢ËÍÊ±¼ä
-//Éè¶¨ÏÂÎ»·¢ËÍµ¥µãµÄÊ±¼ä  
+//71 è®¾å®šå‘é€æ—¶é—´
+//è®¾å®šä¸‹ä½å‘é€å•ç‚¹çš„æ—¶é—´  
 
-//0.2 Îª0.2ºÁÃë 
-//0.1 ·¢ËÍ²»³öÀ´
-///Èç¹ûÓÃ40¸öµãÀ´´úÌæÒ»¸öÕıÏÒ²¨£¬
-///0.2ºÁÃë40µãÎª250ºÕ×È
-///0.4ºÁÃë40µãÎª84ºÕ×È
-///0.3ºÁÃë40µãÎª125ºÕ×È
-///1¡¢2¡¢4µÈºÁÃë¼¶±ğ×¼È·¡£
-////1Ãëµ½5Ãë×¼È·//
-///¶àÁËµÃÃëÊı »áÓĞµãÎó²î Ã»ÓĞÏêÏ¸²âÁ¿¡£20170814-ÖÜÒ»
+//0.2 ä¸º0.2æ¯«ç§’ 
+//0.1 å‘é€ä¸å‡ºæ¥
+///å¦‚æœç”¨40ä¸ªç‚¹æ¥ä»£æ›¿ä¸€ä¸ªæ­£å¼¦æ³¢ï¼Œ
+///0.2æ¯«ç§’40ç‚¹ä¸º250èµ«å…¹
+///0.4æ¯«ç§’40ç‚¹ä¸º84èµ«å…¹
+///0.3æ¯«ç§’40ç‚¹ä¸º125èµ«å…¹
+///1ã€2ã€4ç­‰æ¯«ç§’çº§åˆ«å‡†ç¡®ã€‚
+////1ç§’åˆ°5ç§’å‡†ç¡®//
+///å¤šäº†å¾—ç§’æ•° ä¼šæœ‰ç‚¹è¯¯å·® æ²¡æœ‰è¯¦ç»†æµ‹é‡ã€‚20170814-å‘¨ä¸€
 
 DLL_XMT_SER_API void 	XMT_COMMAND_SetMCUSendDataTimer(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
                     unsigned char Channel_Num,
-					float SendDataTimer//0.1ºÁÃë-9999ºÁÃëÖ®¼ä
+					float SendDataTimer//0.1æ¯«ç§’-9999æ¯«ç§’ä¹‹é—´
 					);
 
 
-// 72 ·¢ËÍÔ¤ÏÈÉè¶¨ºÃµÄ³ÌĞò Æô¶¯/Í£Ö¹ 
+// 72 å‘é€é¢„å…ˆè®¾å®šå¥½çš„ç¨‹åº å¯åŠ¨/åœæ­¢ 
 DLL_XMT_SER_API void 	XMT_COMMAND_SetMCU_BeginSend(
 	                unsigned char address,
 					unsigned char Command_B3,//36
 					unsigned char Command_B4,//0
 					unsigned char Channel_Num,//0,1,2
-					unsigned char RunFlag//'S'¿ªÊ¼    'T' Í£Ö¹   'P'ÔİÍ£ 
+					unsigned char RunFlag//'S'å¼€å§‹    'T' åœæ­¢   'P'æš‚åœ 
 					) ;
-// 73 ÉèÖÃ¿ª»úDA³õÊ¼Öµ
+// 73 è®¾ç½®å¼€æœºDAåˆå§‹å€¼
 DLL_XMT_SER_API void XMT_COMMAND_SetMCU_FlagDa(
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								unsigned char DaFlag,//'Z' Éè¶¨Îª0µã²ÎÊı 'M'Éè¶¨×î´óÖµ²ÎÊı 
-								float FlagForDa//[7][8][9][10] ²ÎÊıÊıÖµ¸¡µãÊı
+								unsigned char DaFlag,//'Z' è®¾å®šä¸º0ç‚¹å‚æ•° 'M'è®¾å®šæœ€å¤§å€¼å‚æ•° 
+								float FlagForDa//[7][8][9][10] å‚æ•°æ•°å€¼æµ®ç‚¹æ•°
 					);
-// 74 Éè¶¨¿ª»úDA³õÊ¼Öµ
+// 74 è®¾å®šå¼€æœºDAåˆå§‹å€¼
 DLL_XMT_SER_API void 	XMT_COMMAND_SetMCU_FlagVolt(
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								float FlagForVolt//[6][7][8][9] DAÊä³öµçÑ¹°Ù·Ö±È DA³õÊ¼Öµ×î´óÖµ°Ù·Ö±ÈÎª0-1Ğ¡Êı£¬0´ú±íÊä³ö0£¬1´ú±íÊä³ö×î´óµçÑ¹Öµ
+								float FlagForVolt//[6][7][8][9] DAè¾“å‡ºç”µå‹ç™¾åˆ†æ¯” DAåˆå§‹å€¼æœ€å¤§å€¼ç™¾åˆ†æ¯”ä¸º0-1å°æ•°ï¼Œ0ä»£è¡¨è¾“å‡º0ï¼Œ1ä»£è¡¨è¾“å‡ºæœ€å¤§ç”µå‹å€¼
 					);
 
-// 75 AD²É¼¯µ÷Áãµ÷·Å´ó
+// 75 ADé‡‡é›†è°ƒé›¶è°ƒæ”¾å¤§
 DLL_XMT_SER_API void 	XMT_COMMAND_SetMCU_FlagAD(
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								unsigned char FlagAD,//[6]'Z'¿ªÊ¼µ÷Áã 'M'¿ªÊ¼µ÷·Å´ó
-								unsigned char FlagCloseOrOpen //[7]'C'±Õ»· 'O'¿ª»·
+								unsigned char FlagAD,//[6]'Z'å¼€å§‹è°ƒé›¶ 'M'å¼€å§‹è°ƒæ”¾å¤§
+								unsigned char FlagCloseOrOpen //[7]'C'é—­ç¯ 'O'å¼€ç¯
 					);
 
-// 76 ¶ÁÈ¡ÏÂÎ»»ú µçÑ¹»òÎ»ÒÆÃüÁî
-DLL_XMT_SER_API void SendArray_ReadDataChannel_AllVolt(    int address_ma,//µØÖ·Âë
-									  int bao_long,  //°ü³¤
-									  int zhilingma_B3,//Ö¸ÁîÂë
+// 76 è¯»å–ä¸‹ä½æœº ç”µå‹æˆ–ä½ç§»å‘½ä»¤
+DLL_XMT_SER_API void SendArray_ReadDataChannel_AllVolt(    int address_ma,//åœ°å€ç 
+									  int bao_long,  //åŒ…é•¿
+									  int zhilingma_B3,//æŒ‡ä»¤ç 
 									  int zhilingma_B4,
-									  unsigned char DisTimer);//Ö¸ÁîÂë	
+									  unsigned char DisTimer);//æŒ‡ä»¤ç 	
 
-// 76  ×éºÏÃüÁî¶ÁÈ¡·µ»ØÌØ¶¨8Â·ÃüÁî ÄÚ²¿Ê¹ÓÃ8Â·AD
-DLL_XMT_SER_API void SendKeilth(void);//²âÊÔÃüÁî
-//77 ÃüÁî ÅĞ¶ÏÊÇ·ñÁ¬½ÓÕı³£   
+// 76  ç»„åˆå‘½ä»¤è¯»å–è¿”å›ç‰¹å®š8è·¯å‘½ä»¤ å†…éƒ¨ä½¿ç”¨8è·¯AD
+DLL_XMT_SER_API void SendKeilth(void);//æµ‹è¯•å‘½ä»¤
+//77 å‘½ä»¤ åˆ¤æ–­æ˜¯å¦è¿æ¥æ­£å¸¸   
 DLL_XMT_SER_API unsigned char CheckConnection(int Now_control_mcu_address,
 	                                          int bao_long, 
-											  int Command_B3,//Ö¸ÁîÂë
-									          int Command_B4,//Ö¸ÁîÂë
-											  int WaitTime);//¶ÁÈ¡ÊÇ·ñÁ¬½ÓÕı³£ Èç¹û·¢»Ó¡®K'±íÊ¾Á¬½ÓÕı³£//¶ÁÈ¡ÊÇ·ñÁ¬½ÓÕı³£ Èç¹û·¢»Ó¡®K'±íÊ¾Á¬½ÓÕı³£
+											  int Command_B3,//æŒ‡ä»¤ç 
+									          int Command_B4,//æŒ‡ä»¤ç 
+											  int WaitTime);//è¯»å–æ˜¯å¦è¿æ¥æ­£å¸¸ å¦‚æœå‘æŒ¥â€˜K'è¡¨ç¤ºè¿æ¥æ­£å¸¸//è¯»å–æ˜¯å¦è¿æ¥æ­£å¸¸ å¦‚æœå‘æŒ¥â€˜K'è¡¨ç¤ºè¿æ¥æ­£å¸¸
 
 
-short CalData_8(unsigned char tmp_A,unsigned char tmp_B); //Êı¾İ×ª»»
+short CalData_8(unsigned char tmp_A,unsigned char tmp_B); //æ•°æ®è½¬æ¢
 
-void DoData(unsigned char tmp_arr[],unsigned char ArrLong,float tmpData_Arr[8]); // tmp_arr[] ÒëÂëÊı×é Êı×é³¤¶È ·µ»ØµÄÒëÂëºóµÄÊı×é
+void DoData(unsigned char tmp_arr[],unsigned char ArrLong,float tmpData_Arr[8]); // tmp_arr[] è¯‘ç æ•°ç»„ æ•°ç»„é•¿åº¦ è¿”å›çš„è¯‘ç åçš„æ•°ç»„
 
-DLL_XMT_SER_API void SendArray_ReadDataChannel_AllVoltAndRead(int address_ma,//µØÖ·Âë
-									  int bao_long,  //°ü³¤
-									  int Command_B3,//Ö¸ÁîÂë
+DLL_XMT_SER_API void SendArray_ReadDataChannel_AllVoltAndRead(int address_ma,//åœ°å€ç 
+									  int bao_long,  //åŒ…é•¿
+									  int Command_B3,//æŒ‡ä»¤ç 
 									  int Command_B4,
 									  unsigned char DisTimer,
-									  float TmpF[8]);//Ö¸ÁîÂë
+									  float TmpF[8]);//æŒ‡ä»¤ç 
 
 
 
-unsigned char XMT_ReDo_proNew(unsigned char comand_Arr[]); //¸ù¾İ²»Í¬ÃüÁîÀ´×ö²âÊÔ
+unsigned char XMT_ReDo_proNew(unsigned char comand_Arr[]); //æ ¹æ®ä¸åŒå‘½ä»¤æ¥åšæµ‹è¯•
 unsigned char Res_command_proNew(unsigned char T_D_3,unsigned char T_D_4);
 
 //B3=100 B4 =0
-//±ê¶¨ÏÂÎ»»úÀàĞÍ //0 1 2 3 4 5 6 7´ú±íE17 E18 E72 E73 E70 E53D E709
+//æ ‡å®šä¸‹ä½æœºç±»å‹ //0 1 2 3 4 5 6 7ä»£è¡¨E17 E18 E72 E73 E70 E53D E709
 
-//20180629 ÑéÖ¤Çé¿ö
-//B3=0 B4 =57 ±ê¶¨ÏÂÎ»»úĞÍºÅ
-//±ê¶¨ÏÂÎ»»úMCUÀàĞÍ
+//20180629 éªŒè¯æƒ…å†µ
+//B3=0 B4 =57 æ ‡å®šä¸‹ä½æœºå‹å·
+//æ ‡å®šä¸‹ä½æœºMCUç±»å‹
 //0 E70.S3 1 E18 2 E53 3 E18 24bit 4E51.D12S //20180629
 
 DLL_XMT_SER_API void  XMT_COMMAND_SetMCUNum(		
@@ -612,51 +612,51 @@ DLL_XMT_SER_API void  XMT_COMMAND_SetMCUNum(
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char FlagMCUFlag
-					);//0 1 2 3 4 5 6 7´ú±íE17 E18 E72 E73 E70 E53D E709
+					);//0 1 2 3 4 5 6 7ä»£è¡¨E17 E18 E72 E73 E70 E53D E709
 //B3=100 B4 =0  78
-//¶ÁÈ¡ÏÂÎ»»úÀàĞÍ //0 1 2 3 4 5 6 7´ú±íE17 E18 E72 E73 E70 E53D E709 //20180820 E63 ·µ»Ø 6 
+//è¯»å–ä¸‹ä½æœºç±»å‹ //0 1 2 3 4 5 6 7ä»£è¡¨E17 E18 E72 E73 E70 E53D E709 //20180820 E63 è¿”å› 6 
 DLL_XMT_SER_API unsigned char XMT_COMMAND_ReadMCUNum(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-// 79 ±ê¶¨µçÔ´ĞÅÏ¢ ±È½ÏÏêÏ¸µÄĞÅÏ¢
+// 79 æ ‡å®šç”µæºä¿¡æ¯ æ¯”è¾ƒè¯¦ç»†çš„ä¿¡æ¯
 DLL_XMT_SER_API void  XMT_COMMAND_SetPowerConfig(
     unsigned char address,
     unsigned char Command_B3,
     unsigned char Command_B4,
-    unsigned char Flag_SheBeiNum_1,//CUPĞÍºÅ ARM DSP AVR 0 1 2 3 
-    unsigned char Flag_SheBeiNum_2,//Çı¶¯Æ÷Í¨µÀÊı;  1 2 3 4 5
-	unsigned char Flag_SheBeiNum_3,//ÏÂÎ»»ú°æ±¾ºÅÉè¶¨ ¸ñÊ½V2.0.2 £¨²»¿ÉÉè¶¨ ÏÂÎ»»ú²»´¦Àí£© 
+    unsigned char Flag_SheBeiNum_1,//CUPå‹å· ARM DSP AVR 0 1 2 3 
+    unsigned char Flag_SheBeiNum_2,//é©±åŠ¨å™¨é€šé“æ•°;  1 2 3 4 5
+	unsigned char Flag_SheBeiNum_3,//ä¸‹ä½æœºç‰ˆæœ¬å·è®¾å®š æ ¼å¼V2.0.2 ï¼ˆä¸å¯è®¾å®š ä¸‹ä½æœºä¸å¤„ç†ï¼‰ 
 	unsigned char Flag_SheBeiNum_4,//
 	unsigned char Flag_SheBeiNum_5,// 
-	unsigned char Flag_SheBeiNum_6,//Í¨ĞÅ¶Ë¿ÚĞÅÏ¢  Íø¿Ú/485/USB/422/RS232£¬0001 1111 ´ú±íÈ«Ö§³Ö  ¡®X' ²¹Î»
+	unsigned char Flag_SheBeiNum_6,//é€šä¿¡ç«¯å£ä¿¡æ¯  ç½‘å£/485/USB/422/RS232ï¼Œ0001 1111 ä»£è¡¨å…¨æ”¯æŒ  â€˜X' è¡¥ä½
 	unsigned char Flag_SheBeiNum_7,//'X'
-	unsigned char Flag_SheBeiNum_8,//ÊÇ·ñºãÑ¹ YÊÇ N·ñ
-	unsigned char Flag_SheBeiNum_9,//È«ÇÅ ÌØÊâÈ«ÇÅ °ëÇÅ  0 1 2 3 
-    unsigned char Flag_SheBeiNum_10,//Ä£ÄâÊäÈëµÍ Ä£ÄâÊäÈë¸ß -3.3V-µ½+3.3VÊäÈë±ê¶¨Îª33 33 Ò»ºÅ µÍÎ»
-	unsigned char Flag_SheBeiNum_11,//Ä£ÄâÊäÈëµÍ Ä£ÄâÊäÈë¸ß -3.3V-µ½+3.3VÊäÈë±ê¶¨Îª33 33 Ò»ºÅ ¸ßÎ»
-	unsigned char Flag_SheBeiNum_12,//¶şºÅ ¡®X'²¹Î»
-	unsigned char Flag_SheBeiNum_13,//¶şºÅ ¡®X'²¹Î»
-	unsigned char Flag_SheBeiNum_14,//ÈıºÅ ¡®X'²¹Î»
-	unsigned char Flag_SheBeiNum_15,//ÈıºÅ ¡®X'²¹Î»
-	unsigned char Flag_SheBeiNum_16,//´«¸ĞÆ÷ÀàĞÍ R C L 
-	unsigned char Flag_SheBeiNum_17,//Êı×Ö´ø¿í 1K 2K 10K 30K
-	unsigned char Flag_SheBeiNum_18,//DA·Ö±æÂÊ ·¢ËÍÊµ¼Ê·Ö±æÂÊÊı×Ö  8 16 18 20 24
-	unsigned char Flag_SheBeiNum_19,//AD·Ö±æÂÊ ·¢ËÍÊµ¼Ê·Ö±æÂÊ 8 16 18 20 24 
-	unsigned char commandFlagArr[32],// 0 µ½ 255 ÌõÃ÷Áî
-	unsigned char Flag_SheBeiNum_20,//'X' ²¹Î»
-	unsigned char Flag_SheBeiNum_21,//'X' ²¹Î»
-	unsigned char Flag_SheBeiNum_22,//'X' ²¹Î»
-	unsigned char Flag_SheBeiNum_23//'X' ²¹Î»
+	unsigned char Flag_SheBeiNum_8,//æ˜¯å¦æ’å‹ Yæ˜¯ Nå¦
+	unsigned char Flag_SheBeiNum_9,//å…¨æ¡¥ ç‰¹æ®Šå…¨æ¡¥ åŠæ¡¥  0 1 2 3 
+    unsigned char Flag_SheBeiNum_10,//æ¨¡æ‹Ÿè¾“å…¥ä½ æ¨¡æ‹Ÿè¾“å…¥é«˜ -3.3V-åˆ°+3.3Vè¾“å…¥æ ‡å®šä¸º33 33 ä¸€å· ä½ä½
+	unsigned char Flag_SheBeiNum_11,//æ¨¡æ‹Ÿè¾“å…¥ä½ æ¨¡æ‹Ÿè¾“å…¥é«˜ -3.3V-åˆ°+3.3Vè¾“å…¥æ ‡å®šä¸º33 33 ä¸€å· é«˜ä½
+	unsigned char Flag_SheBeiNum_12,//äºŒå· â€˜X'è¡¥ä½
+	unsigned char Flag_SheBeiNum_13,//äºŒå· â€˜X'è¡¥ä½
+	unsigned char Flag_SheBeiNum_14,//ä¸‰å· â€˜X'è¡¥ä½
+	unsigned char Flag_SheBeiNum_15,//ä¸‰å· â€˜X'è¡¥ä½
+	unsigned char Flag_SheBeiNum_16,//ä¼ æ„Ÿå™¨ç±»å‹ R C L 
+	unsigned char Flag_SheBeiNum_17,//æ•°å­—å¸¦å®½ 1K 2K 10K 30K
+	unsigned char Flag_SheBeiNum_18,//DAåˆ†è¾¨ç‡ å‘é€å®é™…åˆ†è¾¨ç‡æ•°å­—  8 16 18 20 24
+	unsigned char Flag_SheBeiNum_19,//ADåˆ†è¾¨ç‡ å‘é€å®é™…åˆ†è¾¨ç‡ 8 16 18 20 24 
+	unsigned char commandFlagArr[32],// 0 åˆ° 255 æ¡æ˜ä»¤
+	unsigned char Flag_SheBeiNum_20,//'X' è¡¥ä½
+	unsigned char Flag_SheBeiNum_21,//'X' è¡¥ä½
+	unsigned char Flag_SheBeiNum_22,//'X' è¡¥ä½
+	unsigned char Flag_SheBeiNum_23//'X' è¡¥ä½
 	);
-// B3 = 80,B4 = 0; //20180629 ¶ÁÈ¡µçÔ´Ïà¹ØĞÅÏ¢
+// B3 = 80,B4 = 0; //20180629 è¯»å–ç”µæºç›¸å…³ä¿¡æ¯
 DLL_XMT_SER_API void XMT_COMMAND_ReadPowerConfig(char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char RcArr[61]);
 
-//¶àÂ·µ¥µãÀà 92 93  
+//å¤šè·¯å•ç‚¹ç±» 92 93  
 DLL_XMT_SER_API unsigned char  XMT_COMMAND_MultSinglePointT(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -672,10 +672,10 @@ DLL_XMT_SER_API void  XMT_COMMAND_SetPower(unsigned char Flag_SheBeiNum_23)
 
 
 }
-//unsigned char commandFlagArr[32],// 0 µ½ 255 ÌõÃ÷Áî
+//unsigned char commandFlagArr[32],// 0 åˆ° 255 æ¡æ˜ä»¤
 
-//B3=100 B4 =21  81 ºÅÃüÁî ±ê¶¨ÏÂÎ»»úÅäÌ×Ì¨×ÓĞÅÏ¢
-//±ê¶¨Ì¨×ÓÀàĞÍ //ÀıÈç XP 611 P93 N12 Èı´óÀà
+//B3=100 B4 =21  81 å·å‘½ä»¤ æ ‡å®šä¸‹ä½æœºé…å¥—å°å­ä¿¡æ¯
+//æ ‡å®šå°å­ç±»å‹ //ä¾‹å¦‚ XP 611 P93 N12 ä¸‰å¤§ç±»
 DLL_XMT_SER_API void  XMT_COMMAND_SetMoveMNum(
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -683,143 +683,143 @@ DLL_XMT_SER_API void  XMT_COMMAND_SetMoveMNum(
 					unsigned char Flag_SheBeiNum_1,//X,N,P
 					unsigned char Flag_SheBeiNum_2,//P
 					unsigned char Flag_SheBeiNum_3,
-					unsigned char Flag_SheBeiNum_4, // Êı×Ö 0 µ½ 255 
-					unsigned char Flag_SheBeiNum_5, // Êı×Ö 0 µ½ 255  Á½×éÊı×ÖµÄ ºÍ ÀıÈç XP 611 P93 N12 Èı´óÀà
-					unsigned char Flag_SheBeiNum_6, //Éè±¸ºÅ Í¨µÀÊı 1 2 3 4 5 6Í¨µÀ
-					unsigned char Flag_SheBeiNum_lei,//Éè±¸ºÅ ZÏßÔË¶¯ B°ÚÌ¨Àà ×ÛºÏÀàĞÍ
+					unsigned char Flag_SheBeiNum_4, // æ•°å­— 0 åˆ° 255 
+					unsigned char Flag_SheBeiNum_5, // æ•°å­— 0 åˆ° 255  ä¸¤ç»„æ•°å­—çš„ å’Œ ä¾‹å¦‚ XP 611 P93 N12 ä¸‰å¤§ç±»
+					unsigned char Flag_SheBeiNum_6, //è®¾å¤‡å· é€šé“æ•° 1 2 3 4 5 6é€šé“
+					unsigned char Flag_SheBeiNum_lei,//è®¾å¤‡å· Zçº¿è¿åŠ¨ Bæ‘†å°ç±» ç»¼åˆç±»å‹
 					unsigned char Flag_SheBeiNum_HengYa,
-					unsigned char Flag_YingPianJi//µç×è µçÈİ µç¸Ğ  0 1 2 
+					unsigned char Flag_YingPianJi//ç”µé˜» ç”µå®¹ ç”µæ„Ÿ  0 1 2 
 					);
 /*
-	unsigned char Flag_SheBeiNum_1;//Éè±¸ºÅ ĞÍºÅ  X 33                                                                                                                                                                     
-	unsigned char Flag_SheBeiNum_2;//Éè±¸ºÅ ĞÍºÅ  P 33                                                                                                                                                                     
-	unsigned char Flag_SheBeiNum_3;//Éè±¸ºÅ Êı×Ö 0 µ½ 255 ÀıÈç XP 611 P93 N12 Èı´óÀà
-	unsigned char Flag_SheBeiNum_4;//Éè±¸ºÅ Í¨µÀÊı 1 2 3 4 5 6Í¨µÀ
-	unsigned char Flag_SheBeiNum_lei;//Éè±¸ºÅ ZÏßÔË¶¯ B°ÚÌ¨Àà ×ÛºÏÀàĞÍ
-	unsigned char Flag_SheBeiNum_HengYa;//Éè±¸ºÅ ÊÇ·ñºãÑ¹ 1 ´øºãÑ¹¡¡0 ´ú±í·ÇºãÑ¹
-	unsigned char Flag_YingPianJi;//µç×è µçÈİ µç¸Ğ  0 1 2 
+	unsigned char Flag_SheBeiNum_1;//è®¾å¤‡å· å‹å·  X 33                                                                                                                                                                     
+	unsigned char Flag_SheBeiNum_2;//è®¾å¤‡å· å‹å·  P 33                                                                                                                                                                     
+	unsigned char Flag_SheBeiNum_3;//è®¾å¤‡å· æ•°å­— 0 åˆ° 255 ä¾‹å¦‚ XP 611 P93 N12 ä¸‰å¤§ç±»
+	unsigned char Flag_SheBeiNum_4;//è®¾å¤‡å· é€šé“æ•° 1 2 3 4 5 6é€šé“
+	unsigned char Flag_SheBeiNum_lei;//è®¾å¤‡å· Zçº¿è¿åŠ¨ Bæ‘†å°ç±» ç»¼åˆç±»å‹
+	unsigned char Flag_SheBeiNum_HengYa;//è®¾å¤‡å· æ˜¯å¦æ’å‹ 1 å¸¦æ’å‹ã€€0 ä»£è¡¨éæ’å‹
+	unsigned char Flag_YingPianJi;//ç”µé˜» ç”µå®¹ ç”µæ„Ÿ  0 1 2 
 */
 
 
 //B3=100 B4 =22
-//±ê¶¨Ì¨×ÓÀàĞÍ //ÀıÈç XP 611 P93 N12 Èı´óÀà
+//æ ‡å®šå°å­ç±»å‹ //ä¾‹å¦‚ XP 611 P93 N12 ä¸‰å¤§ç±»
 					//unsigned char Flag_SheBeiNum_1,//X,N,P
 					//unsigned char Flag_SheBeiNum_2,//P
-					//unsigned char Flag_SheBeiNum_3, // Êı×Ö 0 µ½ 255 
-					//unsigned char Flag_SheBeiNum_4, // Êı×Ö 0 µ½ 255  Á½×éÊı×ÖµÄ ºÍ ÀıÈç XP 611 P93 N12 Èı´óÀà
-					//unsigned char Flag_SheBeiNum_5, //Éè±¸ºÅ Í¨µÀÊı 1 2 3 4 5 6Í¨µÀ
-					//unsigned char Flag_SheBeiNum_lei,//Éè±¸ºÅ ZÏßÔË¶¯ B°ÚÌ¨Àà ×ÛºÏÀàĞÍ
+					//unsigned char Flag_SheBeiNum_3, // æ•°å­— 0 åˆ° 255 
+					//unsigned char Flag_SheBeiNum_4, // æ•°å­— 0 åˆ° 255  ä¸¤ç»„æ•°å­—çš„ å’Œ ä¾‹å¦‚ XP 611 P93 N12 ä¸‰å¤§ç±»
+					//unsigned char Flag_SheBeiNum_5, //è®¾å¤‡å· é€šé“æ•° 1 2 3 4 5 6é€šé“
+					//unsigned char Flag_SheBeiNum_lei,//è®¾å¤‡å· Zçº¿è¿åŠ¨ Bæ‘†å°ç±» ç»¼åˆç±»å‹
 					//unsigned char Flag_SheBeiNum_HengYa,
-					//unsigned char Flag_YingPianJi//µç×è µçÈİ µç¸Ğ  0 1 2 
+					//unsigned char Flag_YingPianJi//ç”µé˜» ç”µå®¹ ç”µæ„Ÿ  0 1 2 
 DLL_XMT_SER_API void  XMT_COMMAND_ReadMoveMNum(
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char ReadArrTmp[9]//¶ÁÈ¡·µ»ØÊı¾İ
+					unsigned char ReadArrTmp[9]//è¯»å–è¿”å›æ•°æ®
 					);
-//unsigned char address, µØÖ·Êı¾İ
-//unsigned char Channel_Num, ¶ÔÓ¦Í¨µÀºÅ
-//unsigned char flagOpenOrClose,¿ª±Õ»·Êı¾İ
-//double Point_A,//ÆğÊ¼µãÊı¾İ
-//double Point_B,//ÖÕÖ¹µãÊı¾İ
-//int ArrLong,//Êı¾İµÄ¼ä¸ôÊı
-//int tmpUs_100us//µãÓëµãÖ®¼äµÄÊ±¼ä¼ä¸ô
+//unsigned char address, åœ°å€æ•°æ®
+//unsigned char Channel_Num, å¯¹åº”é€šé“å·
+//unsigned char flagOpenOrClose,å¼€é—­ç¯æ•°æ®
+//double Point_A,//èµ·å§‹ç‚¹æ•°æ®
+//double Point_B,//ç»ˆæ­¢ç‚¹æ•°æ®
+//int ArrLong,//æ•°æ®çš„é—´éš”æ•°
+//int tmpUs_100us//ç‚¹ä¸ç‚¹ä¹‹é—´çš„æ—¶é—´é—´éš”
 
 DLL_XMT_SER_API void ArrDataSendAToB(unsigned char address,unsigned char Channel_Num,unsigned char flagOpenOrClose,double Point_A,double Point_B,int ArrLong,int tmpUs_100us);
 
 
-//unsigned char address;µØÖ·Êı¾İ
-//unsigned char Channel_Num;¶ÔÓ¦Í¨µÀ
-//unsigned char flagOpenOrClose;¿ª±Õ»·Êı¾İ O ¿ª»· C ±Õ»·
-//double Point_A;//ÆğÊ¼µãÊı¾İ
-//double Point_B;//ÖÕÖ¹µãÊı¾İ
-//float AToBRunTime;Aµãµ½BµãµÄÔËĞĞÊ±¼ä 
-//int BTL;//²¨ÌØÂÊ 9600 115200 µ±Ç°µÄ²¨ÌØÂÊ
+//unsigned char address;åœ°å€æ•°æ®
+//unsigned char Channel_Num;å¯¹åº”é€šé“
+//unsigned char flagOpenOrClose;å¼€é—­ç¯æ•°æ® O å¼€ç¯ C é—­ç¯
+//double Point_A;//èµ·å§‹ç‚¹æ•°æ®
+//double Point_B;//ç»ˆæ­¢ç‚¹æ•°æ®
+//float AToBRunTime;Aç‚¹åˆ°Bç‚¹çš„è¿è¡Œæ—¶é—´ 
+//int BTL;//æ³¢ç‰¹ç‡ 9600 115200 å½“å‰çš„æ³¢ç‰¹ç‡
 DLL_XMT_SER_API void PointAToPointBAndRunTime(unsigned char address,unsigned char Channel_Num,unsigned char flagOpenOrClose,double Point_A,double Point_B,float AToBRunTime,int BTL);//
 
 unsigned char* DataAnla_ProYD(double f, unsigned char kk[4]);	
-long CalDataYD(unsigned char kk0, unsigned char kk1, unsigned char kk2, unsigned char kk3);// 20200529 °´ÕÕÏÄ¸çµÄËã·¨¼ÆËã 
+long CalDataYD(unsigned char kk0, unsigned char kk1, unsigned char kk2, unsigned char kk3);// 20200529 æŒ‰ç…§å¤å“¥çš„ç®—æ³•è®¡ç®— 
 
-//unsigned char receive_usb_info_CheckTimeOut(int NumOfLibusbDevice, unsigned char receive_arr[], int TimeOutUse); //¶ÁÈ¡µÄUSBµÄÊı¾İÖµ //TimeOutUse 20200624 Ä¬ÈÏµÄ²éÑ¯Ê±¼ä
-unsigned char receive_usb_info_CheckTimeOut( unsigned char receive_arr[], int Arrlong, int TimeOutUse); //¶ÁÈ¡µÄUSBµÄÊı¾İÖµ //TimeOutUse 20200624 Ä¬ÈÏµÄ²éÑ¯Ê±¼ä
+//unsigned char receive_usb_info_CheckTimeOut(int NumOfLibusbDevice, unsigned char receive_arr[], int TimeOutUse); //è¯»å–çš„USBçš„æ•°æ®å€¼ //TimeOutUse 20200624 é»˜è®¤çš„æŸ¥è¯¢æ—¶é—´
+unsigned char receive_usb_info_CheckTimeOut( unsigned char receive_arr[], int Arrlong, int TimeOutUse); //è¯»å–çš„USBçš„æ•°æ®å€¼ //TimeOutUse 20200624 é»˜è®¤çš„æŸ¥è¯¢æ—¶é—´
 
 
-//B3 = 0 ÉèÖÃËÙ¶ÈÃüÁî B4 = 1;
+//B3 = 0 è®¾ç½®é€Ÿåº¦å‘½ä»¤ B4 = 1;
 DLL_XMT_SER_API void XMT_COMMAND_YDMoveSPD(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch, double SPD_f);//ÉèÖÃÔËĞĞËÙ¶È//µØÖ· Í¨µÀ 
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch, double SPD_f);//è®¾ç½®è¿è¡Œé€Ÿåº¦//åœ°å€ é€šé“ 
 
 ////////////////B4 = 1;
-//B3 = 1 ¾ø¶ÔÎ»ÒÆÃüÁî
+//B3 = 1 ç»å¯¹ä½ç§»å‘½ä»¤
 DLL_XMT_SER_API float XMT_COMMAND_YDAbMoveX(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch, double MoveX_f, unsigned char ReFlag);//¾ø¶ÔÎ»ÖÃ  unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch, double MoveX_f, unsigned char ReFlag);//ç»å¯¹ä½ç½®  unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ
 
-// Ïà¶ÔÎ»ÒÆÃüÁî
+// ç›¸å¯¹ä½ç§»å‘½ä»¤
 //B3 = 2 B4 = 1
 DLL_XMT_SER_API float XMT_COMMAND_YDReMoveX(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch, float MoveX_f, unsigned char ReFlag);//Ïà¶Ô¶ÔÎ»ÖÃ unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch, float MoveX_f, unsigned char ReFlag);//ç›¸å¯¹å¯¹ä½ç½® unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ
 
 
 //B3 = 3; B4= 1;
 DLL_XMT_SER_API float XMT_COMMAND_YDCTUMove(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch,//Í¨µÀºÅ
-	double SPD_f,//Á¬ĞøÔËĞĞµÄËÙ¶ÈÃüÁî
-	unsigned char ROrLFlag,//ÕıÏò·´Ïò±êÖ¾Î»:'R'±íÊ¾ÕıÏò£»'L'±íÊ¾¸ºÏò£»
-	unsigned char ReFlag);//Á¬ĞøÔËĞĞ float SPD_f ÔËĞĞËÙ¶È ,unsigned char ROrLFlag L×óÔËĞĞ RÓÒÔËĞĞ unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch,//é€šé“å·
+	double SPD_f,//è¿ç»­è¿è¡Œçš„é€Ÿåº¦å‘½ä»¤
+	unsigned char ROrLFlag,//æ­£å‘åå‘æ ‡å¿—ä½:'R'è¡¨ç¤ºæ­£å‘ï¼›'L'è¡¨ç¤ºè´Ÿå‘ï¼›
+	unsigned char ReFlag);//è¿ç»­è¿è¡Œ float SPD_f è¿è¡Œé€Ÿåº¦ ,unsigned char ROrLFlag Lå·¦è¿è¡Œ Rå³è¿è¡Œ unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ
 //
  //B3 = 4; B4= 1;
 DLL_XMT_SER_API float XMT_COMMAND_YDCTUMoveStop(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch, unsigned char ReFlag, unsigned char JOrXFlag);
-//Á¬ĞøÔËĞĞÍ£Ö¹ÃüÁî unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡,unsigned char JOrXFlag 1¾ø¶Ô 0Ïà¶Ô
+//è¿ç»­è¿è¡Œåœæ­¢å‘½ä»¤ unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ,unsigned char JOrXFlag 1ç»å¯¹ 0ç›¸å¯¹
 
-// ¶Áµ±Ç°Î»ÖÃÃüÁî 
+// è¯»å½“å‰ä½ç½®å‘½ä»¤ 
 //B3 = 5; B4= 1;
 DLL_XMT_SER_API double XMT_COMMAND_YDReMoveF(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch, unsigned char JOrXFlag); //unsigned char JOrXFlag 1¾ø¶Ô 0Ïà¶Ô
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch, unsigned char JOrXFlag); //unsigned char JOrXFlag 1ç»å¯¹ 0ç›¸å¯¹
 
-//108 ÉèÖÃÏà¶ÔÁã
+//108 è®¾ç½®ç›¸å¯¹é›¶
 //B3 = 6; B4= 1;
 
 DLL_XMT_SER_API double XMT_COMMAND_YDSetCTZero(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂëw
-	unsigned char Ch, double ZerX_f, unsigned char ReFlag); //ÉèÖÃÏà¶ÔÁã unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç w
+	unsigned char Ch, double ZerX_f, unsigned char ReFlag); //è®¾ç½®ç›¸å¯¹é›¶ unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ
 
-//¶ÁÏà¶ÔÁãÎ»
+//è¯»ç›¸å¯¹é›¶ä½
 //B3 = 7; B4= 1;
 DLL_XMT_SER_API float XMT_COMMAND_YDReadCTZero(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch); //¶ÁÈ¡Ïà¶ÔÁã
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch); //è¯»å–ç›¸å¯¹é›¶
 
-//110 ·µ»Øµ½ÁãÎ»ÖÃ ·Ö¾ø¶Ô£¬ÁãÏà¶ÔÁã
+//110 è¿”å›åˆ°é›¶ä½ç½® åˆ†ç»å¯¹ï¼Œé›¶ç›¸å¯¹é›¶
  //B3 = 8; B4= 1;
 DLL_XMT_SER_API float XMT_COMMAND_YDRBackZero(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch, unsigned char JOrXFlag, unsigned char ReFlag); //·µ»ØÁãÎ»ÖÃ unsigned char JOrXFlag 1¾ø¶Ô 0Ïà¶Ô unsigned char ReFlag 0 ²»·´À¡ 1 ±íÊ¾·´À¡
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch, unsigned char JOrXFlag, unsigned char ReFlag); //è¿”å›é›¶ä½ç½® unsigned char JOrXFlag 1ç»å¯¹ 0ç›¸å¯¹ unsigned char ReFlag 0 ä¸åé¦ˆ 1 è¡¨ç¤ºåé¦ˆ
 
-//111 Ñ¹µç²¨ĞÎÃüÁî
+//111 å‹ç”µæ³¢å½¢å‘½ä»¤
 //B3 = 9; B4= 1;
 DLL_XMT_SER_API void 	XMT_COMMAND_YDWave(
 	unsigned char address,
@@ -832,7 +832,7 @@ DLL_XMT_SER_API void 	XMT_COMMAND_YDWave(
 	double Pianzhi
 );
 
-//112 Ñ¹µç½ô¼±Í£Ö¹ÃüÁî ·µ»Øµ±Ç°¾ø¶ÔÎ»ÖÃ
+//112 å‹ç”µç´§æ€¥åœæ­¢å‘½ä»¤ è¿”å›å½“å‰ç»å¯¹ä½ç½®
 //B3 = 10; B4= 1;
 DLL_XMT_SER_API double XMT_COMMAND_YDStopAll(
 	unsigned char address,
@@ -841,49 +841,49 @@ DLL_XMT_SER_API double XMT_COMMAND_YDStopAll(
 	unsigned char Channel_Num
 );
 
-//·µ»ØÑ¹Aµ½BµãµçÂí´ïËÙ¶È
+//è¿”å›å‹Aåˆ°Bç‚¹ç”µé©¬è¾¾é€Ÿåº¦
 //B3 = 11; B4= 1;
 DLL_XMT_SER_API void XMT_COMMAND_YDAbMoveA_BSpeed(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch, double MoveX_A, double MoveX_B);
-//´Óusb½Ó¿ÚÖĞ¶ÁÈ¡ A BµãµÄ·µ»ØËÙ¶È
+//ä»usbæ¥å£ä¸­è¯»å– A Bç‚¹çš„è¿”å›é€Ÿåº¦
 DLL_XMT_SER_API double XMT_COMMAND_RecA_BSpeed(unsigned char Ch, int TimeOutUse);
 
-//B3 = 12 B4 = 1 ±êµÍÏŞÏŞÎ»ÖÃ
+//B3 = 12 B4 = 1 æ ‡ä½é™é™ä½ç½®
 DLL_XMT_SER_API double XMT_COMMAND_YDAbSetLimit(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch,
 	double SetDataLimit);
 
-//¶ÁÏŞÏŞÎ»ÖÃ
+//è¯»é™é™ä½ç½®
 //B3 = 13 B4 = 1
 DLL_XMT_SER_API float XMT_COMMAND_YDReadAbLimit(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	unsigned char Ch); //¶ÁÈ¡Ïà¶ÔÁã
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	unsigned char Ch); //è¯»å–ç›¸å¯¹é›¶
 
-											  //B3 = 14 B4 = 1 ±ê¸ßÏŞÏŞÎ»ÖÃ
+											  //B3 = 14 B4 = 1 æ ‡é«˜é™é™ä½ç½®
 DLL_XMT_SER_API double XMT_COMMAND_YDAbSetHighLimit(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch,
 	double SetDataLimit);
 
-//¶ÁÏŞÏŞÎ»ÖÃ
+//è¯»é™é™ä½ç½®
 //B3 = 15 B4 = 1
 DLL_XMT_SER_API float XMT_COMMAND_YDReadAbHighLimit(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
-	 unsigned char Ch); //¶ÁÈ¡Ïà¶ÔÁã
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
+	 unsigned char Ch); //è¯»å–ç›¸å¯¹é›¶
 
-//¾ø¶ÔÁãÎ»Ğ£×¼
+//ç»å¯¹é›¶ä½æ ¡å‡†
  //B3 = 16 B4 = 1
 DLL_XMT_SER_API void XMT_COMMAND_CorrectAbZero(
 	unsigned char address,
@@ -898,73 +898,73 @@ void DataLongToArr_8(long long RunCi, unsigned char TmpDataArr[]);
 unsigned char* DataAnla_ProLD(long IntTmp, unsigned char kk[4]);
 int CalDataLD(unsigned kk0, unsigned kk1, unsigned kk2, unsigned kk3);
 int SendArray_ReadDataChannel_LDRcy(int bao_long, unsigned char ArrRec[], unsigned char ChType);
-// Ñ¹µçÂİ¶¤
+// å‹ç”µèºé’‰
 //B3 = 0; B4= 2;
 DLL_XMT_SER_API void XMT_COMMAND_YD_LDing_SendWave(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch,
 	unsigned char WaveType,
 	double FengFengZhi,
 	double PinLvHz,
 	double Pianzhi,
-	unsigned char RunZhengOrFanFlag,//Õı·½Ïò 'P' 'N'
-	unsigned char FlagRunForever,//Ò»Ö±ÔË¶¯0x01 £¬¶¨ÖÜÆÚÔË¶¯ 0x00
+	unsigned char RunZhengOrFanFlag,//æ­£æ–¹å‘ 'P' 'N'
+	unsigned char FlagRunForever,//ä¸€ç›´è¿åŠ¨0x01 ï¼Œå®šå‘¨æœŸè¿åŠ¨ 0x00
 	long long RunCi,
 	unsigned char  Percent
 );
-// Ñ¹µçÂİ¶¤
+// å‹ç”µèºé’‰
 //B3 = 0; B4= 2;
 DLL_XMT_SER_API void XMT_COMMAND_YD_LDing_SendWave(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch,
 	unsigned char WaveType,
 	double FengFengZhi,
 	double PinLvHz,
 	double Pianzhi,
-	unsigned char RunZhengOrFanFlag,//Õı·½Ïò 'P' 'N'
-	unsigned char FlagRunForever,//Ò»Ö±ÔË¶¯0x01 £¬¶¨ÖÜÆÚÔË¶¯ 0x00
+	unsigned char RunZhengOrFanFlag,//æ­£æ–¹å‘ 'P' 'N'
+	unsigned char FlagRunForever,//ä¸€ç›´è¿åŠ¨0x01 ï¼Œå®šå‘¨æœŸè¿åŠ¨ 0x00
 	long long RunCi,
 	unsigned char  Percent
 );
-// Ñ¹µçÂİ¶¤
+// å‹ç”µèºé’‰
 //B3 = 1; B4= 2;
 DLL_XMT_SER_API void XMT_COMMAND_YD_LDing_SendWaveStop(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch
 );
 
-// Ñ¹µçÂİ¶¤ Ñ¹µçÂİ¶¤Ïà¶ÔÔË¶¯
+// å‹ç”µèºé’‰ å‹ç”µèºé’‰ç›¸å¯¹è¿åŠ¨
 //B3 = 2; B4= 2;
-// Ñ¹µçÂİ¶¤ Ñ¹µçÂİ¶¤¾ø¶ÔÔË¶¯
+// å‹ç”µèºé’‰ å‹ç”µèºé’‰ç»å¯¹è¿åŠ¨
 //B3 = 3; B4= 2;
 DLL_XMT_SER_API void XMT_COMMAND_YD_LDing_Move(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch,
-	unsigned char RunZhengOrFanFlag,//[6]'P'ÕıÏò'N'·´Ïò
+	unsigned char RunZhengOrFanFlag,//[6]'P'æ­£å‘'N'åå‘
 	long RunCi
 );
 
 //B3 = 4; B4= 2;
 DLL_XMT_SER_API int XMT_COMMAND_YD_LDing_ReadZQ(
 	unsigned char Address,
-	int Command_B3,//Ö¸ÁîÂë
-	int Command_B4,//Ö¸ÁîÂë
+	int Command_B3,//æŒ‡ä»¤ç 
+	int Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch
 );
 
 //B3 = 5; B4= 2;
-//Ñ¹µçÂİ¶¤ Í¨µÀ¼ÆÊıÇåÁã
+//å‹ç”µèºé’‰ é€šé“è®¡æ•°æ¸…é›¶
 DLL_XMT_SER_API void XMT_COMMAND_YD_LDing_ZeroCyc(
 	unsigned char Address,
-	unsigned char Command_B3,//Ö¸ÁîÂë
-	unsigned char Command_B4,//Ö¸ÁîÂë
+	unsigned char Command_B3,//æŒ‡ä»¤ç 
+	unsigned char Command_B4,//æŒ‡ä»¤ç 
 	unsigned char Ch
 );

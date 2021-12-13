@@ -1,4 +1,4 @@
-// XMT_DLL_USB.h : XMT_DLL_USB DLL µÄÖ÷Í·ÎÄ¼ş
+// XMT_DLL_USB.h : XMT_DLL_USB DLL çš„ä¸»å¤´æ–‡ä»¶
 //
 //xmt
 #include "libusb.h"
@@ -14,35 +14,35 @@
 //
 
 // CXMT_DLL_USBApp
-// ÓĞ¹Ø´ËÀàÊµÏÖµÄĞÅÏ¢£¬Çë²ÎÔÄ XMT_DLL_USB.cpp
+// æœ‰å…³æ­¤ç±»å®ç°çš„ä¿¡æ¯ï¼Œè¯·å‚é˜… XMT_DLL_USB.cpp
 //
 
 
 // CXMT_DLL_USBApp
-// ÓĞ¹Ø´ËÀàÊµÏÖµÄĞÅÏ¢£¬Çë²ÎÔÄ XMT_DLL_USB.cpp
+// æœ‰å…³æ­¤ç±»å®ç°çš„ä¿¡æ¯ï¼Œè¯·å‚é˜… XMT_DLL_USB.cpp
 //
 
-//ÄÚ²¿Êı¾İ×ª»»Ïà¹Øº¯Êı
-unsigned char* DataAnla_length_command(int f,unsigned char kk[2]); //½«³¤¶È×ª»¯Îª×Ö·û·¢ÏÂÈ¥
+//å†…éƒ¨æ•°æ®è½¬æ¢ç›¸å…³å‡½æ•°
+unsigned char* DataAnla_length_command(int f,unsigned char kk[2]); //å°†é•¿åº¦è½¬åŒ–ä¸ºå­—ç¬¦å‘ä¸‹å»
 unsigned char* DataAnla(float f,unsigned char kk[4]);
-unsigned char *copy_arr_data(unsigned char target[],unsigned char source[],int num); //×ªÒÆÊı×éµÄÄÚ²¿µÄÊı¾İ
-unsigned char *copy_arr_data_float(unsigned char target[],unsigned char source[],int num); //½«¸¡µãÊı¾İ×ª»»¹ıÈ¥
-void copy_arr_xmt_yll(unsigned char target[],unsigned char source[]);//¿½±´Ğ£ÑéÎ»
+unsigned char *copy_arr_data(unsigned char target[],unsigned char source[],int num); //è½¬ç§»æ•°ç»„çš„å†…éƒ¨çš„æ•°æ®
+unsigned char *copy_arr_data_float(unsigned char target[],unsigned char source[],int num); //å°†æµ®ç‚¹æ•°æ®è½¬æ¢è¿‡å»
+void copy_arr_xmt_yll(unsigned char target[],unsigned char source[]);//æ‹·è´æ ¡éªŒä½
 
-//·¢ËÍµ¥µãÃüÁî
+//å‘é€å•ç‚¹å‘½ä»¤
 void SEND_V_COMMAND_SINGLE(libusb_device_handle *UsbHandle,int command_length,unsigned char a1,unsigned char b1,unsigned char c1,float data);
 
 
-//ÄÚ²¿´¦Àíº¯Êı
+//å†…éƒ¨å¤„ç†å‡½æ•°
 unsigned char* DataAnla_Pro(double f,unsigned char kk[4]);
-void receive_usb_info(int NumOfLibusbDevice,unsigned char receive_arr[]); //¶ÁÈ¡µÄUSBµÄÊı¾İÖµ
+void receive_usb_info(int NumOfLibusbDevice,unsigned char receive_arr[]); //è¯»å–çš„USBçš„æ•°æ®å€¼
 
 double XMT_ReDo_pro(unsigned char comand_Arr[]);
-double Res_command_pro(unsigned char T_D_3,unsigned char T_D_4);//½â°üÃüÁî
-float CalData(unsigned char kk0,unsigned char kk1,unsigned char kk2,unsigned char kk3);//ÓÃÀ´×ª»¯ Õı¸ºÊı
-unsigned char XMT_ReDo_pro_Unit(unsigned char comand_Arr[]); //ÓÃÓÚ×ö53¶ÁÈ¡ ÏÂÎ»»ú µ¥Î»Êı¾İ
-unsigned char Res_command_pro_Unit(unsigned char T_D_3,unsigned char T_D_4);//½â°üÃüÁî
-void XMT_ReDo_PIDinfo(unsigned char tmpChannel ,unsigned char RecArr[],float PID[3]);//½âÂëPID
+double Res_command_pro(unsigned char T_D_3,unsigned char T_D_4);//è§£åŒ…å‘½ä»¤
+float CalData(unsigned char kk0,unsigned char kk1,unsigned char kk2,unsigned char kk3);//ç”¨æ¥è½¬åŒ– æ­£è´Ÿæ•°
+unsigned char XMT_ReDo_pro_Unit(unsigned char comand_Arr[]); //ç”¨äºåš53è¯»å– ä¸‹ä½æœº å•ä½æ•°æ®
+unsigned char Res_command_pro_Unit(unsigned char T_D_3,unsigned char T_D_4);//è§£åŒ…å‘½ä»¤
+void XMT_ReDo_PIDinfo(unsigned char tmpChannel ,unsigned char RecArr[],float PID[3]);//è§£ç PID
 void XMT_ReadMultReal(  unsigned char comand_Arr[],
 					  	unsigned char *OpenOrCloseFlag_0,
 						double *Data_0,
@@ -50,12 +50,12 @@ void XMT_ReadMultReal(  unsigned char comand_Arr[],
 						double *Data_1,
 						unsigned char *OpenOrCloseFlag_2,
 						double *Data_2
-					);//½«²É¼¯µÄÊı×é½øĞĞ·Ö°ü´¦Àí
+					);//å°†é‡‡é›†çš„æ•°ç»„è¿›è¡Œåˆ†åŒ…å¤„ç†
 
-void XMT_ReDo_pro_Arr(unsigned char comand_Arr[],unsigned char arrRec[3]); //¶ÁÈ¡´ø·µ»ØÊı¾İÖµµÃ
+void XMT_ReDo_pro_Arr(unsigned char comand_Arr[],unsigned char arrRec[3]); //è¯»å–å¸¦è¿”å›æ•°æ®å€¼å¾—
 
-//·¢ËÍÊı¾İ×ª»» ¸¡µãÊı×ª»¯ÎªDA(0-65535)Ö®¼ä×ª»»
-void ChangeDataToDa(unsigned char TmpDa[2],float TmpSendData,float MaxData,float MinData); //½«¸¡µãÊı ×ª»¯ÎªÁ½¸ö[0] ´ú±í¸ß×Ö½Ú ÏÈ·¢ËÍ [1]´ú±íµÍ×Ö½Úºó·¢ËÍ
+//å‘é€æ•°æ®è½¬æ¢ æµ®ç‚¹æ•°è½¬åŒ–ä¸ºDA(0-65535)ä¹‹é—´è½¬æ¢
+void ChangeDataToDa(unsigned char TmpDa[2],float TmpSendData,float MaxData,float MinData); //å°†æµ®ç‚¹æ•° è½¬åŒ–ä¸ºä¸¤ä¸ª[0] ä»£è¡¨é«˜å­—èŠ‚ å…ˆå‘é€ [1]ä»£è¡¨ä½å­—èŠ‚åå‘é€
 
 void XMT_ReadMultReal_Do( unsigned char T_D_3,unsigned char T_D_4,
 									   	unsigned char *OpenOrCloseFlag_0,
@@ -67,37 +67,37 @@ void XMT_ReadMultReal_Do( unsigned char T_D_3,unsigned char T_D_4,
 										);
 DLL_XMT_USB_API void DataAnla_ProLabviewDo(double f,unsigned char kk[4]);
 
-extern "C"	DLL_XMT_USB_API int add(int x,int y);//ÑéÖ¤¼òµ¥·½·¨
+extern "C"	DLL_XMT_USB_API int add(int x,int y);//éªŒè¯ç®€å•æ–¹æ³•
 
-DLL_XMT_USB_API int  print_devs_pro(libusb_device **devs);//µÃµ½ÓĞ¼¸¸öusbµÄE17»òÊÇE70Á¬½Ó Ê×ÏÈÔËĞĞ
+DLL_XMT_USB_API int  print_devs_pro(libusb_device **devs);//å¾—åˆ°æœ‰å‡ ä¸ªusbçš„E17æˆ–æ˜¯E70è¿æ¥ é¦–å…ˆè¿è¡Œ
 
 extern "C"
 {
 	int DLL_XMT_USB_API SendABC(int UseUsbNum);
-    DLL_XMT_USB_API int ScanUsbDevice(void);//É¨ÃèÁ¬½ÓµÄusbÉè±¸ ·µ»Ø-1±íÊ¾Ã»ÓĞÉè±¸ ·µ»Ø0±íÊ¾Á¬½Ó1¸öÉè±¸ ·µ»Ø1±íÊ¾Á¬½ÓÁ½¸öÉè±¸ Í¬Ê±½«Á¬½ÓusbÉè±¸µÄ¾ä±ú·µ»Ø¸øusbÉè±¸¾ä±úµÄÊı×é
+    DLL_XMT_USB_API int ScanUsbDevice(void);//æ‰«æè¿æ¥çš„usbè®¾å¤‡ è¿”å›-1è¡¨ç¤ºæ²¡æœ‰è®¾å¤‡ è¿”å›0è¡¨ç¤ºè¿æ¥1ä¸ªè®¾å¤‡ è¿”å›1è¡¨ç¤ºè¿æ¥ä¸¤ä¸ªè®¾å¤‡ åŒæ—¶å°†è¿æ¥usbè®¾å¤‡çš„å¥æŸ„è¿”å›ç»™usbè®¾å¤‡å¥æŸ„çš„æ•°ç»„
 }
 
 
-DLL_XMT_USB_API int TotalNumUsbDevice(void);//·µ»ØusbÉè±¸×ÜÊı
-//°´usbÉè±¸±àºÅ´ò¿ªUSBÉè±¸
-DLL_XMT_USB_API int OpenUsbNumOfDevice(libusb_device *dev, libusb_device_handle *handle);//´ò¿ª°´Ë³ĞòµÄUSBÉè±¸
-DLL_XMT_USB_API int OpenUsbNumOfDevice(int usbDeviceNum);//´ò¿ª°´usbÉè±¸±àºÅ´ò¿ªUSBÉè±¸,Èç¹û´ò¿ªÊ§°Ü£¬ĞèÒªÔÙ´ÎÉ¨ÃèºóÖØĞÂ´ò¿ª£¡
-DLL_XMT_USB_API int OpenUsbDeviceALL(int usbDeviceNum);//ÓĞ¼¸¸öusbÉè±¸È«²¿Ò»´ÎĞÔ´ò¿ª£¡
-DLL_XMT_USB_API int OpenUsbNumOfDeviceLabView(int usbDeviceNum);//´ò¿ª°´usbÉè±¸±àºÅ´ò¿ªUSBÉè±¸¸ü¸ß¼¶Ğ©
-DLL_XMT_USB_API int CloseUsbNumOfDevice(int UsbNumOfDevice);//¹Ø±Õ´ò¿ªµÄµÄÉè±¸
+DLL_XMT_USB_API int TotalNumUsbDevice(void);//è¿”å›usbè®¾å¤‡æ€»æ•°
+//æŒ‰usbè®¾å¤‡ç¼–å·æ‰“å¼€USBè®¾å¤‡
+DLL_XMT_USB_API int OpenUsbNumOfDevice(libusb_device *dev, libusb_device_handle *handle);//æ‰“å¼€æŒ‰é¡ºåºçš„USBè®¾å¤‡
+DLL_XMT_USB_API int OpenUsbNumOfDevice(int usbDeviceNum);//æ‰“å¼€æŒ‰usbè®¾å¤‡ç¼–å·æ‰“å¼€USBè®¾å¤‡,å¦‚æœæ‰“å¼€å¤±è´¥ï¼Œéœ€è¦å†æ¬¡æ‰«æåé‡æ–°æ‰“å¼€ï¼
+DLL_XMT_USB_API int OpenUsbDeviceALL(int usbDeviceNum);//æœ‰å‡ ä¸ªusbè®¾å¤‡å…¨éƒ¨ä¸€æ¬¡æ€§æ‰“å¼€ï¼
+DLL_XMT_USB_API int OpenUsbNumOfDeviceLabView(int usbDeviceNum);//æ‰“å¼€æŒ‰usbè®¾å¤‡ç¼–å·æ‰“å¼€USBè®¾å¤‡æ›´é«˜çº§äº›
+DLL_XMT_USB_API int CloseUsbNumOfDevice(int UsbNumOfDevice);//å…³é—­æ‰“å¼€çš„çš„è®¾å¤‡
 
 
-libusb_device_handle DLL_XMT_USB_API  *relibusb_device_handle(int tmpDataArrNum);//·µ»Ø Éú³ÉlibusbDevice¶ÔÓ¦¾ä±ú
-DLL_XMT_USB_API int print_devs_pro_ADD(libusb_device **devs,libusb_device *dev_rem_usb[20]);//ÓÃÀ´´æ´¢Á¬½Óµ½ µçÄÔÉÏµÄvid 0547 pid A516ÕâÁ½¸öÊı¾İ //×î¶àÁ¬½Ó20Ì¨usb Éè±¸)//µÃµ½ÓĞ¼¸¸öusbµÄE17»òÊÇE70Á¬½Ó Ê×ÏÈÔËĞĞ
+libusb_device_handle DLL_XMT_USB_API  *relibusb_device_handle(int tmpDataArrNum);//è¿”å› ç”ŸæˆlibusbDeviceå¯¹åº”å¥æŸ„
+DLL_XMT_USB_API int print_devs_pro_ADD(libusb_device **devs,libusb_device *dev_rem_usb[20]);//ç”¨æ¥å­˜å‚¨è¿æ¥åˆ° ç”µè„‘ä¸Šçš„vid 0547 pid A516è¿™ä¸¤ä¸ªæ•°æ® //æœ€å¤šè¿æ¥20å°usb è®¾å¤‡)//å¾—åˆ°æœ‰å‡ ä¸ªusbçš„E17æˆ–æ˜¯E70è¿æ¥ é¦–å…ˆè¿è¡Œ
 
-//·¢ËÍÍ¨¹ıusbÉè±¸·¢ËÍÊı¾İ
+//å‘é€é€šè¿‡usbè®¾å¤‡å‘é€æ•°æ®
 DLL_XMT_USB_API int SendArrByusb(int UseUsbNum,unsigned char send_arr[],int ArrLong);
 DLL_XMT_USB_API int SendArrByusb_Pro(libusb_device_handle *handle_TT,unsigned char send_arr[],int Arrlong);
 DLL_XMT_USB_API  int  SendArrByusb_Pro_SEC(int UseUsbNum,unsigned char send_arr[],int Arrlong);
 
-DLL_XMT_USB_API void RecArrFromUsb(int NumOfLibusbDevice,//Éè±¸ºÅ£¬´Ó0¿ªÊ¼
-                                   unsigned char receive_arr[] //²É¼¯µÄÊı¾İ´æ´¢Êı×é
-								   ); //¶ÁÈ¡µÄUSBµÄÊı¾İÖµ
+DLL_XMT_USB_API void RecArrFromUsb(int NumOfLibusbDevice,//è®¾å¤‡å·ï¼Œä»0å¼€å§‹
+                                   unsigned char receive_arr[] //é‡‡é›†çš„æ•°æ®å­˜å‚¨æ•°ç»„
+								   ); //è¯»å–çš„USBçš„æ•°æ®å€¼
 
 extern "C"
 {
@@ -105,7 +105,7 @@ extern "C"
 }
 extern "C"
 {
-//µ¥µãÀà  0 1  
+//å•ç‚¹ç±»  0 1  
 DLL_XMT_USB_API void XMT_COMMAND_SinglePoint(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -114,7 +114,7 @@ DLL_XMT_USB_API void XMT_COMMAND_SinglePoint(int usbDeviceNum,
 					double VoltOrMove_Data
 					); //
 
-//do ¶àÂ·µ¥µãÀà 2 3  
+//do å¤šè·¯å•ç‚¹ç±» 2 3  
  DLL_XMT_USB_API   unsigned char XMT_COMMAND_MultSinglePoint(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -124,14 +124,14 @@ DLL_XMT_USB_API void XMT_COMMAND_SinglePoint(int usbDeviceNum,
 					double VoltOrMove_Data_2
 					);
 
-//doÇåÁãÃüÁî 4
+//doæ¸…é›¶å‘½ä»¤ 4
 DLL_XMT_USB_API void 	XMT_COMMAND_SinglePoint_Clear(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
 
-//¶ÁÊı¾İÀà 5 6 
+//è¯»æ•°æ®ç±» 5 6 
 DLL_XMT_USB_API double XMT_COMMAND_ReadData(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -139,7 +139,7 @@ DLL_XMT_USB_API double XMT_COMMAND_ReadData(int usbDeviceNum,
 					unsigned char Channel_Num
 					);
 
-//do ÊµÊ±Êı¾İ¶ÁÈ¡Àà 7 8 
+//do å®æ—¶æ•°æ®è¯»å–ç±» 7 8 
 DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -157,14 +157,14 @@ DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS_MultChannle(int usbDeviceNum,
 					);
 
 
-//Í£Ö¹¶ÁÈ¡ 11
+//åœæ­¢è¯»å– 11
 DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_Stop(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
-//²¨ĞÎÀà
-//µ¥Â·¸ßËÙ  12 13 
+//æ³¢å½¢ç±»
+//å•è·¯é«˜é€Ÿ  12 13 
 DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetHighSingle(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -176,14 +176,14 @@ DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetHighSingle(int usbDeviceNum,
 					double Pianzhi
 					);
 
-//Í£Ö¹·¢ËÍ  14 
+//åœæ­¢å‘é€  14 
 DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetHighSingleStop(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
 
-//¶àÂ·±ê×¼ËÙ¶ÈÄ£Ê½ 15 16 
+//å¤šè·¯æ ‡å‡†é€Ÿåº¦æ¨¡å¼ 15 16 
 DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetMultWave(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -195,7 +195,7 @@ DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetMultWave(int usbDeviceNum,
 					double Pianzhi
 					);
 
-//Í£Ö¹·¢ËÍ 17
+//åœæ­¢å‘é€ 17
 DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetMultWaveStop(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -203,8 +203,8 @@ DLL_XMT_USB_API void 	XMT_COMMAND_WaveSetMultWaveStop(int usbDeviceNum,
 					unsigned char Channel_Num
 					);
 
-//¸¨ÖúĞ­ÖúÀà
-//ÉèÖÃ  18 20 22 
+//è¾…åŠ©ååŠ©ç±»
+//è®¾ç½®  18 20 22 
 DLL_XMT_USB_API void 	XMT_COMMAND_Assist_SetFlag(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -213,7 +213,7 @@ DLL_XMT_USB_API void 	XMT_COMMAND_Assist_SetFlag(int usbDeviceNum,
 					unsigned char SetFlag
 					);
 
-//¶ÁÈ¡flagÊı¾İ 19 21 23 
+//è¯»å–flagæ•°æ® 19 21 23 
 DLL_XMT_USB_API unsigned char XMT_COMMAND_Assist_ReadFlag(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -221,8 +221,8 @@ DLL_XMT_USB_API unsigned char XMT_COMMAND_Assist_ReadFlag(int usbDeviceNum,
                     unsigned char Channel_Num
 					);
 
-//±ê¶¨ºÍÅäÖÃÀà
-//Éè¶¨ÏµÍ³Àà  24 26 28 
+//æ ‡å®šå’Œé…ç½®ç±»
+//è®¾å®šç³»ç»Ÿç±»  24 26 28 
 DLL_XMT_USB_API void 	XMT_COMMAND_SetSystemInfo(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -231,7 +231,7 @@ DLL_XMT_USB_API void 	XMT_COMMAND_SetSystemInfo(int usbDeviceNum,
 					double SystemInfo
 					);
 
-//¶ÁÊı¾İÀà 25 27  29
+//è¯»æ•°æ®ç±» 25 27  29
 DLL_XMT_USB_API double XMT_COMMAND_ReadSystemInfo(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -239,7 +239,7 @@ DLL_XMT_USB_API double XMT_COMMAND_ReadSystemInfo(int usbDeviceNum,
 					unsigned char Channel_Num
 					);
 
-//Éè¶¨¸ßµÍÏŞ
+//è®¾å®šé«˜ä½é™
 //30 32 34
 DLL_XMT_USB_API void 	XMT_COMMAND_SetSystemHL_Limit(int usbDeviceNum,
 	                unsigned char address,
@@ -248,7 +248,7 @@ DLL_XMT_USB_API void 	XMT_COMMAND_SetSystemHL_Limit(int usbDeviceNum,
 					double SystemInfo
 					);
 
-//¶ÁÈ¡ÏµÍ³¸ßµÍÏŞ 31 33 35 
+//è¯»å–ç³»ç»Ÿé«˜ä½é™ 31 33 35 
 double DLL_XMT_USB_API  XMT_COMMAND_ReadSystemHL_Limit(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -257,51 +257,51 @@ double DLL_XMT_USB_API  XMT_COMMAND_ReadSystemHL_Limit(int usbDeviceNum,
 					);
 
 
-// 36 ÉèÖÃPID Æô¶¯/Í£Ö¹ 
+// 36 è®¾ç½®PID å¯åŠ¨/åœæ­¢ 
 DLL_XMT_USB_API void 	XMT_COMMAND_SETPID_RorH(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channel_Num,
 					unsigned char PIDSetFlag
-					); //Æô¶¯ 'R' Í£Ö¹ 'H' 20170829
+					); //å¯åŠ¨ 'R' åœæ­¢ 'H' 20170829
 
-//37 ÉèÖÃPID²ÎÊı
+//37 è®¾ç½®PIDå‚æ•°
 DLL_XMT_USB_API void SendArray_PID_Channel(  int usbDeviceNum,
-	                     int address,//µØÖ·Âë
-						 int Command_B3,//Ö¸ÁîÂë
-						 int Command_B4,//Ö¸ÁîÂë
+	                     int address,//åœ°å€ç 
+						 int Command_B3,//æŒ‡ä»¤ç 
+						 int Command_B4,//æŒ‡ä»¤ç 
 						 unsigned char Channel_Num,
 						 float PID_P,
 						 float PID_I,
 						 float PID_D
-						 );//·¢ËÍÊı¾İ 20170829
-//38 ¶ÁÈ¡ PID ²ÎÊı 
+						 );//å‘é€æ•°æ® 20170829
+//38 è¯»å– PID å‚æ•° 
 DLL_XMT_USB_API void Read_PID_Channel(  int usbDeviceNum,
-	                     int address,//µØÖ·Âë
-						 int Command_B3,//Ö¸ÁîÂë
-						 int Command_B4,//Ö¸ÁîÂë
+	                     int address,//åœ°å€ç 
+						 int Command_B3,//æŒ‡ä»¤ç 
+						 int Command_B4,//æŒ‡ä»¤ç 
 						 unsigned char Channel_Num,
 						 float PID_Rc[3]
 						 ); 
-//39 40 41 42 43 44 45 ÌØÊâÊ¹ÓÃ
+//39 40 41 42 43 44 45 ç‰¹æ®Šä½¿ç”¨
 ///////////////////////////////
 
-//46 Éè¶¨ÏÂÎ»»úµØÖ· ¸ÃÃüÁîÖØ¸´·¢ËÍ10´Î
+//46 è®¾å®šä¸‹ä½æœºåœ°å€ è¯¥å‘½ä»¤é‡å¤å‘é€10æ¬¡
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCUAddress(int usbDeviceNum,
-	                unsigned char address,//0x00 Õâ¸öÊÇ¹ã²¥µØÖ· ¹Ì¶¨µÄ
+	                unsigned char address,//0x00 è¿™ä¸ªæ˜¯å¹¿æ’­åœ°å€ å›ºå®šçš„
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char SetAddress////Ô¤ÉèµØÖ·
+					unsigned char SetAddress////é¢„è®¾åœ°å€
 					);
-//47 ¶ÁÈ¥ÏÂÎ»»úµØÖ·
+//47 è¯»å»ä¸‹ä½æœºåœ°å€
 DLL_XMT_USB_API unsigned char 	XMT_COMMAND_ReadMCUAddress(int usbDeviceNum,
-	                unsigned char address,//0x00 Õâ¸öÊÇ¹ã²¥µØÖ· ¹Ì¶¨µÄ
+	                unsigned char address,//0x00 è¿™ä¸ªæ˜¯å¹¿æ’­åœ°å€ å›ºå®šçš„
 					unsigned char Command_B3,
 					unsigned char Command_B4
 					);
 
-//¶ÁÈ¡ÏµÍ³Àà 48 
+//è¯»å–ç³»ç»Ÿç±» 48 
 DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS_UpDoPro(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -311,7 +311,7 @@ DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS_UpDoPro(int usbDeviceNum,
 					);
 
 
-//¶ÁÈ¡ÏµÍ³Àà 49
+//è¯»å–ç³»ç»Ÿç±» 49
 DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS_DownDoPro(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -319,30 +319,30 @@ DLL_XMT_USB_API void 	XMT_COMMAND_ReadData_TS_DownDoPro(int usbDeviceNum,
 					unsigned char TimerSet_ms
 					);
 
-// 50 ·ù¶ÈĞ£Õı
+// 50 å¹…åº¦æ ¡æ­£
 DLL_XMT_USB_API void XMT_COMMAND_CONTROL_PID(         int usbDeviceNum,
-	                                  int address_ma,//µØÖ·Âë
-									  int bao_long,  //°ü³¤
-									  int zhilingma_B3,//Ö¸ÁîÂë
-									  int zhilingma_B4,//Ö¸ÁîÂë
-									  unsigned char channel_num,//Í¨µÀÊı
-									  unsigned char FLAG_CLoseOrOpen//¿ªÊ¼½áÊø
+	                                  int address_ma,//åœ°å€ç 
+									  int bao_long,  //åŒ…é•¿
+									  int zhilingma_B3,//æŒ‡ä»¤ç 
+									  int zhilingma_B4,//æŒ‡ä»¤ç 
+									  unsigned char channel_num,//é€šé“æ•°
+									  unsigned char FLAG_CLoseOrOpen//å¼€å§‹ç»“æŸ
 							);
 
-//51  ¶ÁÈ¡¶àÂ·Î»ÒÆ»òµçÑ¹Êı¾İ [5]µçÑ¹/Î»ÒÆbit±êÖ¾ [1111] ´ú±í²»Í¬Í¨µÀµÄ¿ª±Õ»·Êı¾İÖµ 3 2 1 0 Í¨µÀ¶ÔÓ¦
+//51  è¯»å–å¤šè·¯ä½ç§»æˆ–ç”µå‹æ•°æ® [5]ç”µå‹/ä½ç§»bitæ ‡å¿— [1111] ä»£è¡¨ä¸åŒé€šé“çš„å¼€é—­ç¯æ•°æ®å€¼ 3 2 1 0 é€šé“å¯¹åº”
 DLL_XMT_USB_API void 	XMT_COMMAND_ReadMultChannelMoveOrVolt(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char *OpenOrCloseFlag_0,//¿ª±Õ»·Êı¾İ 
-					double *Data_0,//·µ»ØµÄÊı¾İÖµ
-					unsigned char *OpenOrCloseFlag_1,//¿ª±Õ»·Êı¾İ
-					double *Data_1,//·µ»ØµÄÊı¾İÖµ
-					unsigned char *OpenOrCloseFlag_2,//¿ª±Õ»·Êı¾İ
-					double *Data_2//·µ»ØµÄÊı¾İÖµ
+					unsigned char *OpenOrCloseFlag_0,//å¼€é—­ç¯æ•°æ® 
+					double *Data_0,//è¿”å›çš„æ•°æ®å€¼
+					unsigned char *OpenOrCloseFlag_1,//å¼€é—­ç¯æ•°æ®
+					double *Data_1,//è¿”å›çš„æ•°æ®å€¼
+					unsigned char *OpenOrCloseFlag_2,//å¼€é—­ç¯æ•°æ®
+					double *Data_2//è¿”å›çš„æ•°æ®å€¼
 					);
 
-//52 ¶ÁÈ¡µçÑ¹Î»ÒÆÏŞÖÆ°Ù·Ö±È
+//52 è¯»å–ç”µå‹ä½ç§»é™åˆ¶ç™¾åˆ†æ¯”
 DLL_XMT_USB_API float 	XMT_COMMAND_ReadSystem_VoltPer(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -350,87 +350,87 @@ DLL_XMT_USB_API float 	XMT_COMMAND_ReadSystem_VoltPer(int usbDeviceNum,
 				); 
 
 
-//53 ¶ÁÈ¡ÏÂÎ»»úµ¥Î»
+//53 è¯»å–ä¸‹ä½æœºå•ä½
 DLL_XMT_USB_API unsigned char 	XMT_COMMAND_ReadSystem_Unit(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4
 				); 
 
-//54 ¶ÁÈ¡Ä³Ò»Â·²¨ĞÎÆô¶¯Í£Ö¹ËÙ¶È
+//54 è¯»å–æŸä¸€è·¯æ³¢å½¢å¯åŠ¨åœæ­¢é€Ÿåº¦
 DLL_XMT_USB_API unsigned char  XMT_COMMAND_ReadWaveBeginAndStopSpeed(int usbDeviceNum,
-	                int address_ma,//µØÖ·Âë
+	                int address_ma,//åœ°å€ç 
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char channel_num // Í¨µÀÊı 0 1 2 
-					);// 'H'´ú±í¸ßËÙ  'L'´ú±íµÍËÙ 
+					unsigned char channel_num // é€šé“æ•° 0 1 2 
+					);// 'H'ä»£è¡¨é«˜é€Ÿ  'L'ä»£è¡¨ä½é€Ÿ 
 
 
-//55ÉÏÎ»»úÉèÖÃÄ³Ò»Â·²¨ĞÎÆô¶¯Í£Ö¹ËÙ¶È£¨Æô¶¯Í£Ö¹ËÙ¶ÈÒ»ÖÂ£©
+//55ä¸Šä½æœºè®¾ç½®æŸä¸€è·¯æ³¢å½¢å¯åŠ¨åœæ­¢é€Ÿåº¦ï¼ˆå¯åŠ¨åœæ­¢é€Ÿåº¦ä¸€è‡´ï¼‰
 DLL_XMT_USB_API void XMT_COMMAND_SetWaveBeginAndStopSpeed(int usbDeviceNum,
-	                int address_ma,//µØÖ·Âë
+	                int address_ma,//åœ°å€ç 
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char channel_num, // Í¨µÀÊı 0 1 2 
-					unsigned char WaveBeginAndStopFlag // 'H'´ú±í¸ßËÙ  'L'´ú±íµÍËÙ 
+					unsigned char channel_num, // é€šé“æ•° 0 1 2 
+					unsigned char WaveBeginAndStopFlag // 'H'ä»£è¡¨é«˜é€Ÿ  'L'ä»£è¡¨ä½é€Ÿ 
 					);
 
-//56 ÉÏÎ»»úÉèÖÃÏÂÎ»»úµ¥Î»
+//56 ä¸Šä½æœºè®¾ç½®ä¸‹ä½æœºå•ä½
 DLL_XMT_USB_API void XMT_COMMAND_SetMCUMardOrUm(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char MCUMardOrUm //0 ½Ç¶È 1 Î»ÒÆ
+					unsigned char MCUMardOrUm //0 è§’åº¦ 1 ä½ç§»
 	          );
-//57 ÉÏÎ»»úÉèÖÃÏÂÎ»»úµ¥Î»
+//57 ä¸Šä½æœºè®¾ç½®ä¸‹ä½æœºå•ä½
 DLL_XMT_USB_API void XMT_COMMAND_SetMCUE09orOther(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char MCUDoFlag //0 E709 1 E517
 	          );
-//58 Éè¶¨ÏÂÎ»»úµçÑ¹Î»ÒÆÏŞÖÆ°Ù·Ö±È
+//58 è®¾å®šä¸‹ä½æœºç”µå‹ä½ç§»é™åˆ¶ç™¾åˆ†æ¯”
 DLL_XMT_USB_API void XMT_COMMAND_SetMCUVoltOrUmPP(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					float tmpData //0µ½1 µÄĞ¡Êı
+					float tmpData //0åˆ°1 çš„å°æ•°
 	          );
 			  
-// 59 60 //·ù¶ÈĞ£Õı ÒÔ¼°PIDµÄÊı×Ö×´Ì¬
+// 59 60 //å¹…åº¦æ ¡æ­£ ä»¥åŠPIDçš„æ•°å­—çŠ¶æ€
 DLL_XMT_USB_API  void  XMT_COMMAND_ReadMCU_PIDFlag(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char ChannelFlag[3]//'Y'ÓĞĞ§ 'N'±íÊ¾ÎŞĞ§  ·µ»ØÊı¾İÖµ
+					unsigned char ChannelFlag[3]//'Y'æœ‰æ•ˆ 'N'è¡¨ç¤ºæ— æ•ˆ  è¿”å›æ•°æ®å€¼
 					);
-// 61 62 ÔÚ¶àÌ¨»úÆ÷ ´®¿Ú422ÏàÁ¬½ÓÊ±ºòÊ¹ÓÃ
+// 61 62 åœ¨å¤šå°æœºå™¨ ä¸²å£422ç›¸è¿æ¥æ—¶å€™ä½¿ç”¨
 
 // 63 
-//Í¨¹ıusbÍ¨ĞÅ¶Ë¿ÚÉèÖÃÏÂÎ»»ú´®¿ÚÍ¨ĞÅ²¨ÌØÂÊ
+//é€šè¿‡usbé€šä¿¡ç«¯å£è®¾ç½®ä¸‹ä½æœºä¸²å£é€šä¿¡æ³¢ç‰¹ç‡
 DLL_XMT_USB_API void  XMT_COMMAND_SetMCUComBit(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char ComBitFlag
 					);
-/* //ÉèÖÃÏÂÎ»»ú²¨ÌØÂÊ
-  ¡®A¡¯9600 ¡®B¡¯19200  ¡®C¡¯38400 ¡®D¡¯57600    
-  ¡®E¡¯76800¡®F¡¯115200 ¡®G¡¯128000¡®H¡¯230400 
-  ¡®I¡¯256000 
+/* //è®¾ç½®ä¸‹ä½æœºæ³¢ç‰¹ç‡
+  â€˜Aâ€™9600 â€˜Bâ€™19200  â€˜Câ€™38400 â€˜Dâ€™57600    
+  â€˜Eâ€™76800â€˜Fâ€™115200 â€˜Gâ€™128000â€˜Hâ€™230400 
+  â€˜Iâ€™256000 
    //20170509
 */
 
-// 64  AVR×¨ÓÃ¿ªÆôjtag
+// 64  AVRä¸“ç”¨å¼€å¯jtag
 DLL_XMT_USB_API void  XMT_COMMAND_SetMCUJtag(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
-					unsigned char AVRFlag //[5]¿ªÆôAVR Jtag¹¦ÄÜ ¡®S¡¯
+					unsigned char AVRFlag //[5]å¼€å¯AVR JtagåŠŸèƒ½ â€˜Sâ€™
 					);
 
 
-//65 ´ÓÈÎÒâ½çÃæÌø×ªµ½²É¼¯½çÃæ
+//65 ä»ä»»æ„ç•Œé¢è·³è½¬åˆ°é‡‡é›†ç•Œé¢
 DLL_XMT_USB_API void XMT_COMMAND_LetMCUToReadData(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -438,7 +438,7 @@ DLL_XMT_USB_API void XMT_COMMAND_LetMCUToReadData(int usbDeviceNum,
 					);
 
 
-//ÏàÎ»½ÇÄ£Ê½Êä³ö 66 67 
+//ç›¸ä½è§’æ¨¡å¼è¾“å‡º 66 67 
 DLL_XMT_USB_API void XMT_COMMAND_WaveSetMultWaveXwj(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -451,18 +451,18 @@ DLL_XMT_USB_API void XMT_COMMAND_WaveSetMultWaveXwj(int usbDeviceNum,
 					double Xwjiao
 					);
 
-//[5]Í¨µÀÊı
-//[6]¡®S¡¯Æô¶¯µ±Ç°Â·²¨ĞÎ ¡®T¡¯Í£Ö¹µ±Ç°Â·²¨ĞÎ
+//[5]é€šé“æ•°
+//[6]â€˜Sâ€™å¯åŠ¨å½“å‰è·¯æ³¢å½¢ â€˜Tâ€™åœæ­¢å½“å‰è·¯æ³¢å½¢
 DLL_XMT_USB_API void XMT_COMMAND_XWJ_ChannelDoOrStop(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channel_Num,// 0 1 2 
-                    unsigned char FlagMult //¡®S¡¯Æô¶¯µ±Ç°Â·²¨ĞÎ ¡®T¡¯Í£Ö¹µ±Ç°Â·²¨ĞÎ
+                    unsigned char FlagMult //â€˜Sâ€™å¯åŠ¨å½“å‰è·¯æ³¢å½¢ â€˜Tâ€™åœæ­¢å½“å‰è·¯æ³¢å½¢
 					);
 
 
-//MultÊı¾İ 69 ¡®S¡¯ÈıÂ·Í¬²½Æô¶¯ 'T'ÈıÂ·Í¬Ê±Í£Ö¹
+//Multæ•°æ® 69 â€˜Sâ€™ä¸‰è·¯åŒæ­¥å¯åŠ¨ 'T'ä¸‰è·¯åŒæ—¶åœæ­¢
 DLL_XMT_USB_API unsigned char XMT_COMMAND_Assist_Flag(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
@@ -471,108 +471,108 @@ DLL_XMT_USB_API unsigned char XMT_COMMAND_Assist_Flag(int usbDeviceNum,
 					);
 
 
-//70 µ¥µã²½½ø´æ´¢
+//70 å•ç‚¹æ­¥è¿›å­˜å‚¨
 DLL_XMT_USB_API unsigned char XMT_COMMAND_SaveDataArrToMCU(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channle_flag,
-                    unsigned char Flag_AheadOrLeg,//0±íÊ¾Ç°48µã 1±íÊ¾ºó48µã
+                    unsigned char Flag_AheadOrLeg,//0è¡¨ç¤ºå‰48ç‚¹ 1è¡¨ç¤ºå48ç‚¹
 					float ArrData[],
-					unsigned char LongArrData,//·¢ËÍµÄÊı¾İµãÊı0µ½48,
-					float MaxData,//×î´óÊı¾İÖµ Èç¹û¿ª»· Ò»°ãÎª150»ò120
-					float MinData//×îĞ¡Êı¾İÖµ ¸ù¾İÊµ¼ÊĞèÒªÀ´×ö¾ö¶¨
+					unsigned char LongArrData,//å‘é€çš„æ•°æ®ç‚¹æ•°0åˆ°48,
+					float MaxData,//æœ€å¤§æ•°æ®å€¼ å¦‚æœå¼€ç¯ ä¸€èˆ¬ä¸º150æˆ–120
+					float MinData//æœ€å°æ•°æ®å€¼ æ ¹æ®å®é™…éœ€è¦æ¥åšå†³å®š
 					);
 
-//70_PPPP µ¥µã²½½ø´æ´¢
-//70_PPPP µ¥µã²½½ø´æ´¢
+//70_PPPP å•ç‚¹æ­¥è¿›å­˜å‚¨
+//70_PPPP å•ç‚¹æ­¥è¿›å­˜å‚¨
 DLL_XMT_USB_API unsigned char XMT_COMMAND_SaveDataArrToMCU_TEST(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					unsigned char Channle_flag,
-                    unsigned char Flag_AheadOrLeg,//0±íÊ¾Ç°48µã 1±íÊ¾ºó48µã
+                    unsigned char Flag_AheadOrLeg,//0è¡¨ç¤ºå‰48ç‚¹ 1è¡¨ç¤ºå48ç‚¹
 					float ArrData[3],
-					unsigned char LongArrData,//·¢ËÍµÄÊı¾İµãÊı0µ½48,
-					float MaxData,//×î´óÊı¾İÖµ Èç¹û¿ª»· Ò»°ãÎª150»ò120
-					float MinData,//×îĞ¡Êı¾İÖµ ¸ù¾İÊµ¼ÊĞèÒªÀ´×ö¾ö¶¨
+					unsigned char LongArrData,//å‘é€çš„æ•°æ®ç‚¹æ•°0åˆ°48,
+					float MaxData,//æœ€å¤§æ•°æ®å€¼ å¦‚æœå¼€ç¯ ä¸€èˆ¬ä¸º150æˆ–120
+					float MinData,//æœ€å°æ•°æ®å€¼ æ ¹æ®å®é™…éœ€è¦æ¥åšå†³å®š
 					unsigned char ReArr[18]
 					);
 
-//70_PPPP_WWWW µ¥µã²½½ø´æ´¢
+//70_PPPP_WWWW å•ç‚¹æ­¥è¿›å­˜å‚¨
 DLL_XMT_USB_API float XMT_COMMAND_ArrAdd(float a[3]);
-					//70_PPPP µ¥µã²½½ø´æ´¢
+					//70_PPPP å•ç‚¹æ­¥è¿›å­˜å‚¨
 
-					//70_PPPP µ¥µã²½½ø´æ´¢
+					//70_PPPP å•ç‚¹æ­¥è¿›å­˜å‚¨
 DLL_XMT_USB_API float XMT_COMMAND_SaveDataArrToMCU_TEST_AAA(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
 					float ArrData[3],
-					unsigned char LongArrData,//·¢ËÍµÄÊı¾İµãÊı0µ½48,
+					unsigned char LongArrData,//å‘é€çš„æ•°æ®ç‚¹æ•°0åˆ°48,
 					unsigned char *ReArr
 					);
 
 
 
-//71 Éè¶¨·¢ËÍÊ±¼ä
-//Éè¶¨ÏÂÎ»·¢ËÍµ¥µãµÄÊ±¼ä
+//71 è®¾å®šå‘é€æ—¶é—´
+//è®¾å®šä¸‹ä½å‘é€å•ç‚¹çš„æ—¶é—´
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCUSendDataTimer(int usbDeviceNum,
 	                unsigned char address,
 					unsigned char Command_B3,
 					unsigned char Command_B4,
                     unsigned char Channel_Num,
-					float SendDataTimer//0.1ºÁÃë-9999ºÁÃëÖ®¼ä
+					float SendDataTimer//0.1æ¯«ç§’-9999æ¯«ç§’ä¹‹é—´
 					);
 
 
-// 72 ·¢ËÍÔ¤ÏÈÉè¶¨ºÃµÄ³ÌĞò Æô¶¯/Í£Ö¹ 
+// 72 å‘é€é¢„å…ˆè®¾å®šå¥½çš„ç¨‹åº å¯åŠ¨/åœæ­¢ 
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCU_BeginSend(int usbDeviceNum,// 0 , 1 , 2 
 	                unsigned char address,
 					unsigned char Command_B3,//36
 					unsigned char Command_B4,//0
 					unsigned char Channel_Num,//0,1,2
-					unsigned char RunFlag//'S'¿ªÊ¼    'T' Í£Ö¹   'P'ÔİÍ£ 
+					unsigned char RunFlag//'S'å¼€å§‹    'T' åœæ­¢   'P'æš‚åœ 
 					);
 
 
-// 73 Éè¶¨DAÊı×Öµ÷Áã·Å´ó²ÎÊı
+// 73 è®¾å®šDAæ•°å­—è°ƒé›¶æ”¾å¤§å‚æ•°
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCU_FlagDa(int usbDeviceNum,// 0 , 1 , 2 
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								unsigned char DaFlag,//'Z' Éè¶¨Îª0µã²ÎÊı 'M'Éè¶¨×î´óÖµ²ÎÊı 
-								float FlagForDa//[7][8][9][10] ²ÎÊıÊıÖµ¸¡µãÊı
+								unsigned char DaFlag,//'Z' è®¾å®šä¸º0ç‚¹å‚æ•° 'M'è®¾å®šæœ€å¤§å€¼å‚æ•° 
+								float FlagForDa//[7][8][9][10] å‚æ•°æ•°å€¼æµ®ç‚¹æ•°
 					);
 
-// 74 Éè¶¨¿ª»úDA³õÊ¼Öµ
+// 74 è®¾å®šå¼€æœºDAåˆå§‹å€¼
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCU_FlagVolt(int usbDeviceNum,// 0 , 1 , 2 
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								float FlagForVolt//[6][7][8][9] DAÊä³öµçÑ¹°Ù·Ö±È DA³õÊ¼Öµ×î´óÖµ°Ù·Ö±ÈÎª0-1Ğ¡Êı£¬0´ú±íÊä³ö0£¬1´ú±íÊä³ö×î´óµçÑ¹Öµ
+								float FlagForVolt//[6][7][8][9] DAè¾“å‡ºç”µå‹ç™¾åˆ†æ¯” DAåˆå§‹å€¼æœ€å¤§å€¼ç™¾åˆ†æ¯”ä¸º0-1å°æ•°ï¼Œ0ä»£è¡¨è¾“å‡º0ï¼Œ1ä»£è¡¨è¾“å‡ºæœ€å¤§ç”µå‹å€¼
 					);
 
-// 75 AD²É¼¯µ÷Áãµ÷·Å´ó
+// 75 ADé‡‡é›†è°ƒé›¶è°ƒæ”¾å¤§
 DLL_XMT_USB_API void 	XMT_COMMAND_SetMCU_FlagAD(int usbDeviceNum,// 0 , 1 , 2 
 	                            unsigned char address,
 								unsigned char Command_B3,//36
 								unsigned char Command_B4,//0
 								unsigned char Channel_Num,//0,1,2
-								unsigned char FlagAD,//[6]'Z'¿ªÊ¼µ÷Áã 'M'¿ªÊ¼µ÷·Å´ó
-								unsigned char FlagCloseOrOpen //[7]'C'±Õ»· 'O'¿ª»·
+								unsigned char FlagAD,//[6]'Z'å¼€å§‹è°ƒé›¶ 'M'å¼€å§‹è°ƒæ”¾å¤§
+								unsigned char FlagCloseOrOpen //[7]'C'é—­ç¯ 'O'å¼€ç¯
 					);
 }
-void DLL_XMT_USB_API SendABC_P(int UseUsbNum,int address);//ÈÎÒâ½çÃæÌø×ªµ½²É¼¯½çÃæ
+void DLL_XMT_USB_API SendABC_P(int UseUsbNum,int address);//ä»»æ„ç•Œé¢è·³è½¬åˆ°é‡‡é›†ç•Œé¢
 
-DLL_XMT_USB_API void dis_Num100us(int tmpUs_100us);//100usµÄÕûÊı±¶ 
+DLL_XMT_USB_API void dis_Num100us(int tmpUs_100us);//100usçš„æ•´æ•°å€ 
 DLL_XMT_USB_API void ArrDataSend(int usbDeviceNum,unsigned char address,unsigned char Channel_Num,double arr[],int ArrLong,unsigned char flagOpenOrClose,int tmpUs_100us);
 DLL_XMT_USB_API void ArrDataSendAToB(int usbDeviceNum,unsigned char address,unsigned char Channel_Num,unsigned char flagOpenOrClose,double Point_A,double Point_B,int ArrLong,int tmpUs_100us);
 
 DLL_XMT_USB_API void StopAtoB(int tmpSend);
-	//·¢ËÍÊı×é ÒÔ¼°Êı×é³¤¶È flagOpenOrClose¿ª±Õ»· Éè¶¨ 'C'±íÊ¾±Õ»· 'O'±íÊ¾¿ª»·,·¢ËÍ¼ä¸ô100Î¢ÃëÕûÊı±¶
-//{¶È flagOpenOrClose¿ª±Õ»· Éè¶¨ 'C'±íÊ¾±Õ»· 'O'±íÊ¾¿ª»·,·¢ËÍ¼ä¸ô100Î¢ÃëÕûÊı±¶
+	//å‘é€æ•°ç»„ ä»¥åŠæ•°ç»„é•¿åº¦ flagOpenOrCloseå¼€é—­ç¯ è®¾å®š 'C'è¡¨ç¤ºé—­ç¯ 'O'è¡¨ç¤ºå¼€ç¯,å‘é€é—´éš”100å¾®ç§’æ•´æ•°å€
+//{åº¦ flagOpenOrCloseå¼€é—­ç¯ è®¾å®š 'C'è¡¨ç¤ºé—­ç¯ 'O'è¡¨ç¤ºå¼€ç¯,å‘é€é—´éš”100å¾®ç§’æ•´æ•°å€
 
 #endif 
