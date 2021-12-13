@@ -1,7 +1,7 @@
 #Environment Settings
 To use this program, the __Visual Studio 2010 Runtime__ has to be installed previously.
 
-Use `conda env create -n env -f .\Cache\Environment`
+Use `conda env create -n env -f .\Cache\Environment_Requirements\environment.yaml` to create environment
 
 use 
 `conda env export -n env_name > environment.yaml` and `pip freeze > requirements.txt` to export the environment of the conda and pip.
