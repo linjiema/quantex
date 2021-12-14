@@ -27,7 +27,7 @@ class ConfocalScanThread(QtCore.QThread):
 
         # Move to Goal layer
         print('move to goal layer')
-        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6])
+        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6], check=False)
 
         # Define the parameters
         x_start, x_end, x_step, y_start, y_end, y_step = self.parameters[:6]
@@ -45,7 +45,9 @@ class ConfocalScanThread(QtCore.QThread):
         forward_back_status = True
         for y_points in y_axis:
             if self.running:
-                self._hardware.mover.move_position_single(channel=2, location=y_points)  # Move to one location
+                # Move to one location
+                self._hardware.mover.move_position_single(channel=2, location=y_points, check=False)
+                time.sleep(0.05)
                 while True:
                     try:
                         # Init all counting hardware
