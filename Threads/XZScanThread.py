@@ -19,7 +19,7 @@ class XZScanThread(QtCore.QThread):
         self._hardware = hardware
         super().__init__(parent)  # Inherit the init method of parent class
         self.running = False
-        self.parameters = [0, 100, 1, 0, 50, 0.5, 0, 0]
+        self.parameters = [0, 65, 0.65, 0, 35, 0.35, 0, 0]
         # [X_Start, X_End, X_Step, Z_Start, Z_End, Z_Step, Y_Position, Line_Frequency]
 
     def run(self):
@@ -27,7 +27,7 @@ class XZScanThread(QtCore.QThread):
 
         # Move to Goal layer
         print('move to goal layer')
-        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6])
+        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6], check=False)
 
         # Define the parameters
         x_start, x_end, x_step, z_start, z_end, z_step = self.parameters[:6]
@@ -45,7 +45,9 @@ class XZScanThread(QtCore.QThread):
         forward_back_status = True
         for z_points in z_axis:
             if self.running:
-                self._hardware.mover.move_position_single(channel=4, location=z_points)  # Move to one location
+                # Move to one location
+                self._hardware.mover.move_position_single(channel=4, location=z_points, check=False)
+                time.sleep(0.05)
                 while True:
                     try:
                         # Init all counting hardware

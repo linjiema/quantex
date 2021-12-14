@@ -46,6 +46,9 @@ class mainGUI(QtWidgets.QMainWindow):
         # Load defaults
         self.load_defaults()
 
+        # Initialize hardware
+        self.hardware = None
+
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
@@ -158,7 +161,9 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.statusbar.showMessage('Initializing Hardware...')
         # Initialize...
         try:
-            self.hardware = AllHardware()
+            if self.hardware is None:
+                self.hardware = AllHardware()
+            # Connect Piezo Stage
             status = self.hardware.mover.scan_devices()
             if status == 0:
                 self.hardware.mover.open_devices()
@@ -263,7 +268,7 @@ class mainGUI(QtWidgets.QMainWindow):
         __status = self.hardware.cleanup()
         if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
-            self.hardware = None
+            # self.hardware = None
             # Set button
             self.ui.pbInitHW.setEnabled(True)
             self.ui.pbCleanupHW.setEnabled(False)
@@ -287,11 +292,11 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def set_full_range(self):
         self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('100')
-        self.ui.txtStepX.setText('1')
+        self.ui.txtEndX.setText('65')
+        self.ui.txtStepX.setText('0.65')
         self.ui.txtStartY.setText('0')
-        self.ui.txtEndY.setText('100')
-        self.ui.txtStepY.setText('1')
+        self.ui.txtEndY.setText('35')
+        self.ui.txtStepY.setText('0.35')
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -470,9 +475,9 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def go_to_mid(self):
-        self.ui.txtXcom.setText('50')
-        self.ui.txtYcom.setText('50')
-        self.ui.txtZcom.setText('25')
+        self.ui.txtXcom.setText('32.5')
+        self.ui.txtYcom.setText('32.5')
+        self.ui.txtZcom.setText('17.5')
         self.go_to()
 
     @QtCore.pyqtSlot()
