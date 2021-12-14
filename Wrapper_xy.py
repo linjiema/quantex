@@ -742,7 +742,8 @@ class mainGUI(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes,
                                                QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
-            self.cleanup_hardware()
+            if self.hardware is not None:
+                self.cleanup_hardware()
             event.accept()
         else:
             event.ignore()

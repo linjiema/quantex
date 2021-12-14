@@ -616,7 +616,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.load_defaults(location)
 
     @QtCore.pyqtSlot()
-    def save_defaults(self, f_ame='defaults.txt'):
+    def save_defaults(self, f_ame='xzdefaults.txt'):
         pair_list = []
         pair_list.append(("STARTX", self.ui.txtStartX.text()))
         pair_list.append(("STARTY", self.ui.txtStartY.text()))
@@ -742,7 +742,8 @@ class mainGUI(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes,
                                                QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
-            self.cleanup_hardware()
+            if self.hardware is not None:
+                self.cleanup_hardware()
             event.accept()
         else:
             event.ignore()
