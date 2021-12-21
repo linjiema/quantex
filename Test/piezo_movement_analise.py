@@ -14,7 +14,7 @@ hardware.mover.open_devices()
 # Move all axis to 0.0 point
 hardware.mover.clear()
 start_point = 0
-end_point = 50
+end_point = 65
 wave_forward, wave_back = hardware.mover.generating_scan_array(channel=1,
                                                                start_point=start_point,
                                                                end_point=end_point,
@@ -22,8 +22,7 @@ wave_forward, wave_back = hardware.mover.generating_scan_array(channel=1,
 
 hardware.triggered_location_sensor.init_task()
 hardware.timer.init_task()
-hardware.mover.move_position_single(channel=1, location=start_point, check=False)
-time.sleep(0.5)
+hardware.mover.move_position_single(channel=1, location=start_point)
 hardware.timer.start_timer()
 for i in range(1):
     hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)

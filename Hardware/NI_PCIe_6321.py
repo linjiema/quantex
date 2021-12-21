@@ -41,7 +41,8 @@ class TriggeredLocationSensor():
 
     def get_location_data(self):
         raw_location_data = self.get_location_raw_data()
-        location_data = np.asarray(raw_location_data) * 6.60764408 + 0.42575837  # Transform voltage data to position data
+        # Transform voltage data to position data
+        location_data = np.asarray(raw_location_data) * 6.57522502 + 0.52998101
         location_data = list(location_data)
         return location_data
 
