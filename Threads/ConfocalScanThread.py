@@ -27,7 +27,7 @@ class ConfocalScanThread(QtCore.QThread):
 
         # Move to Goal layer
         print('move to goal layer')
-        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6], check=False)
+        self._hardware.mover.move_position_single(channel=4, location=self.parameters[6])
 
         # Define the parameters
         x_start, x_end, x_step, y_start, y_end, y_step = self.parameters[:6]
@@ -46,8 +46,7 @@ class ConfocalScanThread(QtCore.QThread):
         for y_points in y_axis:
             if self.running:
                 # Move to one location
-                self._hardware.mover.move_position_single(channel=2, location=y_points, check=False)
-                time.sleep(0.05)
+                self._hardware.mover.move_position_single(channel=2, location=y_points)
                 while True:
                     try:
                         # Init all counting hardware
@@ -56,7 +55,6 @@ class ConfocalScanThread(QtCore.QThread):
                         self._hardware.timer.init_task()
 
                         # Start scanning
-                        '''
                         self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
                         self._hardware.timer.start_timer()
                         self._hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)
@@ -70,6 +68,7 @@ class ConfocalScanThread(QtCore.QThread):
                             self._hardware.mover.move_position_single(channel=1, location=wave_back[0])
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
+                        '''
                         # Processing the data
                         posArr = self._hardware.triggered_location_sensor.get_location_data()
                         ctsArr = self._hardware.triggered_counter.get_counts_array()

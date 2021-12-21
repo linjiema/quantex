@@ -37,7 +37,6 @@ class MoveThread(QtCore.QThread):
         return pos
 
     def move_to_position(self, command=None):
-        self._hardware.mover.move_position_all(location=command, check=False)
-        time.sleep(1)
+        self._hardware.mover.move_position_all(location=command)
 
 
