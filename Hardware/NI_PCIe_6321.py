@@ -61,7 +61,7 @@ class TriggeredCounter():
 
     def init_task(self):
         self.counter = nidaqmx.Task()
-        self.counter.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr0',
+        self.counter.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
                                                          name_to_assign_to_channel="",
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
@@ -147,7 +147,7 @@ class OneTimeCounter_HardwareTimer():
                                                     samps_per_chan=2)
         # Input as counter
         self.counter_in = nidaqmx.Task()
-        self.counter_in.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr0',
+        self.counter_in.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
                                                             name_to_assign_to_channel="",
                                                             edge=nidaqmx.constants.Edge.RISING,
                                                             initial_count=0,
