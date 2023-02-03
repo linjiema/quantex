@@ -550,6 +550,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
 
+        self.maxThread.step = round(float(self.ui.txtStepZ.text()), 3)
         self.maxThread.start()
 
     # Plot Group
