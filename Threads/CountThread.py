@@ -37,7 +37,7 @@ class CountThread(QtCore.QThread):
                 self._hardware.counter.arm_one_time_counter(freq=self.count_freq)
                 self.count_freq_changed = False
 
-            cts = self._hardware.counter.count_once(freq=self.count_freq)
+            cts = self._hardware.counter.one_time_counter_count_once(freq=self.count_freq)
             self.counts.emit(cts)
 
         self._hardware.counter.reset_tt()  # Clean up the hardware
