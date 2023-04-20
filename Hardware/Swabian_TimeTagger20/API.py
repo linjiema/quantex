@@ -110,6 +110,27 @@ class TimeTagger20:
         return ref, sig
 
     # One time Counter
+    def arm_one_time_counter(self, freq=1):
+        self.combined_channel = TimeTagger.Combiner(tagger=self.tagger, channels=[SPCM_1, SPCM_2])
+        self.one_time_counter = TimeTagger.Counter(tagger=self.tagger,
+                                                   channels=[self.combined_channel.getChannel()],
+                                                   binwidth=int(1e10),
+                                                   n_values=int(100 / freq))
+        # stop and clean the buffer for future measurement
+        self.one_time_counter.stop()
+        self.one_time_counter.clear()
+    def one_time_counter_count_once(self, freq=1):
+        """
+        Count once based on the given frequency.
+        :param freq: Counting frequency
+        :return counts per second
+        """
+        self.one_time_counter.startFor(int(1e12 / freq))
+        self.one_time_counter.waitUntilFinished()
+        cts = np.sum(self.one_time_counter.getData()) * freq
+        self.one_time_counter.clear()
+        return cts
+
     def count_once(self, freq=1):
         """
         Count once based on the given frequency.

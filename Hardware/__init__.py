@@ -16,9 +16,9 @@ class AllHardware():
         self.pulser = PulseGenerator(serial='00-26-32-f0-92-26')
         self.counter = TimeTagger20(serial="2208000ZCM")
         self.triggered_location_sensor = TriggeredLocationSensor()
-        self.triggered_counter = TriggeredCounter()
+        # self.triggered_counter = TriggeredCounter()
         self.timer = HardwareTimer()
-        self.one_time_counter = OneTimeCounter_HardwareTimer()
+        # self.one_time_counter = OneTimeCounter_HardwareTimer()
 
     def cleanup(self):
         try:

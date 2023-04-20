@@ -29,25 +29,16 @@ class CountThread(QtCore.QThread):
             pass
 
         self.running = True  # Label the status
-
-        self.init_counter()  # Init hardware
+        self._hardware.counter.arm_one_time_counter(freq=self.count_freq)
 
         while self.running:
             if self.count_freq_changed:
-                self._hardware.one_time_counter.change_freq(new_freq=self.count_freq)
+                self._hardware.counter.reset_tt()
+                self._hardware.counter.arm_one_time_counter(freq=self.count_freq)
                 self.count_freq_changed = False
-            cts = self.get_counts()
+
+            cts = self._hardware.counter.count_once(freq=self.count_freq)
             self.counts.emit(cts)
 
-        self.cleanup()  # Clean up the hardware
+        self._hardware.counter.reset_tt()  # Clean up the hardware
 
-    def init_counter(self):
-        self._hardware.one_time_counter.count_freq = self.count_freq
-        self._hardware.one_time_counter.init_task()
-
-    def get_counts(self):
-        __cts = self._hardware.one_time_counter.count_once()
-        return __cts
-
-    def cleanup(self):
-        self._hardware.one_time_counter.close()
