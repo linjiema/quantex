@@ -48,6 +48,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
         # Initialize hardware
         self.hardware = None
+        self.hardware_status = None
 
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
@@ -163,6 +164,9 @@ class mainGUI(QtWidgets.QMainWindow):
         try:
             if self.hardware is None:
                 self.hardware = AllHardware()
+            else:
+                # reconnect to time tagger as it has been free
+                self.hardware.counter.reconnect_tt()
             # Connect Piezo Stage
             status = self.hardware.mover.scan_devices()
             if status == 0:
@@ -190,6 +194,7 @@ class mainGUI(QtWidgets.QMainWindow):
             # Initialize Data Thread
             self.dThread = DataThread()
             self.dThread.update.connect(self.update_image)
+            self.hardware_status = 1
 
         except BaseException as e:
             print(e)
@@ -272,6 +277,7 @@ class mainGUI(QtWidgets.QMainWindow):
             # Set button
             self.ui.pbInitHW.setEnabled(True)
             self.ui.pbCleanupHW.setEnabled(False)
+            self.hardware_status = 0
         else:
             self.ui.statusbar.showMessage('Hardware Reset Failed.')
 
@@ -743,8 +749,10 @@ class mainGUI(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes,
                                                QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
-            if self.hardware is not None:
+            if self.hardware_status == 1:
                 self.cleanup_hardware()
+            else:
+                pass
             event.accept()
         else:
             event.ignore()
