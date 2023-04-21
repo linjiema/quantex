@@ -105,7 +105,7 @@ class HardwareTimer():
                                                             duty_cycle=0.5
                                                             )
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=200)
+                                                    samps_per_chan=202)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq

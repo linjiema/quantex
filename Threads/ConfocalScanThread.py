@@ -43,6 +43,7 @@ class ConfocalScanThread(QtCore.QThread):
 
         # Scanning process
         forward_back_status = True
+        self._hardware.counter.arm_triggered_counter()
         for y_points in y_axis:
             if self.running:
                 # Move to one location
@@ -51,7 +52,7 @@ class ConfocalScanThread(QtCore.QThread):
                     try:
                         # Init all counting hardware
                         self._hardware.triggered_location_sensor.init_task()
-                        self._hardware.triggered_counter.init_task()
+                        self._hardware.counter.start_triggered_counter()
                         self._hardware.timer.init_task()
 
                         # Start scanning
@@ -71,19 +72,21 @@ class ConfocalScanThread(QtCore.QThread):
                         '''
                         # Processing the data
                         posArr = self._hardware.triggered_location_sensor.get_location_data()
-                        ctsArr = self._hardware.triggered_counter.get_counts_array()
+                        ctsArr = self._hardware.counter.get_triggered_counter_counts_array()
                         self._hardware.timer.recycle_timer()
                         forward_back_status = bool(1 - forward_back_status)
                     except BaseException as e:
                         print(e, y_points)
                         self._hardware.triggered_location_sensor.close()
-                        self._hardware.trigger_counter.close()
+                        self._hardware.counter.reset_tt()
                         self._hardware.timer.close()
                         continue
                     break
 
                 self.update.emit(y_points, posArr, ctsArr)
             else:
+                self._hardware.counter.reset_tt()
                 print('Warning: Scanning is stopped!')
                 break
+        self._hardware.counter.reset_tt()
         self.running = False
