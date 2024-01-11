@@ -27,7 +27,8 @@ class PulseGenerator:
         self.device_serial = serial
         try:
             # try to connect to the device
-            self.pulser = PulseStreamer(self.get_ip())
+            # self.pulser = PulseStreamer(self.get_ip())
+            self.pulser = PulseStreamer('169.254.8.2')
         except BaseException as e:
             print(e)
         else:
