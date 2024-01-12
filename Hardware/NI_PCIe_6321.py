@@ -26,7 +26,7 @@ class TriggeredLocationSensor():
                                                              )
 
         self.location_sensor.timing.cfg_samp_clk_timing(rate=200,
-                                                        source='/Dev1/PFI15',  # need to set the terminal
+                                                        source='/Dev1/PFI13',  # need to set the terminal
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                         samps_per_chan=200)
@@ -67,7 +67,7 @@ class TriggeredCounter():
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter.timing.cfg_samp_clk_timing(rate=400,
-                                                source='/Dev1/PFI10',
+                                                source='/Dev1/PFI13',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                 samps_per_chan=200)
@@ -153,7 +153,7 @@ class OneTimeCounter_HardwareTimer():
                                                             initial_count=0,
                                                             count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
         self.counter_in.timing.cfg_samp_clk_timing(rate=self.count_freq * 3,
-                                                   source='/Dev1/PFI10',
+                                                   source='/Dev1/PFI13',
                                                    active_edge=nidaqmx.constants.Edge.RISING,
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                    samps_per_chan=2)
