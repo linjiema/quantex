@@ -9,6 +9,8 @@ import numpy as np
 
 
 class XMT:
+    PORT_NUM = 'COM3'
+
     def __init__(self):
         origin_path = os.getcwd()
         dll = os.path.dirname(__file__) + '/DLL_Ser/XMT_DLL_SER.dll'  # Give the path of dll file
