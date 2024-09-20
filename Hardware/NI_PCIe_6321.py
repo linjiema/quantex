@@ -10,6 +10,46 @@ import numpy as np
 import nidaqmx
 
 
+class GScanner():
+    def __init__(self):
+        self.wave_form_x = []
+        self.wave_form_y = []
+        self.current_x = 0.00
+        self.current_y = 0.00
+        self.sample_number = 200
+
+    def init_task_x(self):
+        self.x_scanner = nidaqmx.Task()
+        self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.x_scanner.timing.cfg_samp_clk_timing(rate=1000,
+                                                  source='/Dev1/PFI13',
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                  samps_per_chan=int(self.sample_number))
+
+        self.x_scanner.write(self.wave_form, auto_start=False, timeout=10.0)
+        self.x_scanner.start()
+
+    def stop_scan_x(self):
+        self.x_scanner.stop()
+
+    def go_to_x(self, position):
+        self.x_scanner.write(self.pos_to_volt(position), auto_start=False, timeout=10.0)
+        self.current_x = self.pos_to_volt_x(position)
+
+    def pos_to_volt_x(self, position):
+        # load a stored table to convert position to voltage
+        pass
+        return 0
+
+
+
 class TriggeredLocationSensor():
     def __init__(self):
         pass
@@ -30,7 +70,6 @@ class TriggeredLocationSensor():
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                         samps_per_chan=200)
-        self.location_sensor.start()
 
     def get_location_raw_data(self):
         self.location_sensor.wait_until_done()
