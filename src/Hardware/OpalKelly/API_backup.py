@@ -4,7 +4,7 @@ from collections import deque
 import time
 import numpy as np
 
-from Hardware.NI_PCIe_6321.API import SampleTriggerOutput, GatedCounter
+from src.hardware.NI_PCIe_6321.API import SampleTriggerOutput, GatedCounter
 
 
 class PulseGenerator():

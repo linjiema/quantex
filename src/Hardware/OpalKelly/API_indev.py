@@ -11,10 +11,7 @@ Requirement: OpalKelly Package
 from OpalKelly_pypackage.pulsegenerator import PulseGenerator500
 from collections import deque
 
-import time
 import numpy as np
-
-from Hardware.NI_PCIe_6321.API import SampleTriggerOutput, GatedCounter
 
 
 class PulseGenerator():

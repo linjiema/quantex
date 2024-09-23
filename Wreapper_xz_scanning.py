@@ -5,7 +5,7 @@ import sys
 import os.path
 import time
 import numpy
-from GUI.GUI import Ui_MainWindow
+from ui import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -14,7 +14,7 @@ from matplotlib.widgets import Cursor
 from matplotlib import cm
 from collections import deque
 
-from Threads import CountThread, MoveThread, XZScanThread, MaxThread, DataThread
+from src.threads import CountThread, MoveThread, XZScanThread, MaxThread, DataThread
 from Hardware import AllHardware
 
 
