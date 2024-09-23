@@ -5,6 +5,7 @@ import sys
 import os.path
 import time
 import numpy
+import yaml
 from ui.uipy.confocal import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -18,6 +19,7 @@ from src.threads import CountThread, MoveThread, ConfocalScanThread, MaxThread, 
 from src.hardware import AllHardware
 
 import src.utils.logger as logger
+
 
 class mainGUI(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -128,32 +130,19 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
 
     # Load default setting
-    def load_defaults(self, f_name='defaults.txt'):
-        if f_name == 'defaults.txt':
-            f = open(os.path.join(os.path.dirname(__file__), f_name), 'r')
-        else:
-            f = open(f_name, 'r')
-        d = {}
-        for line in f.readlines():
-            if line[-1] == '\n':
-                line = line[:-1]
-            [key, value] = line.split('=')
-            d[key] = value
-        f.close()
-        dic = {'STARTX': self.ui.txtStartX,
-               'STARTY': self.ui.txtStartY,
-               'ENDX': self.ui.txtEndX,
-               'ENDY': self.ui.txtEndY,
-               'STEPX': self.ui.txtStepX,
-               'STEPY': self.ui.txtStepY,
-               'ZVAL': self.ui.txtZcom,
-               'STEPZ': self.ui.txtStepZ,
-               'CURSORX': self.ui.txtXcom,
-               'CURSORY': self.ui.txtYcom,
-               'RANGE': self.ui.txtRange
-               }
-        for key, value in d.items():
-            dic.get(key).setText(value)
+    def load_defaults(self, config_path='config/config_confocal.yaml'):
+        self.config_confocal = load_config(config_path=config_path)
+        self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
+        self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
+        self.ui.txtEndX.setText(str(self.config_confocal['scan']['x']['end']))
+        self.ui.txtEndY.setText(str(self.config_confocal['scan']['y']['end']))
+        self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
+        self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
+        self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
+        self.ui.txtStepZ.setText(str(self.config_confocal['move']['step']))
+        self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
+        self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
+        self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
 
     # Methods for QT slots
     # Hardware Group
@@ -615,26 +604,24 @@ class mainGUI(QtWidgets.QMainWindow):
     def open_defaults(self):
         directory = os.path.dirname(os.path.abspath(__file__))
         location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
-        self.load_defaults(location)
+        if location != '':
+            self.load_defaults(location)
 
     @QtCore.pyqtSlot()
-    def save_defaults(self, f_ame='defaults.txt'):
-        pair_list = []
-        pair_list.append(("STARTX", self.ui.txtStartX.text()))
-        pair_list.append(("STARTY", self.ui.txtStartY.text()))
-        pair_list.append(("ENDX", self.ui.txtEndX.text()))
-        pair_list.append(("ENDY", self.ui.txtEndY.text()))
-        pair_list.append(("STEPX", self.ui.txtStepX.text()))
-        pair_list.append(("STEPY", self.ui.txtStepY.text()))
-        pair_list.append(("ZVAL", self.ui.txtZcom.text()))
-        pair_list.append(("STEPZ", self.ui.txtStepZ.text()))
-        pair_list.append(("CURSORX", self.ui.txtXcom.text()))
-        pair_list.append(("CURSORY", self.ui.txtYcom.text()))
-        pair_list.append(("RANGE", self.ui.txtRange.text()))
-        o_file = open(os.path.join(os.path.dirname(__file__), f_ame), 'w')
-        for pair in pair_list:
-            o_file.write(pair[0] + "=" + pair[1] + "\n")
-        o_file.close()
+    def save_defaults(self, config_path='config/config_confocal.yaml'):
+        self.config_confocal['scan']['x']['start'] = float(self.ui.txtStartX.text())
+        self.config_confocal['scan']['y']['start'] = float(self.ui.txtStartY.text())
+        self.config_confocal['scan']['x']['end'] = float(self.ui.txtEndX.text())
+        self.config_confocal['scan']['y']['end'] = float(self.ui.txtEndY.text())
+        self.config_confocal['scan']['x']['step'] = float(self.ui.txtStepX.text())
+        self.config_confocal['scan']['y']['step'] = float(self.ui.txtStepY.text())
+        self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
+        self.config_confocal['move']['step'] = float(self.ui.txtStepZ.text())
+        self.config_confocal['cursor']['x'] = float(self.ui.txtXcom.text())
+        self.config_confocal['cursor']['y'] = float(self.ui.txtYcom.text())
+        self.config_confocal['scan']['range'] = float(self.ui.txtRange.text())
+        save_config(config=self.config_confocal, config_path=config_path)
+
 
     # Thread methods
     # cThread
@@ -744,11 +731,23 @@ class mainGUI(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes,
                                                QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
+            self.save_defaults()
             if self.hardware is not None:
                 self.cleanup_hardware()
             event.accept()
         else:
             event.ignore()
+
+
+def load_config(config_path):
+    with open(config_path, 'r') as config_file:
+        config = yaml.safe_load(config_file)
+    return config
+
+
+def save_config(config, config_path):
+    with open(config_path, 'w') as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
 
 
 if __name__ == '__main__':
