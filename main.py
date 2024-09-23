@@ -17,6 +17,7 @@ from collections import deque
 from src.threads import CountThread, MoveThread, ConfocalScanThread, MaxThread, DataThread
 from src.hardware import AllHardware
 
+import src.utils.logger as logger
 
 class mainGUI(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
