@@ -2,14 +2,12 @@
 This file used to list all the hardware we use.
 """
 
-# from Hardware.XMT_E70D4 import XMT
-from Hardware.XMT_E70D4_Ser import XMT
+# from Hardware.XMT_E70D4.API import XMT
+from Hardware.XMT_E70D4.API_Ser import XMT
 # from Hardware.SynthUSB3 import SynthUSB3
 from Hardware.Swabian_Pulse_Streamer.API import PulseGenerator
-from Hardware.NI_PCIe_6321 import TriggeredLocationSensor
-from Hardware.NI_PCIe_6321 import TriggeredCounter
-from Hardware.NI_PCIe_6321 import HardwareTimer
-from Hardware.NI_PCIe_6321 import OneTimeCounter_HardwareTimer
+from Hardware.NI_PCIe_6321.API import TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
+    OneTimeCounter_HardwareTimer, GScanner
 
 
 class AllHardware():
