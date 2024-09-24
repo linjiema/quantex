@@ -42,9 +42,9 @@ class mainGUI(QtWidgets.QMainWindow):
         # Counts plot matplotlib widget
         fig = Figure()
         self.ui.mplPlot = FigureCanvas(fig)
-        self.ui.mplPlot.setParent(self.ui.wMpl2)
+        self.ui.mplPlot.setParent(self.ui.wMplCounts)
         self.ui.mplPlot.axes = fig.add_subplot(111)
-        self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMpl2.size()))
+        self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMplCounts.size()))
 
         # Load defaults
         self.load_defaults()
@@ -139,7 +139,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
         self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
         self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
-        self.ui.txtStepZ.setText(str(self.config_confocal['move']['step']))
+        self.ui.txtStep.setText(str(self.config_confocal['move']['step']))
         self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
         self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
         self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
@@ -220,10 +220,10 @@ class mainGUI(QtWidgets.QMainWindow):
                 str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
 
             'z+': lambda: self.ui.txtZcom.setText(
-                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStepZ.text()), 3))),
+                str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStep.text()), 3))),
 
             'z-': lambda: self.ui.txtZcom.setText(
-                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStepZ.text()), 3)))}
+                str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStep.text()), 3)))}
 
     def init_position(self):
         x = self.hardware.mover.read_position_single(channel=1)
@@ -540,7 +540,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
 
-        self.maxThread.step = round(float(self.ui.txtStepZ.text()), 3)
+        self.maxThread.step = round(float(self.ui.txtStep.text()), 3)
         self.maxThread.start()
 
     # Plot Group
@@ -616,7 +616,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.config_confocal['scan']['x']['step'] = float(self.ui.txtStepX.text())
         self.config_confocal['scan']['y']['step'] = float(self.ui.txtStepY.text())
         self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
-        self.config_confocal['move']['step'] = float(self.ui.txtStepZ.text())
+        self.config_confocal['move']['step'] = float(self.ui.txtStep.text())
         self.config_confocal['cursor']['x'] = float(self.ui.txtXcom.text())
         self.config_confocal['cursor']['y'] = float(self.ui.txtYcom.text())
         self.config_confocal['scan']['range'] = float(self.ui.txtRange.text())
