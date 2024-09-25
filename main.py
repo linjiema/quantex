@@ -61,6 +61,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCenter.clicked.connect(self.set_center_range)
         self.ui.pbStart.clicked.connect(self.scan_start)
         self.ui.pbStop.clicked.connect(self.scan_stop)
+        # Scan Group Z
+        self.ui.pbFullRangeZ.clicked.connect(self.set_full_range_ZScan)
+        self.ui.pbSelectRangeZ.clicked.connect(self.select_range_ZScan)
+        self.ui.pbCenterZ.clicked.connect(self.set_center_range_Zscan)
+        self.ui.pbStartZ.clicked.connect(self.scan_start_Z)
+        self.ui.pbStopZ.clicked.connect(self.scan_stop_Z)
+
+
         # Cursor Group
         self.ui.pbNewCursor.clicked.connect(self.new_cursor)
         self.ui.pbShowCursor.clicked.connect(self.show_cursor)
@@ -93,8 +101,6 @@ class mainGUI(QtWidgets.QMainWindow):
         # Load and Save defaults
         self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
-
-
 
     # init methods
     def init_xy_scan_plot(self):
@@ -406,12 +412,12 @@ class mainGUI(QtWidgets.QMainWindow):
         x_val = round(float(self.ui.txtXcom.text()), 1)
         y_val = round(float(self.ui.txtYcom.text()), 1)
         d = float(self.ui.txtRange.text())
-        self.ui.txtStartX.setText(str(x_val - d / 2))
-        self.ui.txtStartY.setText(str(y_val - d / 2))
-        self.ui.txtEndX.setText(str(x_val + d / 2))
-        self.ui.txtEndY.setText(str(y_val + d / 2))
-        self.ui.txtStepX.setText(str(d / 100))
-        self.ui.txtStepY.setText(str(d / 100))
+        self.ui.txtStartX.setText(str(round(x_val - d / 2, 3)))
+        self.ui.txtStartY.setText(str(round(y_val - d / 2, 3)))
+        self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
+        self.ui.txtEndY.setText(str(round(y_val + d / 2, 3)))
+        self.ui.txtStepX.setText(str(round(d / 100, 3)))
+        self.ui.txtStepY.setText(str(round(d / 100, 3)))
 
     @QtCore.pyqtSlot()
     def scan_start(self):
@@ -465,13 +471,110 @@ class mainGUI(QtWidgets.QMainWindow):
         # Stop the process
         self.sThread.running = False
 
+    @QtCore.pyqtSlot()
+    def set_full_range_ZScan(self):
+        self.ui.txtStartX.setText('0')
+        self.ui.txtEndX.setText('65')
+        self.ui.txtStepX.setText('0.65')
+        self.ui.txtStartZ.setText('0')
+        self.ui.txtEndZ.setText('30')
+        self.ui.txtStepZ.setText('0.6')
+
+    @QtCore.pyqtSlot()
+    def select_range_ZScan(self):
+        if self.cursor_ZScan:
+            self.cursor_ZScan.disconnect_events()
+            self.cursor_ZScan = None
+            self.ui.mplMapZ.draw()
+
+        self._cid = []
+        cid = self.ui.mplMapZ.mpl_connect('axes_enter_event',
+                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.CrossCursor))
+        self._cid.append(cid)
+        cid = self.ui.mplMapZ.mpl_connect('axes_leave_event',
+                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor))
+        self._cid.append(cid)
+        cid = self.ui.mplMapZ.mpl_connect('button_press_event', self.select_drag_start_Zscan)
+        self._cid.append(cid)
+
+    def select_drag_start_Zscan(self, event):
+        if event.inaxes and event.x < 330:
+            self.select_x0 = event.xdata
+            self.select_y0 = event.ydata
+            self._x0 = event.x
+            self._y0 = event.y
+            cid = self.ui.mplMapZ.mpl_connect('button_release_event', self.select_drag_end_Zscan)
+            self._cid.append(cid)
+            cid = self.ui.mplMapZ.mpl_connect('motion_notify_event', self.select_dragging_Zscan)
+            self._cid.append(cid)
+
+    def select_dragging_Zscan(self, event):
+        if event.inaxes and event.x < 330:
+            self.select_x1 = event.xdata
+            self.select_y1 = event.ydata
+
+            x1 = event.x
+            y1 = event.y
+            x0 = self._x0
+            y0 = self._y0
+            height = self.ui.mplMapZ.figure.bbox.height
+            y1 = height - y1
+            y0 = height - y0
+
+            if abs(x1 - x0) < abs(y1 - y0):
+                if (x1 - x0) * (y1 - y0) > 0:
+                    rect = [int(val) for val in (x0, y0, x1 - x0, x1 - x0)]
+                    self.select_y1 = self.select_y0 + self.select_x0 - self.select_x1
+                else:
+                    rect = [int(val) for val in (x0, y0, x1 - x0, x0 - x1)]
+                    self.select_y1 = self.select_y0 + self.select_x1 - self.select_x0
+            else:
+                if (x1 - x0) * (y1 - y0) > 0:
+                    rect = [int(val) for val in (x0, y0, y1 - y0, y1 - y0)]
+                    self.select_x1 = self.select_x0 + self.select_y0 - self.select_y1
+                else:
+                    rect = [int(val) for val in (x0, y0, y0 - y1, y1 - y0)]
+                    self.select_x1 = self.select_x0 + self.select_y1 - self.select_y0
+            self.ui.mplMapZ.drawRectangle(rect)
+
+    def select_drag_end_Zscan(self, event):
+        self.ui.txtStartX.setText(str(round(min(self.select_x0, self.select_x1), 3)))
+        self.ui.txtEndX.setText(str(round(max(self.select_x0, self.select_x1), 3)))
+        self.ui.txtStepX.setText(str(round(abs(self.select_x0 - self.select_x1) / 100, 3)))
+        self.ui.txtStartZ.setText(str(round(min(self.select_y0, self.select_y1), 3)))
+        self.ui.txtEndZ.setText(str(round(max(self.select_y0, self.select_y1), 3)))
+        self.ui.txtStepZ.setText(str(round(abs(self.select_y0 - self.select_y1) / 50, 3)))
+        self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor)
+        for cid in self._cid:
+            self.ui.mplMapZ.mpl_disconnect(cid)
+
+
+    def set_center_range_Zscan(self):
+        x_val = round(float(self.ui.txtXcom.text()), 1)
+        z_val = round(float(self.ui.txtZcom.text()), 1)
+        d = float(self.ui.txtRange.text())
+        self.ui.txtStartX.setText(str(round(x_val - d / 2, 3)))
+        self.ui.txtStartZ.setText(str(round(z_val - d / 2, 3)))
+        self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
+        self.ui.txtEndZ.setText(str(round(z_val + d / 2, 3)))
+        self.ui.txtStepX.setText(str(round(d / 100, 3)))
+        self.ui.txtStepZ.setText(str(round(d / 50, 3)))
+
+    def scan_start_Z(self):
+        pass
+    def scan_stop_Z(self):
+        pass
+
     # Cursor Group
     @QtCore.pyqtSlot()
     def new_cursor(self):
         self.hide_cursor()
         self.cursor = Cursor(self.ui.mplMap.axes, useblit=True, color='red', linewidth=1)
         self.cursor.connect_event('button_press_event', self.new_cursor_marked)
+        self.cursor_ZScan = Cursor(self.ui.mplMapZ.axes, useblit=True, color='red', linewidth=1)
+        self.cursor_ZScan.connect_event('button_press_event', self.new_cursor_marked_ZScan)
         self.ui.mplMap.draw()
+        self.ui.mplMapZ.draw()
 
     @QtCore.pyqtSlot()
     def new_cursor_marked(self, event):
@@ -485,6 +588,18 @@ class mainGUI(QtWidgets.QMainWindow):
             self.curv.set_xdata((x, x))
             self.show_cursor()
             self.cursor = None
+
+    def new_cursor_marked_ZScan(self, event):
+        if event.inaxes and event.x < 330:
+            x = round(event.xdata, 3)
+            z = round(event.ydata, 3)
+            self.ui.txtXcom.setText(str(x))
+            self.ui.txtZcom.setText(str(z))
+            self.cursor_ZScan.disconnect_events()
+            self.curh_ZScan.set_ydata((z, z))
+            self.curv_ZScan.set_xdata((x, x))
+            self.show_cursor()
+            self.cursor_ZScan = None
 
     @QtCore.pyqtSlot()
     def show_cursor(self):
@@ -505,6 +620,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.curh_ZScan.set_ydata((float(self.ui.txtZcom.text()), float(self.ui.txtZcom.text())))
         self.curv_ZScan.set_visible(True)
         self.curv_ZScan.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+        self.ui.mplMapZ.draw()
 
         self.ui.pbShowCursor.setEnabled(False)
         self.ui.pbHideCursor.setEnabled(True)
@@ -652,9 +768,31 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.modify_image()
 
+    @QtCore.pyqtSlot()
     def replot_image_ZScan(self):
-        pass
+        self.ui.mplMapZ.figure.clear()
+        self.ui.mplMapZ.axes = self.ui.mplMapZ.figure.add_subplot(111)
+        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ,
+                                                cmap=cm.get_cmap(self.mapColor),
+                                                vmin=0, vmax=self.mapZ.max(),
+                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
+                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
+                                                interpolation='nearest',
+                                                origin='lower')
+        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
 
+        self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
+        self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+        self.cbarZ = self.ui.mplMapZ.figure.colorbar(self.imageZ)
+        self.ui.mplMapZ.figure.tight_layout()
+
+        self.cursor_ZScan = None
+        self.curh_ZScan = self.ui.mplMapZ.axes.axhline(color='red', linewidth=1, visible=False)
+        self.curh_ZScan.set_ydata((float(self.ui.txtZcom.text()), float(self.ui.txtZcom.text())))
+        self.curv_ZScan = self.ui.mplMapZ.axes.axvline(color='red', linewidth=1, visible=False)
+        self.curv_ZScan.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+
+        self.modify_image_ZScan()
 
     @QtCore.pyqtSlot()
     def modify_image(self):
@@ -829,6 +967,10 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.image.set_clim(0, self.map.max())
         self.ui.mplMap.draw()
+
+    @QtCore.pyqtSlot(numpy.ndarray)
+    def update_image_ZScan(self, map_array):
+        pass
 
     # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)
