@@ -27,66 +27,20 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        # Image matplotlib widget
-        fig = Figure()
-        self.ui.mplMap = FigureCanvas(fig)
-        self.ui.mplMap.setParent(self.ui.wMpl)
-        self.ui.mplMap.axes = fig.add_subplot(111)
-        self.ui.mplMap.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMpl.size()))
-
-        # Toolbar widget for image
-        self.ui.mplToolbar = NavigationToolbar(self.ui.mplMap, self.ui.wToolbar)
-        self.ui.mplToolbar.setGeometry(QtCore.QRect(0, 0, self.ui.wToolbar.size().width(), 31))
-        self.ui.mplToolbar.setParent(self.ui.wToolbar)
-
-        # Counts plot matplotlib widget
-        fig = Figure()
-        self.ui.mplPlot = FigureCanvas(fig)
-        self.ui.mplPlot.setParent(self.ui.wMplCounts)
-        self.ui.mplPlot.axes = fig.add_subplot(111)
-        self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMplCounts.size()))
-
         # Load defaults
         self.load_defaults()
-
+        # Initialize plots
+        self.init_xy_scan_plot()
+        self.init_z_scan_plot()
+        self.init_counts_plot()
         # Initialize hardware
         self.hardware = None
-
-        # Initialize Dummy Map Data
-        xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
-        yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
-        self.map = numpy.random.randint(0, 100, size=(yNum, xNum))
-        self.map[30][40] = 100000
-
-        # Initialize Map
-        self.mapColor = 'gist_earth'
-        # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
-                                                interpolation='nearest',
-                                                origin='lower')
-        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
-        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
-        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
-        self.cbar = self.ui.mplMap.figure.colorbar(self.image)
-        self.ui.mplMap.figure.tight_layout()
-
         # Initialize Cursor Lines
         self.cursor = None
         self.curh = self.ui.mplMap.axes.axhline(color='red', linewidth=1, visible=False)
         self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
         self.curv = self.ui.mplMap.axes.axvline(color='red', linewidth=1, visible=False)
         self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
-
-        # Initialize Dummy Counts Data
-        self.countsX = deque(numpy.arange(10).tolist())
-        self.countsY = deque(numpy.zeros(10, dtype=int).tolist())
-
-        # Initialize counts plot
-        self.countPlot, = self.ui.mplPlot.axes.plot(self.countsX, self.countsY)
-        self.ui.mplPlot.axes.set_xlabel('time (s)')
-        self.ui.mplPlot.figure.subplots_adjust(top=0.95, bottom=0.3, right=0.99)
 
         # Connect to qt Slots
         # Hardware Group
@@ -129,20 +83,98 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
 
-    # Load default setting
-    def load_defaults(self, config_path='config/config_confocal.yaml'):
-        self.config_confocal = load_config(config_path=config_path)
-        self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
-        self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
-        self.ui.txtEndX.setText(str(self.config_confocal['scan']['x']['end']))
-        self.ui.txtEndY.setText(str(self.config_confocal['scan']['y']['end']))
-        self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
-        self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
-        self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
-        self.ui.txtStep.setText(str(self.config_confocal['move']['step']))
-        self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
-        self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
-        self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
+    # init methods
+    def init_xy_scan_plot(self):
+        # Image matplotlib widget
+        fig = Figure()
+        self.ui.mplMap = FigureCanvas(fig)
+        self.ui.mplMap.setParent(self.ui.wMpl)
+        self.ui.mplMap.axes = fig.add_subplot(111)
+        self.ui.mplMap.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMpl.size()))
+
+        # Toolbar widget for image
+        self.ui.mplToolbar = NavigationToolbar(self.ui.mplMap, self.ui.wToolbar)
+        self.ui.mplToolbar.setGeometry(QtCore.QRect(0, 0, self.ui.wToolbar.size().width(), 31))
+        self.ui.mplToolbar.setParent(self.ui.wToolbar)
+
+        # Initialize Dummy Map Data
+        self.init_xy_dummy_map()
+
+    def init_xy_dummy_map(self):
+        # Initialize Dummy Map Data
+        xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
+        yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
+        self.map = numpy.random.randint(0, 100, size=(yNum, xNum))
+        self.map[30][40] = 100000
+
+        # Initialize Map
+        self.mapColor = 'gist_earth'
+        # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
+        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
+                                                        float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
+                                                interpolation='nearest',
+                                                origin='lower')
+        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+        self.ui.mplMap.axes.set_ylim([float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())])
+        self.ui.mplMap.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+        self.cbar = self.ui.mplMap.figure.colorbar(self.image)
+        self.ui.mplMap.figure.tight_layout()
+
+    def init_z_scan_plot(self):
+        # Image matplotlib widget
+        fig = Figure()
+        self.ui.mplMapZ = FigureCanvas(fig)
+        self.ui.mplMapZ.setParent(self.ui.wMpl_ZScan)
+        self.ui.mplMapZ.axes = fig.add_subplot(111)
+        self.ui.mplMapZ.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMpl_ZScan.size()))
+
+        # Toolbar widget for image
+        self.ui.mplToolbarZ = NavigationToolbar(self.ui.mplMapZ, self.ui.wToolbar_ZScan)
+        self.ui.mplToolbarZ.setGeometry(QtCore.QRect(0, 0, self.ui.wToolbar_ZScan.size().width(), 31))
+        self.ui.mplToolbarZ.setParent(self.ui.wToolbar_ZScan)
+
+        # Initialize Dummy Map Data
+        self.init_z_dummy_map()
+
+    def init_z_dummy_map(self):
+        # Initialize Dummy Map Data
+        xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
+        yNum = int((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) / float(self.ui.txtStepZ.text()))
+        self.mapZ = numpy.random.randint(0, 100, size=(yNum, xNum))
+        self.mapZ[10][10] = 100000
+
+        # Initialize Map
+        self.mapColor = 'gist_earth'
+        # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
+        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.mapZ.max(),
+                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
+                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
+                                                interpolation='nearest',
+                                                origin='lower')
+        # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
+        self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
+        self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+        self.cbarZ = self.ui.mplMapZ.figure.colorbar(self.imageZ)
+        self.ui.mplMapZ.figure.tight_layout()
+
+    def init_counts_plot(self):
+        # Counts plot matplotlib widget
+        fig = Figure()
+        self.ui.mplPlot = FigureCanvas(fig)
+        self.ui.mplPlot.setParent(self.ui.wMplCounts)
+        self.ui.mplPlot.axes = fig.add_subplot(111)
+        self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMplCounts.size()))
+
+    def init_counts_dummy_data(self):
+        # Initialize Dummy Counts Data
+        self.countsX = deque(numpy.arange(10).tolist())
+        self.countsY = deque(numpy.zeros(10, dtype=int).tolist())
+
+        # Initialize counts plot
+        self.countPlot, = self.ui.mplPlot.axes.plot(self.countsX, self.countsY)
+        self.ui.mplPlot.axes.set_xlabel('time (s)')
+        self.ui.mplPlot.figure.subplots_adjust(top=0.95, bottom=0.3, right=0.99)
 
     # Methods for QT slots
     # Hardware Group
@@ -502,7 +534,6 @@ class mainGUI(QtWidgets.QMainWindow):
         return [float(self.ui.txtXcom.text()), float(self.ui.txtYcom.text()), float(self.ui.txtZcom.text())]
 
     # Move Group
-
     # Counts Group
     @QtCore.pyqtSlot()
     def count_start(self):
@@ -564,7 +595,6 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def replot_image(self):
-
         self.ui.mplMap.figure.clear()
         self.ui.mplMap.axes = self.ui.mplMap.figure.add_subplot(111)
         self.image = self.ui.mplMap.axes.imshow(self.map,
@@ -607,19 +637,48 @@ class mainGUI(QtWidgets.QMainWindow):
         if location != '':
             self.load_defaults(location)
 
+
+    def load_defaults(self, config_path='config/config_confocal.yaml'):
+        self.config_confocal = load_config(config_path=config_path)
+        self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
+        self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
+        self.ui.txtStartZ.setText(str(self.config_confocal['scan']['z']['start']))
+        self.ui.txtEndX.setText(str(self.config_confocal['scan']['x']['end']))
+        self.ui.txtEndY.setText(str(self.config_confocal['scan']['y']['end']))
+        self.ui.txtEndZ.setText(str(self.config_confocal['scan']['z']['end']))
+        self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
+        self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
+        self.ui.txtStepZ.setText(str(self.config_confocal['scan']['z']['step']))
+        self.ui.txtStep.setText(str(self.config_confocal['move']['step']))
+        self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
+        self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
+        self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
+        self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
+        if self.config_confocal['scanner'] == 'piezo':
+            self.ui.rbPiezo.setChecked(True)
+        elif self.config_confocal['scanner'] == 'galvo':
+            self.ui.rbGalvo.setChecked(True)
+
     @QtCore.pyqtSlot()
     def save_defaults(self, config_path='config/config_confocal.yaml'):
         self.config_confocal['scan']['x']['start'] = float(self.ui.txtStartX.text())
         self.config_confocal['scan']['y']['start'] = float(self.ui.txtStartY.text())
+        self.config_confocal['scan']['z']['start'] = float(self.ui.txtStartZ.text())
         self.config_confocal['scan']['x']['end'] = float(self.ui.txtEndX.text())
         self.config_confocal['scan']['y']['end'] = float(self.ui.txtEndY.text())
+        self.config_confocal['scan']['z']['end'] = float(self.ui.txtEndZ.text())
         self.config_confocal['scan']['x']['step'] = float(self.ui.txtStepX.text())
         self.config_confocal['scan']['y']['step'] = float(self.ui.txtStepY.text())
-        self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
+        self.config_confocal['scan']['z']['step'] = float(self.ui.txtStepZ.text())
         self.config_confocal['move']['step'] = float(self.ui.txtStep.text())
         self.config_confocal['cursor']['x'] = float(self.ui.txtXcom.text())
         self.config_confocal['cursor']['y'] = float(self.ui.txtYcom.text())
+        self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
         self.config_confocal['scan']['range'] = float(self.ui.txtRange.text())
+        if self.ui.rbPiezo.isChecked():
+            self.config_confocal['scanner'] = 'piezo'
+        elif self.ui.rbGalvo.isChecked():
+            self.config_confocal['scanner'] = 'galvo'
         save_config(config=self.config_confocal, config_path=config_path)
 
 

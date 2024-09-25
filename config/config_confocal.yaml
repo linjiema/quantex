@@ -7,14 +7,15 @@ move:
 scan:
   range: 2.0
   x:
-    end: 43.8
-    start: 41.8
-    step: 0.02
+    end: 65.0
+    start: 0.0
+    step: 0.65
   y:
-    end: 26.3
-    start: 24.3
-    step: 0.02
+    end: 65.0
+    start: 0.0
+    step: 0.65
   z:
     end: 30.0
     start: 0.0
-    step: 0.3
+    step: 0.6
+scanner: piezo
