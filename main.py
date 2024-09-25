@@ -15,7 +15,7 @@ from matplotlib.widgets import Cursor
 from matplotlib import cm
 from collections import deque
 
-from src.threads import CountThread, MoveThread, ConfocalScanThread, MaxThread, DataThread
+from src.threads import CountThread, MoveThread, ConfocalScanThread, XZScanThread, MaxThread, DataThread
 from src.hardware import AllHardware
 
 import src.utils.logger as logger
@@ -224,6 +224,10 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sThread = ConfocalScanThread(self.hardware)
             self.sThread.update.connect(self.scan_data_back)
             self.sThread.finished.connect(self.scan_stopped)
+            # Initialize XZ Scan Thread
+            self.sThreadZ = XZScanThread(self.hardware)
+            self.sThreadZ.update.connect(self.scan_data_back_ZScan)
+            self.sThreadZ.finished.connect(self.scan_stopped_ZScan)
             # Initialize Max Thread
             self.maxThread = MaxThread(self.hardware)
             self.maxThread.counts.connect(self.update_counts)
@@ -435,6 +439,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(False)
         self.ui.pbStart.setEnabled(False)
         self.ui.pbStop.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(1, False)
         self.ui.pbFullRange.setEnabled(False)
         self.ui.pbSelectRange.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
@@ -462,12 +467,15 @@ class mainGUI(QtWidgets.QMainWindow):
                                          float(self.ui.txtStepY.text()))
         self.dThread.raw = None
         self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image)
         self.sThread.start()
 
     @QtCore.pyqtSlot()
     def scan_stop(self):
         self.ui.statusbar.showMessage('Scan stopping...')
         self.ui.pbStop.setEnabled(False)
+        self.ui.tabScanControl.setTabEnabled(1, True)
         # Stop the process
         self.sThread.running = False
 
@@ -548,7 +556,6 @@ class mainGUI(QtWidgets.QMainWindow):
         for cid in self._cid:
             self.ui.mplMapZ.mpl_disconnect(cid)
 
-
     def set_center_range_Zscan(self):
         x_val = round(float(self.ui.txtXcom.text()), 1)
         z_val = round(float(self.ui.txtZcom.text()), 1)
@@ -561,9 +568,58 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStepZ.setText(str(round(d / 50, 3)))
 
     def scan_start_Z(self):
-        pass
+        self.ui.statusbar.showMessage('Scanning...')
+        self.ui.pbCount.setEnabled(False)
+        self.ui.pbGoTo.setEnabled(False)
+        self.ui.pbGoToMid.setEnabled(False)
+        self.ui.pbMax.setEnabled(False)
+        self.ui.pbKeepNV.setEnabled(False)
+        self.ui.pbXleft.setEnabled(False)
+        self.ui.pbXright.setEnabled(False)
+        self.ui.pbYdown.setEnabled(False)
+        self.ui.pbYup.setEnabled(False)
+        self.ui.pbZdown.setEnabled(False)
+        self.ui.pbZup.setEnabled(False)
+        self.ui.pbStartZ.setEnabled(False)
+        self.ui.pbStopZ.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(0, False)
+        self.ui.pbFullRange.setEnabled(False)
+        self.ui.pbSelectRange.setEnabled(False)
+        self.ui.pbCount.setEnabled(False)
+        self.ui.txtStartX.setEnabled(False)
+        self.ui.txtEndX.setEnabled(False)
+        self.ui.txtStepX.setEnabled(False)
+        self.ui.txtStartY.setEnabled(False)
+        self.ui.txtEndY.setEnabled(False)
+        self.ui.txtStepY.setEnabled(False)
+
+        self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
+                                   float(self.ui.txtEndX.text()),
+                                   float(self.ui.txtStepX.text()),
+                                   float(self.ui.txtStartZ.text()),
+                                   float(self.ui.txtEndZ.text()),
+                                   float(self.ui.txtStepZ.text()),
+                                   float(self.ui.txtYcom.text()),
+                                   float(self.ui.cbFreq.currentText())
+                                   )
+        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
+                                         float(self.ui.txtEndX.text()),
+                                         float(self.ui.txtStepX.text()))
+        self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
+                                         float(self.ui.txtEndZ.text()),
+                                         float(self.ui.txtStepZ.text()))
+        self.dThread.raw = None
+        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image_ZScan)
+        self.sThreadZ.start()
+
     def scan_stop_Z(self):
-        pass
+        self.ui.statusbar.showMessage('Scan stopping...')
+        self.ui.pbStopZ.setEnabled(False)
+        self.ui.tabScanControl.setTabEnabled(0, True)
+        # Stop the process
+        self.sThreadZ.running = False
 
     # Cursor Group
     @QtCore.pyqtSlot()
@@ -723,24 +779,33 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def save_data(self):
         try:
-            self.actualData = self.dThread.raw
+            self.saved_data = self.actualData_xy
         except:
             sys.stderr.write('No data to be saved!\n')
             return
+        self.save_data_uni()
 
+    @QtCore.pyqtSlot()
+    def save_data_ZScan(self):
+        try:
+            self.saved_data = self.actualData_z
+        except:
+            sys.stderr.write('No data to be saved!\n')
+            return
+        self.save_data_uni()
+
+
+    def save_data_uni(self):
         directory = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', "", "Text (*.txt)")
         directory = str(directory[0].replace('/', '\\'))
         if directory != '':
             f = open(directory, 'w')
-            for each_datapoint in self.actualData:
+            for each_datapoint in self.saved_data:
                 f.write(str(each_datapoint[0]) + '\t' + str(each_datapoint[1]) + '\t' + str(each_datapoint[2]) + '\n')
             f.close()
         else:
             sys.stderr.write('No file selected\n')
 
-    @QtCore.pyqtSlot()
-    def save_data_ZScan(self):
-        pass
 
     @QtCore.pyqtSlot()
     def replot_image(self):
@@ -937,7 +1002,9 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZdown.setEnabled(True)
         self.ui.pbZup.setEnabled(True)
         self.ui.pbStart.setEnabled(True)
+        self.ui.pbStartZ.setEnabled(True)
         self.ui.pbStop.setEnabled(False)
+        self.ui.pbStopZ.setEnabled(False)
         self.ui.pbFullRange.setEnabled(True)
         self.ui.pbSelectRange.setEnabled(True)
         self.ui.pbCount.setEnabled(True)
@@ -947,11 +1014,57 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        try:
+            self.actualData_xy = self.dThread.raw
+        except:
+            return
+
+    # sThreadZ
+    # Run when signal 'update' emit
+    @QtCore.pyqtSlot(float, list, list)
+    def scan_data_back_ZScan(self, z, posData, countsData):
+        self.dThread.y = z
+        self.dThread.xData = posData
+        self.dThread.countsData = countsData
+        self.dThread.start()
+
+    @QtCore.pyqtSlot()
+    def scan_stopped_ZScan(self):
+        self.ui.statusbar.showMessage('Scanning stopped.')
+        self.ui.pbCount.setEnabled(True)
+        self.ui.pbGoTo.setEnabled(True)
+        self.ui.pbGoToMid.setEnabled(True)
+        self.ui.pbMax.setEnabled(True)
+        self.ui.pbKeepNV.setEnabled(True)
+        self.ui.pbXleft.setEnabled(True)
+        self.ui.pbXright.setEnabled(True)
+        self.ui.pbYdown.setEnabled(True)
+        self.ui.pbYup.setEnabled(True)
+        self.ui.pbZdown.setEnabled(True)
+        self.ui.pbZup.setEnabled(True)
+        self.ui.pbStart.setEnabled(True)
+        self.ui.pbStartZ.setEnabled(True)
+        self.ui.pbStop.setEnabled(False)
+        self.ui.pbStopZ.setEnabled(False)
+        self.ui.pbFullRange.setEnabled(True)
+        self.ui.pbSelectRange.setEnabled(True)
+        self.ui.pbCount.setEnabled(True)
+        self.ui.txtStartX.setEnabled(True)
+        self.ui.txtEndX.setEnabled(True)
+        self.ui.txtStepX.setEnabled(True)
+        self.ui.txtStartY.setEnabled(True)
+        self.ui.txtEndY.setEnabled(True)
+        self.ui.txtStepY.setEnabled(True)
+        try:
+            self.actualData_z = self.dThread.raw
+        except:
+            return
 
     # dThread
     # Run when signal 'update' emit
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image(self, map_array):
+        self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
         print('updating...', time.perf_counter())
         self.map = map_array
         self.image.set_data(self.map)
@@ -970,7 +1083,22 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image_ZScan(self, map_array):
-        pass
+        self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
+        print('updating...', time.perf_counter())
+        self.mapZ = map_array
+        self.imageZ.set_data(self.mapZ)
+        self.imageZ.set_extent(
+            [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartZ.text()),
+             float(self.ui.txtEndZ.text())])
+
+        self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
+        self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+
+        self.ui.vsMax_ZScan.setValue(59)
+        self.ui.vsMin_ZScan.setValue(0)
+
+        self.imageZ.set_clim(0, self.mapZ.max())
+        self.ui.mplMapZ.draw()
 
     # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)
