@@ -42,6 +42,12 @@ class mainGUI(QtWidgets.QMainWindow):
         self.curv = self.ui.mplMap.axes.axvline(color='red', linewidth=1, visible=False)
         self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
 
+        self.cursor_ZScan = None
+        self.curh_ZScan = self.ui.mplMapZ.axes.axhline(color='red', linewidth=1, visible=False)
+        self.curh_ZScan.set_ydata((float(self.ui.txtZcom.text()), float(self.ui.txtZcom.text())))
+        self.curv_ZScan = self.ui.mplMapZ.axes.axvline(color='red', linewidth=1, visible=False)
+        self.curv_ZScan.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+
         # Connect to qt Slots
         # Hardware Group
         self.ui.pbInitHW.clicked.connect(self.init_hardware)
@@ -74,14 +80,21 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCount.clicked.connect(self.count_start)
         self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_rate)
         self.ui.pbMax.clicked.connect(self.maximize)
-        # Plot Group
+        # Plot Group XY
         self.ui.pbSaveData.clicked.connect(self.save_data)
         self.ui.pbReplot.clicked.connect(self.replot_image)
         self.ui.vsMax.sliderMoved.connect(self.modify_image)
         self.ui.vsMin.sliderMoved.connect(self.modify_image)
+        # Plot Group Z
+        self.ui.pbSaveData_ZScan.clicked.connect(self.save_data_ZScan)
+        self.ui.pbReplot_ZScan.clicked.connect(self.replot_image_ZScan)
+        self.ui.vsMax_ZScan.sliderMoved.connect(self.modify_image_ZScan)
+        self.ui.vsMin_ZScan.sliderMoved.connect(self.modify_image_ZScan)
         # Load and Save defaults
         self.ui.actionOpen_Defaults.triggered.connect(self.open_defaults)
         self.ui.actionSave_Defaults.triggered.connect(self.save_defaults)
+
+
 
     # init methods
     def init_xy_scan_plot(self):
@@ -478,20 +491,36 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.cursor:
             self.cursor.disconnect_events()
             self.cursor = None
+        if self.cursor_ZScan:
+            self.cursor_ZScan.disconnect_events()
+            self.cursor_ZScan = None
+        # show xy cursor
         self.curh.set_visible(True)
         self.curh.set_ydata((float(self.ui.txtYcom.text()), float(self.ui.txtYcom.text())))
         self.curv.set_visible(True)
         self.curv.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
         self.ui.mplMap.draw()
+        # show z cursor
+        self.curh_ZScan.set_visible(True)
+        self.curh_ZScan.set_ydata((float(self.ui.txtZcom.text()), float(self.ui.txtZcom.text())))
+        self.curv_ZScan.set_visible(True)
+        self.curv_ZScan.set_xdata((float(self.ui.txtXcom.text()), float(self.ui.txtXcom.text())))
+
         self.ui.pbShowCursor.setEnabled(False)
         self.ui.pbHideCursor.setEnabled(True)
 
     @QtCore.pyqtSlot()
     def hide_cursor(self):
         self.cur_vis = False
+        # hide xy cursor
         self.curh.set_visible(False)
         self.curv.set_visible(False)
         self.ui.mplMap.draw()
+        # hide z cursor
+        self.curh_ZScan.set_visible(False)
+        self.curv_ZScan.set_visible(False)
+        self.ui.mplMapZ.draw()
+
         self.ui.pbShowCursor.setEnabled(True)
         self.ui.pbHideCursor.setEnabled(False)
 
@@ -594,6 +623,10 @@ class mainGUI(QtWidgets.QMainWindow):
             sys.stderr.write('No file selected\n')
 
     @QtCore.pyqtSlot()
+    def save_data_ZScan(self):
+        pass
+
+    @QtCore.pyqtSlot()
     def replot_image(self):
         self.ui.mplMap.figure.clear()
         self.ui.mplMap.axes = self.ui.mplMap.figure.add_subplot(111)
@@ -619,6 +652,10 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.modify_image()
 
+    def replot_image_ZScan(self):
+        pass
+
+
     @QtCore.pyqtSlot()
     def modify_image(self):
         val_max = self.ui.vsMax.value()
@@ -628,6 +665,16 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.image.set_clim(vmin, vmax)
         self.ui.mplMap.draw()
+
+    @QtCore.pyqtSlot()
+    def modify_image_ZScan(self):
+        val_max = self.ui.vsMax_ZScan.value()
+        val_min = self.ui.vsMin_ZScan.value()
+        vmax = self.mapZ.max() * (10 ** ((val_max + 1) / 20)) / 1000
+        vmin = min(self.mapZ.mean(), vmax) * val_min / 100
+
+        self.imageZ.set_clim(vmin, vmax)
+        self.ui.mplMapZ.draw()
 
     # Load and Save defaults
     @QtCore.pyqtSlot()
