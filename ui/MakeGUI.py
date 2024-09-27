@@ -7,3 +7,5 @@ from os import path
 directory = path.dirname(path.abspath(__file__))
 subprocess.call(["pyuic5", path.join(directory, "ui_files\\confocal.ui"), ">",
                  path.join(directory, "uipy\\confocal.py")],shell=True)
+subprocess.call(["pyuic5", path.join(directory, "ui_files\\main.ui"), ">",
+                 path.join(directory, "uipy\\main.py")],shell=True)
