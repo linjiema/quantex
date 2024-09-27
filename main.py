@@ -452,35 +452,44 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(False)
         self.ui.txtEndY.setEnabled(False)
         self.ui.txtStepY.setEnabled(False)
-
-        self.sThread.parameters = (float(self.ui.txtStartX.text()),
-                                   float(self.ui.txtEndX.text()),
-                                   float(self.ui.txtStepX.text()),
-                                   float(self.ui.txtStartY.text()),
-                                   float(self.ui.txtEndY.text()),
-                                   float(self.ui.txtStepY.text()),
-                                   float(self.ui.txtZcom.text()),
-                                   float(self.ui.cbFreq.currentText())
-                                   )
-        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                         float(self.ui.txtEndX.text()),
-                                         float(self.ui.txtStepX.text()))
-        self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
-                                         float(self.ui.txtEndY.text()),
-                                         float(self.ui.txtStepY.text()))
-        self.dThread.raw = None
-        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-        self.dThread.update.disconnect()
-        self.dThread.update.connect(self.update_image)
-        self.sThread.start()
+        self.ui.rbPiezo.setEnabled(False)
+        self.ui.rbGalvo.setEnabled(False)
+        if self.ui.rbPiezo.isChecked():
+            self.sThread.parameters = (float(self.ui.txtStartX.text()),
+                                       float(self.ui.txtEndX.text()),
+                                       float(self.ui.txtStepX.text()),
+                                       float(self.ui.txtStartY.text()),
+                                       float(self.ui.txtEndY.text()),
+                                       float(self.ui.txtStepY.text()),
+                                       float(self.ui.txtZcom.text()),
+                                       float(self.ui.cbFreq.currentText())
+                                       )
+            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
+                                             float(self.ui.txtEndX.text()),
+                                             float(self.ui.txtStepX.text()))
+            self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
+                                             float(self.ui.txtEndY.text()),
+                                             float(self.ui.txtStepY.text()))
+            self.dThread.raw = None
+            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+            self.dThread.update.disconnect()
+            self.dThread.update.connect(self.update_image)
+            self.sThread.start()
+        elif self.ui.rbGalvo.isChecked():
+            pass
 
     @QtCore.pyqtSlot()
     def scan_stop(self):
         self.ui.statusbar.showMessage('Scan stopping...')
         self.ui.pbStop.setEnabled(False)
         self.ui.tabScanControl.setTabEnabled(1, True)
+        self.ui.rbPiezo.setEnabled(True)
+        self.ui.rbGalvo.setEnabled(True)
         # Stop the process
-        self.sThread.running = False
+        if self.ui.rbPiezo.isChecked():
+            self.sThread.running = False
+        elif self.ui.rbGalvo.isChecked():
+            pass
 
     @QtCore.pyqtSlot()
     def set_full_range_ZScan(self):
@@ -595,34 +604,44 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(False)
         self.ui.txtEndY.setEnabled(False)
         self.ui.txtStepY.setEnabled(False)
+        self.ui.rbPiezo.setEnabled(False)
+        self.ui.rbGalvo.setEnabled(False)
 
-        self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
-                                   float(self.ui.txtEndX.text()),
-                                   float(self.ui.txtStepX.text()),
-                                   float(self.ui.txtStartZ.text()),
-                                   float(self.ui.txtEndZ.text()),
-                                   float(self.ui.txtStepZ.text()),
-                                   float(self.ui.txtYcom.text()),
-                                   float(self.ui.cbFreq.currentText())
-                                   )
-        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                         float(self.ui.txtEndX.text()),
-                                         float(self.ui.txtStepX.text()))
-        self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
-                                         float(self.ui.txtEndZ.text()),
-                                         float(self.ui.txtStepZ.text()))
-        self.dThread.raw = None
-        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-        self.dThread.update.disconnect()
-        self.dThread.update.connect(self.update_image_ZScan)
-        self.sThreadZ.start()
+        if self.ui.rbPiezo.isChecked():
+            self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
+                                        float(self.ui.txtEndX.text()),
+                                        float(self.ui.txtStepX.text()),
+                                        float(self.ui.txtStartZ.text()),
+                                        float(self.ui.txtEndZ.text()),
+                                        float(self.ui.txtStepZ.text()),
+                                        float(self.ui.txtYcom.text()),
+                                        float(self.ui.cbFreq.currentText())
+                                        )
+            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
+                                             float(self.ui.txtEndX.text()),
+                                             float(self.ui.txtStepX.text()))
+            self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
+                                             float(self.ui.txtEndZ.text()),
+                                             float(self.ui.txtStepZ.text()))
+            self.dThread.raw = None
+            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+            self.dThread.update.disconnect()
+            self.dThread.update.connect(self.update_image_ZScan)
+            self.sThreadZ.start()
+        elif self.ui.rbGalvo.isChecked():
+            pass
 
     def scan_stop_Z(self):
         self.ui.statusbar.showMessage('Scan stopping...')
         self.ui.pbStopZ.setEnabled(False)
+        self.ui.rbPiezo.setEnabled(True)
+        self.ui.rbGalvo.setEnabled(True)
         self.ui.tabScanControl.setTabEnabled(0, True)
         # Stop the process
-        self.sThreadZ.running = False
+        if self.ui.rbPiezo.isChecked():
+            self.sThreadZ.running = False
+        elif self.ui.rbGalvo.isChecked():
+            pass
 
     # Cursor Group
     @QtCore.pyqtSlot()
