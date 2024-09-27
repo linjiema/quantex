@@ -27,8 +27,7 @@ class PulseGenerator:
         self.device_serial = serial
         try:
             # try to connect to the device
-            # self.pulser = PulseStreamer(self.get_ip())
-            self.pulser = PulseStreamer('169.254.8.2')
+            self.pulser = PulseStreamer(self.get_ip())
         except BaseException as e:
             print(e)
         else:
@@ -49,6 +48,20 @@ class PulseGenerator:
                 return each_device[0]
         raise ValueError('No Device!')
 
+    def load_rotation_gate_seq(self):
+        microwave_patten = [(200000, 0), (200000, 1)]
+        rotation_gate_ref_patten = [(20000, 0), (180000, 1), (200000, 0)]
+        rotation_gate_sig_patten = [(200000, 0), (20000, 0), (180000, 1)]
+        rotation_seq = self.pulser.createSequence()
+        rotation_seq.setDigital(COUNTER_REFERENCE, rotation_gate_ref_patten)
+        rotation_seq.setDigital(COUNTER_SIGNAL, rotation_gate_sig_patten)
+        rotation_seq.setDigital(MICROWAVE_SWITCH, microwave_patten)
+        rotation_seq.setDigital(LASER, [(8, 1)])
+        rotation_seq_upload = rotation_seq * 8
+        self.pulser.stream(seq=rotation_seq_upload, n_runs=-1)
+
+
+
     def load_seq(self, pulse_seq, repeat_time):
         """
         Load sequence into the device buffer
@@ -57,6 +70,7 @@ class PulseGenerator:
         :return: None
         """
         [ref_patten, sig_patten, laser_patten, microwave_patten, trigger_patten] = self.change_form(pulse_seq)
+        # print('patten:[ref, sig, laser, microwave, trigger]', [ref_patten, sig_patten, laser_patten, microwave_patten, trigger_patten])
         seq = self.pulser.createSequence()
         seq.setDigital(COUNTER_REFERENCE, ref_patten)
         seq.setDigital(COUNTER_SIGNAL, sig_patten)
@@ -68,11 +82,14 @@ class PulseGenerator:
         # print('Seq:', seq.getData(), 'duration:', seq.getDuration())
         # print('Seq_upload:', seq_upload.getData(), 'duration:', seq_upload.getDuration())
         # set repeat time
-        repeat = int(math.ceil(repeat_time / 8) + 1)
-        # print('Total point:', repeat_time, 'repeat_time:', repeat)
-        # set stream parameters
-        self.pulser.stream(seq=seq_upload, n_runs=repeat)
-        # self.pulser.stream(seq=seq_upload)
+        if repeat_time == -1:
+            self.pulser.stream(seq=seq_upload, n_runs=-1)
+        else:
+            repeat = int(math.ceil(repeat_time / 8) + 2)
+            # print('Total point:', repeat_time, 'repeat_time:', repeat)
+            # set stream parameters
+            self.pulser.stream(seq=seq_upload, n_runs=repeat)
+            # self.pulser.stream(seq=seq_upload)
 
     @staticmethod
     def change_form(pulse_seq):
@@ -106,6 +123,9 @@ class PulseGenerator:
                         if each_channel[j][0] > each_channel[j + 1][0]:
                             each_channel[j], each_channel[j + 1] = each_channel[j + 1], each_channel[j]
         # print('sort:', channels)
+        # find the end time of the sequence
+        end_time = channels[-1][-1][-1]
+        # print('end_time:', end_time)
         # generate patten
         patten = []
         for each_channel in channels:
@@ -122,6 +142,9 @@ class PulseGenerator:
                 # get interval between pulse
                 for i in range(len(each_channel) - 1):
                     interval.append(each_channel[i + 1][0] - each_channel[i][1])
+                # check how long is the last blank
+                last_blank = end_time - each_channel[-1][-1]
+                # print('last_pulse_end:', last_blank)
                 # add first term if the first high voltage pulse is not start form 0
                 if init_time != 0:
                     patten_each_channel.append((init_time, 0))
@@ -136,6 +159,9 @@ class PulseGenerator:
                     else:
                         patten_each_channel.append((interval[i], 0))
                         patten_each_channel.append((pulse_length[i + 1], 1))
+                # fill the last blank
+                if last_blank != 0:
+                    patten_each_channel.append((last_blank, 0))
                 patten.append(patten_each_channel)
             else:
                 patten.append([])
@@ -200,9 +226,25 @@ class PulseGenerator:
         self.pulser.constant()
 
     def test(self):
-        self.load_seq(pulse_seq=[['Sig', '710', '1010'], ['Laser', ' 500', ' 1000'], ['Ref', '1200', '1500'],
-                                 ['Trigger', '1500', '1520']], repeat_time=10000)
-        self.start_output()
+        [ref_patten, sig_patten, laser_patten, microwave_patten, trigger_patten] = [[(1853, 0), (300, 1), (50, 0)], [(1853, 0), (300, 1), (50, 0)], [(1500, 0), (500, 1), (203, 0)], [], [(2153, 0), (50, 1)]]
+        seq1 = self.pulser.createSequence()
+        seq1.setDigital(COUNTER_REFERENCE, ref_patten)
+        seq1.setDigital(COUNTER_SIGNAL, sig_patten)
+        seq1.setDigital(LASER, laser_patten)
+        seq1.setDigital(MICROWAVE_SWITCH, microwave_patten)
+        seq1.setDigital(COUNTER_TRIGGER, trigger_patten)
+        # create seq used to upload
+        seq_upload = seq1 * 8
+        # print('Seq:', seq.getData(), 'duration:', seq.getDuration())
+        # print('Seq_upload:', seq_upload.getData(), 'duration:', seq_upload.getDuration())
+        # set repeat time
+        # print('Total point:', repeat_time, 'repeat_time:', repeat)
+        # set stream parameters
+        # self.pulser.stream(seq=seq_upload)
+        seq2 = self.pulser.createSequence()
+        seq2.setDigital(7, [(10, 1), (300, 0)])
+        seq_upload2 = seq2 * 8
+        self.pulser.stream(seq=seq_upload2, n_runs=500000)
 
 
 if __name__ == '__main__':
@@ -211,10 +253,10 @@ if __name__ == '__main__':
     # time.sleep(30)
     # pulse_generator.laser_off()
     pulse_generator.test()
-    time.sleep(2)
-    pulse_generator.test()
+    pulse_generator.start_output()
     time.sleep(2)
     pulse_generator.stop_output()
+
 
     # pulse_generator.reset_pulse_generator()
     # pulse_generator = PulseGenerator(serial='00-26-32-f0-92-20')
