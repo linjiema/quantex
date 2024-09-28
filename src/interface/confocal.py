@@ -6,7 +6,7 @@ import os.path
 import time
 import numpy
 import yaml
-from ui.uipy.confocal import Ui_MainWindow
+from ui.uipy.confocal import Ui_Confocal
 from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -16,15 +16,15 @@ from matplotlib import cm
 from collections import deque
 
 from src.threads.confocal_threads import CountThread, MoveThread, ConfocalScanThread, XZScanThread, MaxThread, DataThread
-from src.hardware import AllHardware
 
 import src.utils.logger as logger
 
 
 class mainGUI(QtWidgets.QMainWindow):
+    SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_Confocal()
         self.ui.setupUi(self)
 
         # Load defaults
@@ -202,15 +202,16 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.statusbar.showMessage('Initializing Hardware...')
         # Initialize...
         try:
-            if self.hardware is None:
-                self.hardware = AllHardware()
-            # Connect Piezo Stage
-            status = self.hardware.mover.scan_devices()
-            if status == 0:
-                self.hardware.mover.open_devices()
-                self.init_position()
-            else:
-                print('Warning: Piezo stage hasn\'t been connected!')
+            # if self.hardware is None:
+            #     self.hardware = AllHardware()
+            # # Connect Piezo Stage
+            # status = self.hardware.mover.scan_devices()
+            # if status == 0:
+            #     self.hardware.mover.open_devices()
+            #     self.init_position()
+            # else:
+            #     print('Warning: Piezo stage hasn\'t been connected!')
+            self.hardware.init_all_device()
 
             # Initialize thread (Need to initialize hardware first!!)
             # Initialize Count Thread
@@ -914,7 +915,9 @@ class mainGUI(QtWidgets.QMainWindow):
 
 
     def load_defaults(self, config_path='config/config_confocal.yaml'):
-        self.config_confocal = load_config(config_path=config_path)
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
+        self.config_confocal = load_config(config_path=CONFIG_file)
         self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
         self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
         self.ui.txtStartZ.setText(str(self.config_confocal['scan']['z']['start']))
@@ -954,7 +957,9 @@ class mainGUI(QtWidgets.QMainWindow):
             self.config_confocal['scanner'] = 'piezo'
         elif self.ui.rbGalvo.isChecked():
             self.config_confocal['scanner'] = 'galvo'
-        save_config(config=self.config_confocal, config_path=config_path)
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
+        save_config(config=self.config_confocal, config_path=CONFIG_file)
 
 
     # Thread methods
@@ -1128,13 +1133,19 @@ class mainGUI(QtWidgets.QMainWindow):
     # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
-        quit_msg = "Are you sure you want to exit the program?"
-        reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Yes,
-                                               QtWidgets.QMessageBox.No)
-        if reply == QtWidgets.QMessageBox.Yes:
+        quit_msg = "Save parameters as Defaults?"
+        reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg, QtWidgets.QMessageBox.Save |
+                                               QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+        if reply == QtWidgets.QMessageBox.Save:
             self.save_defaults()
             if self.hardware is not None:
                 self.cleanup_hardware()
+            self.ExpConfocalClose.emit()
+            event.accept()
+        elif reply == QtWidgets.QMessageBox.Discard:
+            if self.hardware is not None:
+                self.cleanup_hardware()
+            self.ExpConfocalClose.emit()
             event.accept()
         else:
             event.ignore()

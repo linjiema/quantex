@@ -12,6 +12,7 @@ import nidaqmx
 
 class GScanner():
     def __init__(self):
+        connection_check()
         self.wave_form_x = []
         self.wave_form_y = []
         self.current_x = 0.00
@@ -49,10 +50,9 @@ class GScanner():
         return 0
 
 
-
 class TriggeredLocationSensor():
     def __init__(self):
-        pass
+        connection_check()
 
     def init_task(self):
         self.location_sensor = nidaqmx.Task()
@@ -96,7 +96,7 @@ class TriggeredCounter():
     """
 
     def __init__(self):
-        pass
+        connection_check()
 
     def init_task(self):
         self.counter = nidaqmx.Task()
@@ -131,6 +131,7 @@ class TriggeredCounter():
 
 class HardwareTimer():
     def __init__(self):
+        connection_check()
         self.count_freq = 200
 
     def init_task(self):
@@ -169,6 +170,7 @@ class OneTimeCounter_HardwareTimer():
     """
 
     def __init__(self):
+        connection_check()
         self.count_freq = 1
 
     def init_task(self):
@@ -219,6 +221,19 @@ class OneTimeCounter_HardwareTimer():
     def close(self):
         self.counter_in.close()
         self.counter_out.close()
+
+
+def connection_check():
+    local_system = nidaqmx.system.System.local()
+    status = 0
+    try:
+        for each_device in local_system.devices:
+            if each_device == 'Dev1':
+                status = 1
+        if status == 0:
+            raise ValueError('Check NI Device Index!')
+    except BaseException:
+        raise ValueError('No NI DAQ Device Found!')
 
 
 if __name__ == '__main__':

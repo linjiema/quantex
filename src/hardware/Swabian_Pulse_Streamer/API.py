@@ -29,7 +29,7 @@ class PulseGenerator:
             # try to connect to the device
             self.pulser = PulseStreamer(self.get_ip())
         except BaseException as e:
-            print(e)
+            raise
         else:
             # set trigger
             self.pulser.setTrigger(start=TriggerStart.SOFTWARE)
@@ -46,7 +46,7 @@ class PulseGenerator:
         for each_device in re.findall('([-.0-9]+)\s+([-0-9a-f]{17})\s+(\w+)', arp_table):
             if each_device[1] == self.device_serial:
                 return each_device[0]
-        raise ValueError('No Device!')
+        raise ValueError('PulseGenerator hasn\'t been connected!')
 
     def load_rotation_gate_seq(self):
         microwave_patten = [(200000, 0), (200000, 1)]

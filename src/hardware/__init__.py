@@ -2,6 +2,7 @@
 This file used to list all the hardware we use.
 """
 import src.utils.logger as logger
+from PyQt5 import QtCore
 # from src.hardware.XMT_E70D4.API import XMT
 from src.hardware.XMT_E70D4.API_Ser import XMT
 # from src.hardware.SynthUSB3 import SynthUSB3
@@ -36,6 +37,7 @@ class AllHardware():
 
 
 class device_manager():
+    SIGNAL_DeviceStatusUpdate = QtCore.pyqtSignal(str, bool, name='DeviceStatusUpdate')
     """
 
     """
@@ -63,6 +65,14 @@ class device_manager():
         self.init_triggered_location_sensor()
         self.init_timer()
         self.init_one_time_counter()
+        print(self.mover_status, self.scanner_status,self.pulser_status, self.counter_status,self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
+        print('Mover:', self.mover, '\n',
+              'scanner:', self.scanner,  '\n',
+              'pulser:', self.pulser,  '\n',
+              'counter:', self.counter, '\n',
+              'triggered_location_sensor:', self.triggered_location_sensor,  '\n',
+              'timer:', self.timer,  '\n',
+              'one_time_counter:', self.one_time_counter)
 
     def cleanup(self):
         self.reset_mover()
@@ -76,10 +86,16 @@ class device_manager():
     def init_mover(self):
         try:
             self.mover = XMT()
+            if self.mover.scan_devices() == 0:
+                self.mover.open_devices()
+            else:
+                raise ValueError('Piezo stage hasn\'t been connected!')
         except BaseException as e:
+            self.mover = None
             logger.logger.warning(f"Warning: Mover init failed! {e}")
         else:
             self.mover_status = 1
+            self.DeviceStatusUpdate.emit('mover', self.mover_status)
 
     def reset_mover(self):
         if self.mover_status:
@@ -90,6 +106,7 @@ class device_manager():
             else:
                 self.mover = None
                 self.mover_status = 0
+                self.DeviceStatusUpdate.emit('mover', self.mover_status)
 
     def init_scanner(self):
         try:
@@ -99,6 +116,7 @@ class device_manager():
             logger.logger.warning(f"Warning: Scanner init failed! {e}")
         else:
             self.scanner_status = 1
+            self.DeviceStatusUpdate.emit('scanner', self.scanner_status)
 
     def reset_scanner(self):
         if self.scanner_status:
@@ -110,6 +128,7 @@ class device_manager():
             else:
                 self.scanner = None
                 self.scanner_status = 0
+                self.DeviceStatusUpdate.emit('scanner', self.scanner_status)
 
     def init_pulser(self, serial='00-26-32-f0-92-26'):
         try:
@@ -118,6 +137,7 @@ class device_manager():
             logger.logger.warning(f"Warning: Pulser init failed! {e}")
         else:
             self.pulser_status = 1
+            self.DeviceStatusUpdate.emit('pulser', self.pulser_status)
 
     def reset_pulser(self):
         if self.pulser_status:
@@ -128,6 +148,7 @@ class device_manager():
             else:
                 self.pulser = None
                 self.pulser_status = 0
+                self.DeviceStatusUpdate.emit('pulser', self.pulser_status)
 
 
     def init_counter(self, serial="2208000ZCM"):
@@ -137,6 +158,7 @@ class device_manager():
             logger.logger.warning(f"Warning: Counter init failed! {e}")
         else:
             self.counter_status = 1
+            self.DeviceStatusUpdate.emit('counter', self.counter_status)
 
     def reset_counter(self):
         if self.counter_status:
@@ -147,10 +169,12 @@ class device_manager():
             else:
                 self.counter = None
                 self.counter_status = 0
+                self.DeviceStatusUpdate.emit('counter', self.counter_status)
 
     def init_triggered_location_sensor(self):
         try:
             self.triggered_location_sensor = TriggeredLocationSensor()
+            self.triggered_location_sensor.connection_check()
         except BaseException as e:
             logger.logger.warning(f"Warning: Triggered location sensor init failed! {e}")
         else:
