@@ -9,7 +9,7 @@ from ui.uipy.mainWindow import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
 
 from src.interface.confocal import mainGUI as confocal_interface
-from src.hardware import device_manager
+from src.hardware import DeviceManager
 import src.utils.logger as logger
 
 
@@ -18,7 +18,7 @@ class mainGUI(QtWidgets.QMainWindow):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.hardware = device_manager()
+        self.hardware = DeviceManager()
         self.connect_pb_all()
         self.confocal_interface = None
 

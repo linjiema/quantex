@@ -232,8 +232,8 @@ def connection_check():
                 status = 1
         if status == 0:
             raise ValueError('Check NI Device Index!')
-    except BaseException:
-        raise ValueError('No NI DAQ Device Found!')
+    except BaseException as e:
+        raise e
 
 
 if __name__ == '__main__':

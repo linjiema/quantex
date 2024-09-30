@@ -314,7 +314,16 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZdown.setEnabled(False)
         self.ui.pbZup.setEnabled(False)
 
-        __status = self.hardware.cleanup()
+        self.hardware.reset_mover()
+        self.hardware.reset_scanner()
+        self.hardware.reset_pulser()
+        self.hardware.reset_counter()
+        self.hardware.reset_triggered_location_sensor()
+        self.hardware.reset_timer()
+        self.hardware.reset_one_time_counter()
+        __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
+                       self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
+                       self.hardware.timer_status, self.hardware.one_time_counter_status)
         if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
             # self.hardware = None
@@ -1138,13 +1147,9 @@ class mainGUI(QtWidgets.QMainWindow):
                                                QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
         if reply == QtWidgets.QMessageBox.Save:
             self.save_defaults()
-            if self.hardware is not None:
-                self.cleanup_hardware()
             self.ExpConfocalClose.emit()
             event.accept()
         elif reply == QtWidgets.QMessageBox.Discard:
-            if self.hardware is not None:
-                self.cleanup_hardware()
             self.ExpConfocalClose.emit()
             event.accept()
         else:

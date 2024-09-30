@@ -29,7 +29,7 @@ class PulseGenerator:
             # try to connect to the device
             self.pulser = PulseStreamer(self.get_ip())
         except BaseException as e:
-            raise
+            raise e
         else:
             # set trigger
             self.pulser.setTrigger(start=TriggerStart.SOFTWARE)

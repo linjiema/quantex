@@ -11,7 +11,7 @@ from src.hardware.Swabian_TimeTagger20.API import TimeTagger20
 from src.hardware.NI_PCIe_6321.API import TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
     OneTimeCounter_HardwareTimer
 
-
+'''
 class AllHardware():
     def __init__(self):
         self.mover = XMT()
@@ -34,14 +34,17 @@ class AllHardware():
             return e
         else:
             return 0
+'''
 
 
-class device_manager():
+class DeviceManager(QtCore.QObject):
     SIGNAL_DeviceStatusUpdate = QtCore.pyqtSignal(str, bool, name='DeviceStatusUpdate')
     """
 
     """
-    def __init__(self):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.mover = None
         self.mover_status = 0
         self.scanner = None
@@ -65,13 +68,14 @@ class device_manager():
         self.init_triggered_location_sensor()
         self.init_timer()
         self.init_one_time_counter()
-        print(self.mover_status, self.scanner_status,self.pulser_status, self.counter_status,self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
+        print(self.mover_status, self.scanner_status, self.pulser_status, self.counter_status,
+              self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
         print('Mover:', self.mover, '\n',
-              'scanner:', self.scanner,  '\n',
-              'pulser:', self.pulser,  '\n',
+              'scanner:', self.scanner, '\n',
+              'pulser:', self.pulser, '\n',
               'counter:', self.counter, '\n',
-              'triggered_location_sensor:', self.triggered_location_sensor,  '\n',
-              'timer:', self.timer,  '\n',
+              'triggered_location_sensor:', self.triggered_location_sensor, '\n',
+              'timer:', self.timer, '\n',
               'one_time_counter:', self.one_time_counter)
 
     def cleanup(self):
@@ -150,7 +154,6 @@ class device_manager():
                 self.pulser_status = 0
                 self.DeviceStatusUpdate.emit('pulser', self.pulser_status)
 
-
     def init_counter(self, serial="2208000ZCM"):
         try:
             self.counter = TimeTagger20(serial=serial)
@@ -174,7 +177,6 @@ class device_manager():
     def init_triggered_location_sensor(self):
         try:
             self.triggered_location_sensor = TriggeredLocationSensor()
-            self.triggered_location_sensor.connection_check()
         except BaseException as e:
             logger.logger.warning(f"Warning: Triggered location sensor init failed! {e}")
         else:
@@ -225,9 +227,3 @@ class device_manager():
             else:
                 self.one_time_counter = None
                 self.one_time_counter_status = 0
-
-
-
-
-
-
