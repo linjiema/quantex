@@ -69,6 +69,7 @@ class ConfocalScanThread(QtCore.QThread):
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
                         '''
+                        print(y_points)
                         # Processing the data
                         posArr = self._hardware.triggered_location_sensor.get_location_data()
                         ctsArr = self._hardware.triggered_counter.get_counts_array()
@@ -77,9 +78,9 @@ class ConfocalScanThread(QtCore.QThread):
                     except BaseException as e:
                         print(e, y_points)
                         self._hardware.triggered_location_sensor.close()
-                        self._hardware.trigger_counter.close()
+                        self._hardware.triggered_counter.close()
                         self._hardware.timer.close()
-                        continue
+                        return
                     break
 
                 self.update.emit(y_points, posArr, ctsArr)
