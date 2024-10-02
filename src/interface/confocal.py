@@ -8,6 +8,7 @@ import numpy
 import yaml
 from ui.uipy.confocal import Ui_Confocal
 from PyQt5 import QtWidgets, QtCore
+import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -129,7 +130,7 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
                                                 interpolation='nearest',
@@ -166,7 +167,7 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=cm.get_cmap(self.mapColor), vmin=0, vmax=self.mapZ.max(),
+        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.mapZ.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
                                                 interpolation='nearest',
