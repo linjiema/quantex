@@ -71,6 +71,7 @@ class DeviceManager(QtCore.QObject):
         self.init_triggered_location_sensor()
         self.init_timer()
         self.init_one_time_counter()
+        '''
         print(self.mover_status, self.scanner_status, self.pulser_status, self.counter_status, self.triggered_counter_status,
               self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
         print('Mover:', self.mover, '\n',
@@ -81,6 +82,7 @@ class DeviceManager(QtCore.QObject):
               'triggered_location_sensor:', self.triggered_location_sensor, '\n',
               'timer:', self.timer, '\n',
               'one_time_counter:', self.one_time_counter)
+        '''
 
     def cleanup(self):
         self.reset_mover()

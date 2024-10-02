@@ -326,9 +326,9 @@ class mainGUI(QtWidgets.QMainWindow):
         __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
                        self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
                        self.hardware.timer_status, self.hardware.one_time_counter_status)
-        print(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
-                       self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
-                       self.hardware.timer_status, self.hardware.one_time_counter_status)
+        # print(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
+        #                self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
+        #                self.hardware.timer_status, self.hardware.one_time_counter_status)
         if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
             # self.hardware = None

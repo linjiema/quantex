@@ -73,6 +73,7 @@ class TriggeredLocationSensor():
                                                         active_edge=nidaqmx.constants.Edge.RISING,
                                                         sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                         samps_per_chan=200)
+        self.location_sensor.start()
 
     def get_location_raw_data(self):
         self.location_sensor.wait_until_done()
@@ -155,7 +156,7 @@ class HardwareTimer():
                                                             duty_cycle=0.5
                                                             )
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=210)
+                                                    samps_per_chan=200)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
@@ -253,16 +254,16 @@ def connection_check():
 
 
 if __name__ == '__main__':
-    counter = OneTimeCounter_HardwareTimer()
-    print('tey to close before init')
-    counter.close()
-    time.sleep(1)
-    print('close normally')
-    counter.init_task()
-    time.sleep(1)
-    counter.close()
-    time.sleep(1)
-    print('close multytime')
-    counter.close()
+    location = TriggeredLocationSensor()
+    sensor = TriggeredCounter()
+
+    timer = HardwareTimer()
+    sensor.init_task()
+    location.init_task()
+    timer.init_task()
+    timer.start_timer()
+    print(sensor.get_counts_array())
+    print(location.get_location_raw_data())
+    timer.close()
 
 
