@@ -212,6 +212,11 @@ class mainGUI(QtWidgets.QMainWindow):
             # else:
             #     print('Warning: Piezo stage hasn\'t been connected!')
             self.hardware.init_all_device()
+            self.hardware.init_mover()
+            self.hardware.init_scanner()
+            self.hardware.init_pulser()
+            self.hardware.init_counter()
+            self.hardware.init_ni()
             if self.hardware.mover_status:
                 self.init_position()
 
@@ -320,9 +325,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.hardware.reset_scanner()
         self.hardware.reset_pulser()
         self.hardware.reset_counter()
-        self.hardware.reset_triggered_location_sensor()
-        self.hardware.reset_timer()
-        self.hardware.reset_one_time_counter()
+        self.hardware.reset_ni()
         __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
                        self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
                        self.hardware.timer_status, self.hardware.one_time_counter_status)

@@ -67,10 +67,7 @@ class DeviceManager(QtCore.QObject):
         self.init_scanner()
         self.init_pulser(serial=pulser_serial)
         self.init_counter(serial=counter_serial)
-        self.init_triggered_counter()
-        self.init_triggered_location_sensor()
-        self.init_timer()
-        self.init_one_time_counter()
+        self.init_ni()
         '''
         print(self.mover_status, self.scanner_status, self.pulser_status, self.counter_status, self.triggered_counter_status,
               self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
@@ -89,10 +86,7 @@ class DeviceManager(QtCore.QObject):
         self.reset_scanner()
         self.reset_pulser()
         self.reset_counter()
-        self.reset_triggered_counter()
-        self.reset_triggered_location_sensor()
-        self.reset_timer()
-        self.reset_one_time_counter()
+        self.reset_ni()
 
     def init_mover(self):
         if not self.mover_status:
@@ -260,3 +254,22 @@ class DeviceManager(QtCore.QObject):
             else:
                 self.one_time_counter = None
                 self.one_time_counter_status = 0
+
+    def init_ni(self):
+        self.init_triggered_counter()
+        self.init_triggered_location_sensor()
+        self.init_timer()
+        self.init_one_time_counter()
+        if self.triggered_counter_status and self.triggered_location_sensor_status and \
+                self.timer_status and self.one_time_counter_status:
+            self.DeviceStatusUpdate.emit('NIDAQ', True)
+
+    def reset_ni(self):
+        self.reset_triggered_counter()
+        self.reset_triggered_location_sensor()
+        self.reset_timer()
+        self.reset_one_time_counter()
+        if not self.triggered_counter_status and not self.triggered_location_sensor_status and \
+                not self.timer_status and not self.one_time_counter_status:
+            self.DeviceStatusUpdate.emit('NIDAQ', False)
+

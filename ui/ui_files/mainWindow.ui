@@ -102,7 +102,7 @@
      <x>0</x>
      <y>0</y>
      <width>742</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -438,7 +438,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QRadioButton" name="rbRotaotrConnect">
+         <widget class="QRadioButton" name="rbRotatorConnect">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -662,7 +662,7 @@
        <item>
         <widget class="QPushButton" name="pbResetAll">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Reset All Device</string>

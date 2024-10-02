@@ -150,7 +150,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.confocal_interface = None
 
     @QtCore.pyqtSlot(QtCore.QEvent)
-    def changeEvent(self, event):
+    def closeEvent(self, event):
         quit_message = 'Do you want to quit?'
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_message, QtWidgets.QMessageBox.Yes |
                                                QtWidgets.QMessageBox.Cancel)
