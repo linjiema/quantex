@@ -220,10 +220,10 @@ class GScanner():
         self.current_x = 0.00
         self.current_y = 0.00
         self.sample_number = 200
+        self.timing_rate = 1000
 
-    def init_task_x(self):
+    def init_scanner(self):
         self.x_scanner = nidaqmx.Task()
-        self.is_closed = False
         self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
                                                        name_to_assign_to_channel="",
                                                        min_val=-5.0,
@@ -231,34 +231,78 @@ class GScanner():
                                                        units=nidaqmx.constants.VoltageUnits.VOLTS,
                                                        custom_scale_name=""
                                                        )
-        self.x_scanner.timing.cfg_samp_clk_timing(rate=1000,
+        self.y_scanner = nidaqmx.Task()
+        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.is_closed = False
+
+    def go_to_x(self, position):
+        self.x_scanner.stop()
+        self.x_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
+                                                  source="",
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.HW_TIMED_SINGLE_POINT)
+        self.x_scanner.write(self.pos_to_volt_x(position), auto_start=True, timeout=10.0)
+        self.current_x = self.pos_to_volt_x(position)
+
+    def go_to_y(self, position):
+        self.y_scanner.stop()
+        self.y_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
+                                                  source="",
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.HW_TIMED_SINGLE_POINT)
+        self.y_scanner.write(self.pos_to_volt_y(position), auto_start=True, timeout=10.0)
+        self.current_y = self.pos_to_volt_y(position)
+
+    def set_x_scan_param(self):
+        self.x_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
                                                   source='/Dev1/PFI13',
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                   samps_per_chan=int(self.sample_number))
+        self.x_scanner.write(self.wave_form_x, auto_start=False)
 
-        x_writer = nidaqmx.stream_writers.AnalogSingleChannelWriter(self.x_scanner.out_stream, auto_start=False)
-        x_writer.write_many_sample(np.ndarray(self.wave_form_x))
+    def set_y_scan_param(self):
+        self.y_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
+                                                  source='/Dev1/PFI13',
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                  samps_per_chan=int(self.sample_number))
+        self.y_scanner.write(self.wave_form_y, auto_start=False)
 
     def start_scan_x(self):
         self.x_scanner.start()
 
     def wait_x_scan_finished(self):
-        self.
+        self.x_scanner.wait_until_done()
+        self.x_scanner.stop()
 
     def stop_scan_x(self):
         self.x_scanner.stop()
 
-    def go_to_x(self, position):
-        self.x_scanner.write(self.pos_to_volt(position), auto_start=False, timeout=10.0)
-        self.current_x = self.pos_to_volt_x(position)
+    def start_scan_y(self):
+        self.y_scanner.start()
+
+    def wait_y_scan_finished(self):
+        self.y_scanner.wait_until_done()
+
+    def stop_scan_y(self):
+        self.y_scanner.stop()
 
     def pos_to_volt_x(self, position):
         # load a stored table to convert position to voltage
         pass
-        return 0
+        return position
 
-
+    def pos_to_volt_y(self, position):
+        # load a stored table to convert position to voltage
+        pass
+        return position
 
 
 if __name__ == '__main__':
@@ -273,5 +317,3 @@ if __name__ == '__main__':
     print(sensor.get_counts_array())
     print(location.get_location_raw_data())
     timer.close()
-
-
