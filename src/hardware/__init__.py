@@ -8,7 +8,7 @@ from src.hardware.XMT_E70D4.API_Ser import XMT
 # from src.hardware.SynthUSB3 import SynthUSB3
 from src.hardware.Swabian_Pulse_Streamer.API import PulseGenerator
 from src.hardware.Swabian_TimeTagger20.API import TimeTagger20
-from src.hardware.NI_PCIe_6321.API import TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
+from src.hardware.NI_PCIe_6321.API import GScanner, TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
     OneTimeCounter_HardwareTimer
 
 '''
@@ -117,7 +117,7 @@ class DeviceManager(QtCore.QObject):
     def init_scanner(self):
         if not self.scanner_status:
             try:
-                # self.scanner =
+                self.scanner = GScanner()
                 pass
             except BaseException as e:
                 logger.logger.warning(f"Warning: Scanner init failed! {e}")
@@ -128,7 +128,7 @@ class DeviceManager(QtCore.QObject):
     def reset_scanner(self):
         if self.scanner_status:
             try:
-                # self.scanner =
+                self.scanner.close()
                 pass
             except BaseException as e:
                 logger.logger.warning(f"Warning: Scanner reset failed! {e}")

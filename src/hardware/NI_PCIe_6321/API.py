@@ -231,6 +231,7 @@ class GScanner():
                                                        units=nidaqmx.constants.VoltageUnits.VOLTS,
                                                        custom_scale_name=""
                                                        )
+        self.is_closed_x = False
         self.y_scanner = nidaqmx.Task()
         self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
                                                        name_to_assign_to_channel="",
@@ -239,7 +240,7 @@ class GScanner():
                                                        units=nidaqmx.constants.VoltageUnits.VOLTS,
                                                        custom_scale_name=""
                                                        )
-        self.is_closed = False
+        self.is_closed_y = False
 
     def go_to_x(self, position):
         self.x_scanner.stop()
@@ -303,6 +304,16 @@ class GScanner():
         # load a stored table to convert position to voltage
         pass
         return position
+
+    def close(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+            self.is_closed_x = True
+        if hasattr(self, 'y_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+            self.is_closed_y = True
+
+
 
 
 if __name__ == '__main__':

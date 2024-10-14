@@ -72,8 +72,6 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.rbRotatorConnect.setChecked(status), self.ui.rbRotatorDisconnect.setChecked(not status)
             self.ui.pbRotatorInit.setEnabled(not status), self.ui.pbRotatorReset.setEnabled
 
-
-
     def init_piezo_stage(self):
         self.hardware.init_mover()
 
