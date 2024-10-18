@@ -16,13 +16,15 @@ from matplotlib.widgets import Cursor
 from matplotlib import cm
 from collections import deque
 
-from src.threads.confocal_threads import CountThread, MoveThread, ConfocalScanThread, XZScanThread, MaxThread, DataThread
+from src.threads.confocal_threads import DataThread, MoveThread, MoveThread_galvo, ConfocalScanThread, \
+    ConfocalScanThread_galvo, CountThread, MaxThread, MaxThread_galvo, XZScanThread, XZScanThread_galvo
 
 import src.utils.logger as logger
 
 
 class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
+
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Confocal()
@@ -34,6 +36,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.init_xy_scan_plot()
         self.init_z_scan_plot()
         self.init_counts_plot()
+        self.init_counts_dummy_data()
         # Initialize hardware
         self.hardware = hardware
         # Initialize Cursor Lines
@@ -68,7 +71,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCenterZ.clicked.connect(self.set_center_range_Zscan)
         self.ui.pbStartZ.clicked.connect(self.scan_start_Z)
         self.ui.pbStopZ.clicked.connect(self.scan_stop_Z)
-
 
         # Cursor Group
         self.ui.pbNewCursor.clicked.connect(self.new_cursor)
@@ -130,7 +132,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
+                                                vmax=self.map.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
                                                 interpolation='nearest',
@@ -167,11 +170,14 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.mapZ.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
-                                                interpolation='nearest',
-                                                origin='lower')
+        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
+                                                  vmax=self.mapZ.max(),
+                                                  extent=[float(self.ui.txtStartX.text()),
+                                                          float(self.ui.txtEndX.text()),
+                                                          float(self.ui.txtStartZ.text()),
+                                                          float(self.ui.txtEndZ.text())],
+                                                  interpolation='nearest',
+                                                  origin='lower')
         # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
         self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
         self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
@@ -229,18 +235,33 @@ class mainGUI(QtWidgets.QMainWindow):
             # Initialize Move Thread
             self.mThread = MoveThread(self.hardware)
             self.mThread.moved.connect(self.gone_to)
+            # Initialize Move Thread Galvo
+            self.gmThread = MoveThread_galvo(self.hardware)
+            self.gmThread.moved.connect(self.gone_to)
             # Initialize Confocal Scan Thread
             self.sThread = ConfocalScanThread(self.hardware)
             self.sThread.update.connect(self.scan_data_back)
             self.sThread.finished.connect(self.scan_stopped)
+            # Initialize Confocal Scan Thread Galvo
+            self.gsThread = ConfocalScanThread_galvo(self.hardware)
+            self.gsThread.update.connect(self.scan_data_back)
+            self.gsThread.finished.connect(self.scan_stopped)
             # Initialize XZ Scan Thread
             self.sThreadZ = XZScanThread(self.hardware)
             self.sThreadZ.update.connect(self.scan_data_back_ZScan)
             self.sThreadZ.finished.connect(self.scan_stopped_ZScan)
+            # Initialize XZ Scan Thread Galvo
+            self.gsThreadZ = XZScanThread(self.hardware)
+            self.gsThreadZ.update.connect(self.scan_data_back_ZScan)
+            self.gsThreadZ.finished.connect(self.scan_stopped_ZScan)
             # Initialize Max Thread
             self.maxThread = MaxThread(self.hardware)
             self.maxThread.counts.connect(self.update_counts)
             self.maxThread.moved.connect(self.gone_to)
+            # Initialize Max Thread Galvo
+            self.gmaxThread = MaxThread(self.hardware)
+            self.gmaxThread.counts.connect(self.update_counts)
+            self.gmaxThread.moved.connect(self.gone_to)
             # Initialize Data Thread
             self.dThread = DataThread()
             self.dThread.update.connect(self.update_image)
@@ -528,10 +549,10 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self._cid = []
         cid = self.ui.mplMapZ.mpl_connect('axes_enter_event',
-                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.CrossCursor))
+                                          lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.CrossCursor))
         self._cid.append(cid)
         cid = self.ui.mplMapZ.mpl_connect('axes_leave_event',
-                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor))
+                                          lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor))
         self._cid.append(cid)
         cid = self.ui.mplMapZ.mpl_connect('button_press_event', self.select_drag_start_Zscan)
         self._cid.append(cid)
@@ -767,7 +788,6 @@ class mainGUI(QtWidgets.QMainWindow):
         elif self.ui.rbGalvo.isChecked():
             pass
 
-
     @QtCore.pyqtSlot()
     def mark_current_position(self):
         self.ui.txtXcom.setText(self.ui.txtX.text())
@@ -838,7 +858,6 @@ class mainGUI(QtWidgets.QMainWindow):
             return
         self.save_data_uni()
 
-
     def save_data_uni(self):
         directory = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', "", "Text (*.txt)")
         directory = str(directory[0].replace('/', '\\'))
@@ -849,7 +868,6 @@ class mainGUI(QtWidgets.QMainWindow):
             f.close()
         else:
             sys.stderr.write('No file selected\n')
-
 
     @QtCore.pyqtSlot()
     def replot_image(self):
@@ -882,12 +900,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplMapZ.figure.clear()
         self.ui.mplMapZ.axes = self.ui.mplMapZ.figure.add_subplot(111)
         self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ,
-                                                cmap=cm.get_cmap(self.mapColor),
-                                                vmin=0, vmax=self.mapZ.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
-                                                interpolation='nearest',
-                                                origin='lower')
+                                                  cmap=cm.get_cmap(self.mapColor),
+                                                  vmin=0, vmax=self.mapZ.max(),
+                                                  extent=[float(self.ui.txtStartX.text()),
+                                                          float(self.ui.txtEndX.text()),
+                                                          float(self.ui.txtStartZ.text()),
+                                                          float(self.ui.txtEndZ.text())],
+                                                  interpolation='nearest',
+                                                  origin='lower')
         # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
 
         self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
@@ -930,7 +950,6 @@ class mainGUI(QtWidgets.QMainWindow):
         location, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose Defaults File', directory)
         if location != '':
             self.load_defaults(location)
-
 
     def load_defaults(self, config_path='config/config_confocal.yaml'):
         current_path = os.path.dirname(os.path.abspath(__file__))
@@ -978,7 +997,6 @@ class mainGUI(QtWidgets.QMainWindow):
         current_path = os.path.dirname(os.path.abspath(__file__))
         CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
         save_config(config=self.config_confocal, config_path=CONFIG_file)
-
 
     # Thread methods
     # cThread

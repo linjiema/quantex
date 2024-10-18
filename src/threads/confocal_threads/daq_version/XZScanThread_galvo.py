@@ -8,7 +8,7 @@ import sys
 import time
 
 
-class XZScanThread(QtCore.QThread):
+class XZScanThread_galvo(QtCore.QThread):
     """
     Confocal Scanning module as a thread, based on PyQt5.QtCore.QThread
 
