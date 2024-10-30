@@ -218,7 +218,6 @@ class mainGUI(QtWidgets.QMainWindow):
             #     self.init_position()
             # else:
             #     print('Warning: Piezo stage hasn\'t been connected!')
-            self.hardware.init_all_device()
             self.hardware.init_mover()
             self.hardware.init_scanner()
             self.hardware.init_pulser()
