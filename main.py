@@ -30,7 +30,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbPiezoReset.clicked.connect(self.hardware.reset_mover)
         self.ui.pbGalvoInit.clicked.connect(self.hardware.init_scanner)
         self.ui.pbGalvoReset.clicked.connect(self.hardware.reset_scanner)
-        self.ui.pbPulseGenInit.clicked.connect(self.hardware.init_pulser)
+        self.ui.pbPulseGenInit.clicked.connect(lambda: self.hardware.init_pulser())
         self.ui.pbPulseGenReset.clicked.connect(self.hardware.reset_pulser)
         self.ui.pbTaggerInit.clicked.connect(self.hardware.init_counter)
         self.ui.pbTaggerReset.clicked.connect(self.hardware.reset_counter)

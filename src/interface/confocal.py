@@ -309,15 +309,18 @@ class mainGUI(QtWidgets.QMainWindow):
         get real position of piezo and galvo by measured the realtime position, then update the ui.
         :return: None
         """
-        if self.ui.rbPiezo.isChecked():
-            x = self.hardware.mover.read_position_single(channel=1)
-            y = self.hardware.mover.read_position_single(channel=2)
-        elif self.ui.rbGalvo.isChecked():
-            x, y = self.hardware.scanner.read_current_position()
-        z = self.hardware.mover.read_position_single(channel=4)
-        self.ui.txtX.setText(str(round(x, 3)))
-        self.ui.txtY.setText(str(round(y, 3)))
-        self.ui.txtZ.setText(str(round(z, 3)))
+        try:
+            if self.ui.rbPiezo.isChecked():
+                x = self.hardware.mover.read_position_single(channel=1)
+                y = self.hardware.mover.read_position_single(channel=2)
+            elif self.ui.rbGalvo.isChecked():
+                x, y = self.hardware.scanner.read_current_position()
+            z = self.hardware.mover.read_position_single(channel=4)
+            self.ui.txtX.setText(str(round(x, 3)))
+            self.ui.txtY.setText(str(round(y, 3)))
+            self.ui.txtZ.setText(str(round(z, 3)))
+        except Exception as e:
+            logger.logger.info(e)
 
     @QtCore.pyqtSlot()
     def cleanup_hardware(self):
