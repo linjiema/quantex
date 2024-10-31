@@ -217,8 +217,6 @@ class GScanner():
         connection_check()
         self.wave_form_x = []
         self.wave_form_y = []
-        self.current_x = 0.00
-        self.current_y = 0.00
         self.sample_number = 200
         self.timing_rate = 1000
 
@@ -249,7 +247,6 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.HW_TIMED_SINGLE_POINT)
         self.x_scanner.write(self.pos_to_volt_x(position), auto_start=True, timeout=10.0)
-        self.current_x = self.pos_to_volt_x(position)
 
     def go_to_y(self, position):
         self.y_scanner.stop()
@@ -258,7 +255,6 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.HW_TIMED_SINGLE_POINT)
         self.y_scanner.write(self.pos_to_volt_y(position), auto_start=True, timeout=10.0)
-        self.current_y = self.pos_to_volt_y(position)
 
     def set_x_scan_param(self):
         self.x_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
@@ -305,6 +301,24 @@ class GScanner():
         pass
         return position
 
+    def vol_to_position(self, xy_voltage: np.ndarray) -> np.ndarray:
+        """
+
+        :param xy_voltage:
+        :return:
+        """
+        return xy_voltage
+
+    def read_current_position(self) -> np.ndarray:
+        with nidaqmx.Task() as voltage_read:
+            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
+            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
+            voltage_read.timing.cfg_samp_clk_timing(rate=10000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                     samps_per_chan=5)
+            voltage_temp = np.average(voltage_read.read(number_of_samples_per_channel=5), axis=1)
+        position_temp = self.vol_to_position(voltage_temp)
+        return position_temp
+
     def close(self):
         if hasattr(self, 'x_scanner') and not self.is_closed_x:
             self.x_scanner.close()
@@ -314,17 +328,16 @@ class GScanner():
             self.is_closed_y = True
 
 
-
-
 if __name__ == '__main__':
-    location = TriggeredLocationSensor()
-    sensor = TriggeredCounter()
-
-    timer = HardwareTimer()
-    sensor.init_task()
-    location.init_task()
-    timer.init_task()
-    timer.start_timer()
-    print(sensor.get_counts_array())
-    print(location.get_location_raw_data())
-    timer.close()
+    with nidaqmx.Task() as task:
+        task.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
+        task.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
+        task.timing.cfg_samp_clk_timing(rate=1000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE, samps_per_chan=5)
+        data = task.read(number_of_samples_per_channel=5)
+        print(data)
+        print(np.round(np.average(data, axis=1), 4))
+        [a, b] = np.average(data, axis=1)
+        print(a)
+        print(b)
+        print(type(np.average(data, axis=1)))
+        print(type(a))

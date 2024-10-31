@@ -32,6 +32,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
         # Load defaults
         self.load_defaults()
+
         # Initialize plots
         self.init_xy_scan_plot()
         self.init_z_scan_plot()
@@ -91,7 +92,7 @@ class mainGUI(QtWidgets.QMainWindow):
         '''missing keep NV'''
         # Counts Group
         self.ui.pbCount.clicked.connect(self.count_start)
-        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_rate)
+        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_count_rate)
         self.ui.pbMax.clicked.connect(self.maximize)
         # Plot Group XY
         self.ui.pbSaveData.clicked.connect(self.save_data)
@@ -217,8 +218,8 @@ class mainGUI(QtWidgets.QMainWindow):
             self.hardware.init_counter()
             self.hardware.init_ni()
             if self.hardware.mover_status:
-                self.init_position()
-
+                self.update_current_position()
+                self.ui.pbGetPos.setEnabled(True)
             # Initialize thread (Need to initialize hardware first!!)
             # Initialize Count Thread
             self.cThread = CountThread(self.hardware)
@@ -303,14 +304,20 @@ class mainGUI(QtWidgets.QMainWindow):
             'z-': lambda: self.ui.txtZcom.setText(
                 str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStep.text()), 3)))}
 
-    def init_position(self):
-        x = self.hardware.mover.read_position_single(channel=1)
-        y = self.hardware.mover.read_position_single(channel=2)
+    def update_current_position(self) -> None:
+        """
+        get real position of piezo and galvo by measured the realtime position, then update the ui.
+        :return: None
+        """
+        if self.ui.rbPiezo.isChecked():
+            x = self.hardware.mover.read_position_single(channel=1)
+            y = self.hardware.mover.read_position_single(channel=2)
+        elif self.ui.rbGalvo.isChecked():
+            x, y = self.hardware.scanner.read_current_position()
         z = self.hardware.mover.read_position_single(channel=4)
         self.ui.txtX.setText(str(round(x, 3)))
         self.ui.txtY.setText(str(round(y, 3)))
         self.ui.txtZ.setText(str(round(z, 3)))
-        self.ui.pbGetPos.setEnabled(True)
 
     @QtCore.pyqtSlot()
     def cleanup_hardware(self):
@@ -343,9 +350,6 @@ class mainGUI(QtWidgets.QMainWindow):
         __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
                        self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
                        self.hardware.timer_status, self.hardware.one_time_counter_status)
-        # print(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
-        #                self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
-        #                self.hardware.timer_status, self.hardware.one_time_counter_status)
         if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
             # self.hardware = None
@@ -809,7 +813,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.cThread.running = False
 
     @QtCore.pyqtSlot(str)
-    def change_rate(self, s):
+    def change_count_rate(self, s):
         new_freq = eval(s)
         self.cThread.count_freq = new_freq
         self.cThread.count_freq_changed = True
@@ -1207,6 +1211,7 @@ class mainGUI(QtWidgets.QMainWindow):
         elif self.ui.rbPiezo.isChecked():
             self.config_confocal['scanner'] = 'piezo'
         self.update_ui_based_on_default()
+        self.update_current_position()
 
     # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)

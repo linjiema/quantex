@@ -120,7 +120,6 @@ class DeviceManager(QtCore.QObject):
         if not self.scanner_status:
             try:
                 self.scanner = GScanner()
-                pass
             except BaseException as e:
                 logger.logger.warning(f"Warning: Scanner init failed! {e}")
             else:
@@ -131,7 +130,6 @@ class DeviceManager(QtCore.QObject):
         if self.scanner_status:
             try:
                 self.scanner.close()
-                pass
             except BaseException as e:
                 logger.logger.warning(f"Warning: Scanner reset failed! {e}")
             else:

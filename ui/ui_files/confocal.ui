@@ -1402,8 +1402,8 @@
    <widget class="QGroupBox" name="gbActual">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>657</y>
+      <x>10</x>
+      <y>660</y>
       <width>251</width>
       <height>51</height>
      </rect>
@@ -1502,8 +1502,8 @@
    <widget class="QGroupBox" name="gbCursor">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>657</y>
+      <x>320</x>
+      <y>660</y>
       <width>251</width>
       <height>51</height>
      </rect>
@@ -1603,7 +1603,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>&lt;--</string>
+     <string>--&gt;</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox">

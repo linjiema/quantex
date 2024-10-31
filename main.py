@@ -36,10 +36,10 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbTaggerReset.clicked.connect(self.hardware.reset_counter)
         self.ui.pbDaqInit.clicked.connect(self.hardware.init_ni)
         self.ui.pbDaqReset.clicked.connect(self.hardware.reset_ni)
-        self.ui.pbMWInit.clicked.connect()
-        self.ui.pbMWReset.clicked.connect()
-        self.ui.pbRotatorInit.clicked.connect()
-        self.ui.pbRotatorReset.clicked.connect()
+        self.ui.pbMWInit.clicked.connect(blank_function)
+        self.ui.pbMWReset.clicked.connect(blank_function)
+        self.ui.pbRotatorInit.clicked.connect(blank_function)
+        self.ui.pbRotatorReset.clicked.connect(blank_function)
         self.ui.pbInitAll.clicked.connect(self.hardware.init_all_device)
         self.ui.pbResetAll.clicked.connect(self.hardware.cleanup)
         # connect device status update signal to handling function
@@ -91,10 +91,14 @@ class mainGUI(QtWidgets.QMainWindow):
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_message, QtWidgets.QMessageBox.Yes |
                                                QtWidgets.QMessageBox.Cancel)
         if reply == QtWidgets.QMessageBox.Yes:
-            self.reset_all_hardware()
+            self.hardware.cleanup()
             event.accept()
         else:
             event.ignore()
+
+
+def blank_function():
+    pass
 
 
 if __name__ == '__main__':
