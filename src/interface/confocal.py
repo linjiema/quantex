@@ -56,6 +56,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Hardware Group
         self.ui.pbInitHW.clicked.connect(self.init_hardware)
         self.ui.pbCleanupHW.clicked.connect(self.cleanup_hardware)
+        self.ui.rbGalvo.toggled.connect(self.scanner_changed)
+        # self.ui.rbPiezo.toggled.connect(self.scanner_changed)
         # Laser Group
         self.ui.pbLaserOn.clicked.connect(self.laser_on)
         self.ui.pbLaserOff.clicked.connect(self.laser_off)
@@ -610,7 +612,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def set_center_range_Zscan(self):
         x_val = round(float(self.ui.txtXcom.text()), 1)
         z_val = round(float(self.ui.txtZcom.text()), 1)
-        d = float(self.ui.txtRange.text())
+        d = float(self.ui.txtRangeZ.text())
         self.ui.txtStartX.setText(str(round(x_val - d / 2, 3)))
         self.ui.txtStartZ.setText(str(round(z_val - d / 2, 3)))
         self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
@@ -954,48 +956,80 @@ class mainGUI(QtWidgets.QMainWindow):
         current_path = os.path.dirname(os.path.abspath(__file__))
         CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
         self.config_confocal = load_config(config_path=CONFIG_file)
-        self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
-        self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
-        self.ui.txtStartZ.setText(str(self.config_confocal['scan']['z']['start']))
-        self.ui.txtEndX.setText(str(self.config_confocal['scan']['x']['end']))
-        self.ui.txtEndY.setText(str(self.config_confocal['scan']['y']['end']))
-        self.ui.txtEndZ.setText(str(self.config_confocal['scan']['z']['end']))
-        self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
-        self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
-        self.ui.txtStepZ.setText(str(self.config_confocal['scan']['z']['step']))
-        self.ui.txtStep.setText(str(self.config_confocal['move']['step']))
-        self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
-        self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
-        self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
-        self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
-        if self.config_confocal['scanner'] == 'piezo':
-            self.ui.rbPiezo.setChecked(True)
-        elif self.config_confocal['scanner'] == 'galvo':
-            self.ui.rbGalvo.setChecked(True)
+        self.update_ui_based_on_default()
 
     @QtCore.pyqtSlot()
     def save_defaults(self, config_path='config/config_confocal.yaml'):
-        self.config_confocal['scan']['x']['start'] = float(self.ui.txtStartX.text())
-        self.config_confocal['scan']['y']['start'] = float(self.ui.txtStartY.text())
-        self.config_confocal['scan']['z']['start'] = float(self.ui.txtStartZ.text())
-        self.config_confocal['scan']['x']['end'] = float(self.ui.txtEndX.text())
-        self.config_confocal['scan']['y']['end'] = float(self.ui.txtEndY.text())
-        self.config_confocal['scan']['z']['end'] = float(self.ui.txtEndZ.text())
-        self.config_confocal['scan']['x']['step'] = float(self.ui.txtStepX.text())
-        self.config_confocal['scan']['y']['step'] = float(self.ui.txtStepY.text())
-        self.config_confocal['scan']['z']['step'] = float(self.ui.txtStepZ.text())
-        self.config_confocal['move']['step'] = float(self.ui.txtStep.text())
-        self.config_confocal['cursor']['x'] = float(self.ui.txtXcom.text())
-        self.config_confocal['cursor']['y'] = float(self.ui.txtYcom.text())
-        self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
-        self.config_confocal['scan']['range'] = float(self.ui.txtRange.text())
-        if self.ui.rbPiezo.isChecked():
-            self.config_confocal['scanner'] = 'piezo'
-        elif self.ui.rbGalvo.isChecked():
-            self.config_confocal['scanner'] = 'galvo'
+        self.update_default_based_on_ui()
         current_path = os.path.dirname(os.path.abspath(__file__))
         CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
         save_config(config=self.config_confocal, config_path=CONFIG_file)
+
+    def update_ui_based_on_default(self):
+        if self.config_confocal['scanner'] == 'piezo':
+            self.ui.rbPiezo.setChecked(True)
+            self.ui.txtStartX.setText(str(self.config_confocal['piezo_scan']['x']['start']))
+            self.ui.txtStartY.setText(str(self.config_confocal['piezo_scan']['y']['start']))
+            self.ui.txtStartZ.setText(str(self.config_confocal['piezo_scan']['z']['start']))
+            self.ui.txtEndX.setText(str(self.config_confocal['piezo_scan']['x']['end']))
+            self.ui.txtEndY.setText(str(self.config_confocal['piezo_scan']['y']['end']))
+            self.ui.txtEndZ.setText(str(self.config_confocal['piezo_scan']['z']['end']))
+            self.ui.txtStepX.setText(str(self.config_confocal['piezo_scan']['x']['step']))
+            self.ui.txtStepY.setText(str(self.config_confocal['piezo_scan']['y']['step']))
+            self.ui.txtStepZ.setText(str(self.config_confocal['piezo_scan']['z']['step']))
+            self.ui.txtRange.setText(str(self.config_confocal['piezo_scan']['range']))
+            self.ui.txtXcom.setText(str(self.config_confocal['piezo_scan']['cursor']['x']))
+            self.ui.txtYcom.setText(str(self.config_confocal['piezo_scan']['cursor']['y']))
+            self.ui.txtZcom.setText(str(self.config_confocal['piezo_scan']['cursor']['z']))
+        elif self.config_confocal['scanner'] == 'galvo':
+            self.ui.rbGalvo.setChecked(True)
+            self.ui.txtStartX.setText(str(self.config_confocal['galvo_scan']['x']['start']))
+            self.ui.txtStartY.setText(str(self.config_confocal['galvo_scan']['y']['start']))
+            self.ui.txtStartZ.setText(str(self.config_confocal['galvo_scan']['z']['start']))
+            self.ui.txtEndX.setText(str(self.config_confocal['galvo_scan']['x']['end']))
+            self.ui.txtEndY.setText(str(self.config_confocal['galvo_scan']['y']['end']))
+            self.ui.txtEndZ.setText(str(self.config_confocal['galvo_scan']['z']['end']))
+            self.ui.txtStepX.setText(str(self.config_confocal['galvo_scan']['x']['step']))
+            self.ui.txtStepY.setText(str(self.config_confocal['galvo_scan']['y']['step']))
+            self.ui.txtStepZ.setText(str(self.config_confocal['galvo_scan']['z']['step']))
+            self.ui.txtRange.setText(str(self.config_confocal['galvo_scan']['range']))
+            self.ui.txtXcom.setText(str(self.config_confocal['galvo_scan']['cursor']['x']))
+            self.ui.txtYcom.setText(str(self.config_confocal['galvo_scan']['cursor']['y']))
+            self.ui.txtZcom.setText(str(self.config_confocal['galvo_scan']['cursor']['z']))
+        self.ui.txtStep.setText(str(self.config_confocal['move']['z_step']))
+        self.ui.txtRangeZ.setText(str(self.config_confocal['z_scan_range']))
+
+    def update_default_based_on_ui(self):
+        if self.config_confocal['scanner'] == 'piezo':
+            self.config_confocal['piezo_scan']['x']['start'] = float(self.ui.txtStartX.text())
+            self.config_confocal['piezo_scan']['y']['start'] = float(self.ui.txtStartY.text())
+            self.config_confocal['piezo_scan']['z']['start'] = float(self.ui.txtStartZ.text())
+            self.config_confocal['piezo_scan']['x']['end'] = float(self.ui.txtEndX.text())
+            self.config_confocal['piezo_scan']['y']['end'] = float(self.ui.txtEndY.text())
+            self.config_confocal['piezo_scan']['z']['end'] = float(self.ui.txtEndZ.text())
+            self.config_confocal['piezo_scan']['x']['step'] = float(self.ui.txtStepX.text())
+            self.config_confocal['piezo_scan']['y']['step'] = float(self.ui.txtStepY.text())
+            self.config_confocal['piezo_scan']['z']['step'] = float(self.ui.txtStepZ.text())
+            self.config_confocal['piezo_scan']['range'] = float(self.ui.txtRange.text())
+            self.config_confocal['piezo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
+            self.config_confocal['piezo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
+            self.config_confocal['piezo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+        elif self.config_confocal['scanner'] == 'galvo':
+            self.config_confocal['galvo_scan']['x']['start'] = float(self.ui.txtStartX.text())
+            self.config_confocal['galvo_scan']['y']['start'] = float(self.ui.txtStartY.text())
+            self.config_confocal['galvo_scan']['z']['start'] = float(self.ui.txtStartZ.text())
+            self.config_confocal['galvo_scan']['x']['end'] = float(self.ui.txtEndX.text())
+            self.config_confocal['galvo_scan']['y']['end'] = float(self.ui.txtEndY.text())
+            self.config_confocal['galvo_scan']['z']['end'] = float(self.ui.txtEndZ.text())
+            self.config_confocal['galvo_scan']['x']['step'] = float(self.ui.txtStepX.text())
+            self.config_confocal['galvo_scan']['y']['step'] = float(self.ui.txtStepY.text())
+            self.config_confocal['galvo_scan']['z']['step'] = float(self.ui.txtStepZ.text())
+            self.config_confocal['galvo_scan']['range'] = float(self.ui.txtRange.text())
+            self.config_confocal['galvo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
+            self.config_confocal['galvo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
+            self.config_confocal['galvo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+        self.config_confocal['move']['z_step'] = float(self.ui.txtStep.text())
+        self.config_confocal['z_scan_range'] = float(self.ui.txtRangeZ.text())
 
     # Thread methods
     # cThread
@@ -1164,6 +1198,15 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self.imageZ.set_clim(0, self.mapZ.max())
         self.ui.mplMapZ.draw()
+
+    @QtCore.pyqtSlot()
+    def scanner_changed(self):
+        self.update_default_based_on_ui()
+        if self.ui.rbGalvo.isChecked():
+            self.config_confocal['scanner'] = 'galvo'
+        elif self.ui.rbPiezo.isChecked():
+            self.config_confocal['scanner'] = 'piezo'
+        self.update_ui_based_on_default()
 
     # Run when close the program
     @QtCore.pyqtSlot(QtCore.QEvent)
