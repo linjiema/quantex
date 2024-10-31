@@ -3,8 +3,8 @@ galvo_scan:
     x: 0.0
     y: 0.0
     z: 0.0
-  line_frequency_index: 6
-  line_frequency_value: 50.0
+  line_frequency_index: 0
+  line_frequency_value: 1.0
   range: 0.1
   x:
     end: 0.3
@@ -19,7 +19,7 @@ galvo_scan:
     start: 0.0
     step: 0.6
 move:
-  galvo_xy_step: 0.003
+  galvo_xy_step: 0.001
   piezo_xy_step: 0.1
   z_step: 0.1
 piezo_scan:

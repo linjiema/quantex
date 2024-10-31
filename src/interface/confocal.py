@@ -211,15 +211,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.statusbar.showMessage('Initializing Hardware...')
         # Initialize...
         try:
-            # if self.hardware is None:
-            #     self.hardware = AllHardware()
-            # # Connect Piezo Stage
-            # status = self.hardware.mover.scan_devices()
-            # if status == 0:
-            #     self.hardware.mover.open_devices()
-            #     self.init_position()
-            # else:
-            #     print('Warning: Piezo stage hasn\'t been connected!')
             self.hardware.init_mover()
             self.hardware.init_scanner()
             self.hardware.init_pulser()
@@ -292,19 +283,19 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCleanupHW.setEnabled(True)
 
         self.ui.statusbar.showMessage('Hardware Initialized Successfully.')
-
+        # set step move dic for move point
         self.stepMoveDic = {
             'x+': lambda: self.ui.txtXcom.setText(
-                str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
+                str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepXY.text()), 3))),
 
             'x-': lambda: self.ui.txtXcom.setText(
-                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
+                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepXY.text()), 3))),
 
             'y+': lambda: self.ui.txtYcom.setText(
-                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
+                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepXY.text()), 3))),
 
             'y-': lambda: self.ui.txtYcom.setText(
-                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
+                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepXY.text()), 3))),
 
             'z+': lambda: self.ui.txtZcom.setText(
                 str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStep.text()), 3))),
@@ -981,6 +972,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.txtXcom.setText(str(self.config_confocal['piezo_scan']['cursor']['x']))
             self.ui.txtYcom.setText(str(self.config_confocal['piezo_scan']['cursor']['y']))
             self.ui.txtZcom.setText(str(self.config_confocal['piezo_scan']['cursor']['z']))
+            self.ui.txtStepXY.setText(str(self.config_confocal['move']['piezo_xy_step']))
             self.ui.cbFreq.setEnabled(False)
         elif self.config_confocal['scanner'] == 'galvo':
             self.ui.rbGalvo.setChecked(True)
@@ -997,6 +989,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.txtXcom.setText(str(self.config_confocal['galvo_scan']['cursor']['x']))
             self.ui.txtYcom.setText(str(self.config_confocal['galvo_scan']['cursor']['y']))
             self.ui.txtZcom.setText(str(self.config_confocal['galvo_scan']['cursor']['z']))
+            self.ui.txtStepXY.setText(str(self.config_confocal['move']['galvo_xy_step']))
             self.ui.cbFreq.setEnabled(True)
             self.ui.cbFreq.setCurrentIndex(int(self.config_confocal['galvo_scan']['line_frequency_index']))
         self.ui.txtStep.setText(str(self.config_confocal['move']['z_step']))
@@ -1017,6 +1010,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.config_confocal['piezo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
             self.config_confocal['piezo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
             self.config_confocal['piezo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+            self.config_confocal['move']['piezo_xy_step'] = float(self.ui.txtStepXY.text())
         elif self.config_confocal['scanner'] == 'galvo':
             self.config_confocal['galvo_scan']['x']['start'] = float(self.ui.txtStartX.text())
             self.config_confocal['galvo_scan']['y']['start'] = float(self.ui.txtStartY.text())
@@ -1031,6 +1025,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.config_confocal['galvo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
             self.config_confocal['galvo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
             self.config_confocal['galvo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+            self.config_confocal['move']['galvo_xy_step'] = float(self.ui.txtStepXY.text())
             self.config_confocal['galvo_scan']['line_frequency_index'] = int(self.ui.cbFreq.currentIndex())
             self.config_confocal['galvo_scan']['line_frequency_value'] = float(self.ui.cbFreq.currentText())
         self.config_confocal['move']['z_step'] = float(self.ui.txtStep.text())
