@@ -981,6 +981,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.txtXcom.setText(str(self.config_confocal['piezo_scan']['cursor']['x']))
             self.ui.txtYcom.setText(str(self.config_confocal['piezo_scan']['cursor']['y']))
             self.ui.txtZcom.setText(str(self.config_confocal['piezo_scan']['cursor']['z']))
+            self.ui.cbFreq.setEnabled(False)
         elif self.config_confocal['scanner'] == 'galvo':
             self.ui.rbGalvo.setChecked(True)
             self.ui.txtStartX.setText(str(self.config_confocal['galvo_scan']['x']['start']))
@@ -996,6 +997,8 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.txtXcom.setText(str(self.config_confocal['galvo_scan']['cursor']['x']))
             self.ui.txtYcom.setText(str(self.config_confocal['galvo_scan']['cursor']['y']))
             self.ui.txtZcom.setText(str(self.config_confocal['galvo_scan']['cursor']['z']))
+            self.ui.cbFreq.setEnabled(True)
+            self.ui.cbFreq.setCurrentIndex(int(self.config_confocal['galvo_scan']['line_frequency_index']))
         self.ui.txtStep.setText(str(self.config_confocal['move']['z_step']))
         self.ui.txtRangeZ.setText(str(self.config_confocal['z_scan_range']))
 
@@ -1028,6 +1031,8 @@ class mainGUI(QtWidgets.QMainWindow):
             self.config_confocal['galvo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
             self.config_confocal['galvo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
             self.config_confocal['galvo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+            self.config_confocal['galvo_scan']['line_frequency_index'] = int(self.ui.cbFreq.currentIndex())
+            self.config_confocal['galvo_scan']['line_frequency_value'] = float(self.ui.cbFreq.currentText())
         self.config_confocal['move']['z_step'] = float(self.ui.txtStep.text())
         self.config_confocal['z_scan_range'] = float(self.ui.txtRangeZ.text())
 
