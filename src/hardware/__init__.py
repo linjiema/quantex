@@ -88,6 +88,8 @@ class DeviceManager(QtCore.QObject):
         self.reset_counter()
         self.reset_ni()
 
+    # function for all individual device
+
     def init_mover(self):
         if not self.mover_status:
             try:
