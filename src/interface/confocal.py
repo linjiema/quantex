@@ -24,6 +24,12 @@ import src.utils.logger as logger
 
 class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
+    XY_MIN_PIEZO = 0.0
+    XY_MAX_PIEZO = 65.0
+    XY_MIN_GALVO = -0.4
+    XY_MAX_GALVO = 0.4
+    Z_MIN_PIEZO = 0.0
+    Z_MAX_PIEZO = 30.0
 
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -376,14 +382,23 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbLaserOff.setEnabled(False)
 
     # Scan Group
+    # function for xy scan
     @QtCore.pyqtSlot()
     def set_full_range(self):
-        self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('65')
-        self.ui.txtStepX.setText('0.65')
-        self.ui.txtStartY.setText('0')
-        self.ui.txtEndY.setText('65')
-        self.ui.txtStepY.setText('0.65')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStartY.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndY.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStartY.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndY.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -530,14 +545,23 @@ class mainGUI(QtWidgets.QMainWindow):
         elif self.ui.rbGalvo.isChecked():
             pass
 
+    # function for z scan
     @QtCore.pyqtSlot()
     def set_full_range_ZScan(self):
-        self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('65')
-        self.ui.txtStepX.setText('0.65')
-        self.ui.txtStartZ.setText('0')
-        self.ui.txtEndZ.setText('30')
-        self.ui.txtStepZ.setText('0.6')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
+            self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
+            self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
 
     @QtCore.pyqtSlot()
     def select_range_ZScan(self):
