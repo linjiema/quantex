@@ -6,6 +6,8 @@ import os.path
 import time
 import numpy
 import yaml
+import tempfile
+import pickle
 from ui.uipy.confocal import Ui_Confocal
 from PyQt5 import QtWidgets, QtCore
 import matplotlib
@@ -24,17 +26,26 @@ import src.utils.logger as logger
 
 class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
-    XY_MIN_PIEZO = 0.0
-    XY_MAX_PIEZO = 65.0
-    XY_MIN_GALVO = -0.4
-    XY_MAX_GALVO = 0.4
-    Z_MIN_PIEZO = 0.0
-    Z_MAX_PIEZO = 30.0
+    XY_MIN_PIEZO = 0.0  # um
+    XY_MAX_PIEZO = 65.0  # um
+    XY_MIN_GALVO = -0.4  # V
+    XY_MAX_GALVO = 0.4  # V
+    Z_MIN_PIEZO = 0.0  # um
+    Z_MAX_PIEZO = 30.0  # um
+    CACHE_LIFE = 7  # days
 
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Confocal()
         self.ui.setupUi(self)
+        self.cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache\\confocal")
+        os.makedirs(self.cache_dir, exist_ok=True)
+        self.scanning_cache = {
+            "piezo_plot": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "piezo_raw": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "galvo_plot": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "galvo_raw": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False)
+        }
 
         # Load defaults
         self.load_defaults()
@@ -43,7 +54,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.init_xy_scan_plot()
         self.init_z_scan_plot()
         self.init_counts_plot()
-        self.init_counts_dummy_data()
+
         # Initialize hardware
         self.hardware = hardware
         # Initialize Cursor Lines
@@ -131,13 +142,15 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         self.init_xy_dummy_map()
 
-    def init_xy_dummy_map(self):
+    def init_xy_dummy_data(self):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
         self.map = numpy.random.randint(0, 100, size=(yNum, xNum))
         self.map[30][40] = 100000
 
+    def init_xy_dummy_map(self):
+        self.init_xy_dummy_data()
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
@@ -169,13 +182,15 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         self.init_z_dummy_map()
 
-    def init_z_dummy_map(self):
+    def init_z_dummy_data(self):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) / float(self.ui.txtStepZ.text()))
         self.mapZ = numpy.random.randint(0, 100, size=(yNum, xNum))
         self.mapZ[10][10] = 100000
 
+    def init_z_dummy_map(self):
+        self.init_z_dummy_data()
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
@@ -200,6 +215,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplPlot.setParent(self.ui.wMplCounts)
         self.ui.mplPlot.axes = fig.add_subplot(111)
         self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMplCounts.size()))
+        # Initialize Dummy Count Data
+        self.init_counts_dummy_data()
 
     def init_counts_dummy_data(self):
         # Initialize Dummy Counts Data
@@ -263,7 +280,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.gmaxThread.moved.connect(self.gone_to)
             # Initialize Data Thread
             self.dThread = DataThread()
-            self.dThread.update.connect(self.update_image)
+            self.dThread.update.connect(self.update_image_data)
 
         except BaseException as e:
             print(e)
@@ -527,7 +544,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.dThread.raw = None
             self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
             self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image)
+            self.dThread.update.connect(self.update_image_data)
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
             pass
@@ -689,7 +706,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.dThread.raw = None
             self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
             self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image_ZScan)
+            self.dThread.update.connect(self.update_image_data_ZScan)
             self.sThreadZ.start()
         elif self.ui.rbGalvo.isChecked():
             pass
@@ -863,6 +880,72 @@ class mainGUI(QtWidgets.QMainWindow):
         self.maxThread.start()
 
     # Plot Group
+    @QtCore.pyqtSlot()
+    def save_plot_to_cache(self):
+        # save temp data to galvo file
+        if self.ui.rbPiezo.isChecked():
+            with open(self.scanning_cache["galvo_plot"].name, 'wb') as f:
+                pickle.dump(self.map, f)
+                pickle.dump(self.mapZ, f)
+            with open(self.scanning_cache["galvo_raw"].name, 'wb') as f:
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData_z, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+        # save temp data to piezo file
+        elif self.ui.rbGalvo.isChecked():
+            with open(self.scanning_cache["piezo_plot"].name, 'wb') as f:
+                pickle.dump(self.map, f)
+                pickle.dump(self.mapZ, f)
+            with open(self.scanning_cache["piezo_raw"].name, 'wb') as f:
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData_z, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+
+    @QtCore.pyqtSlot()
+    def load_plots_from_cache(self):
+        if self.ui.rbPiezo.isChecked():
+            with open(self.scanning_cache["piezo_plot"].name, 'rb') as f:
+                try:
+                    self.map = pickle.load(f)
+                    self.mapZ = pickle.load(f)
+                except EOFError:
+                    self.init_xy_dummy_data()
+                    self.init_z_dummy_data()
+                else:
+                    with open(self.scanning_cache["piezo_raw"].name, 'rb') as f:
+                        self.actualData = pickle.load(f)
+                        self.actualData_z = pickle.load(f)
+                    if self.actualData == 0:
+                        del self.actualData
+                    if self.actualData_z == 0:
+                        del self.actualData_z
+        elif self.ui.rbGalvo.isChecked():
+            with open(self.scanning_cache["galvo_plot"].name, 'rb') as f:
+                try:
+                    self.map = pickle.load(f)
+                    self.mapZ = pickle.load(f)
+                except EOFError:
+                    self.init_xy_dummy_data()
+                    self.init_z_dummy_data()
+                else:
+                    with open(self.scanning_cache["galvo_raw"].name, 'rb') as f:
+                        self.actualData = pickle.load(f)
+                        self.actualData_z = pickle.load(f)
+                    if self.actualData == 0:
+                        del self.actualData
+                    if self.actualData_z == 0:
+                        del self.actualData_z
+
     @QtCore.pyqtSlot()
     def save_data(self):
         try:
@@ -1193,10 +1276,17 @@ class mainGUI(QtWidgets.QMainWindow):
     # dThread
     # Run when signal 'update' emit
     @QtCore.pyqtSlot(numpy.ndarray)
-    def update_image(self, map_array):
+    def update_image_data(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
         print('updating...', time.perf_counter())
         self.map = map_array
+        self.update_image()
+
+    def update_image(self) -> None:
+        """
+        Update image basing on self.map data
+        :return: None
+        """
         self.image.set_data(self.map)
         self.image.set_extent(
             [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartY.text()),
@@ -1212,10 +1302,16 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplMap.draw()
 
     @QtCore.pyqtSlot(numpy.ndarray)
-    def update_image_ZScan(self, map_array):
+    def update_image_data_ZScan(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
         print('updating...', time.perf_counter())
         self.mapZ = map_array
+
+    def update_image_ZScan(self) -> None:
+        """
+        Update image basing on self.mapZ data
+        :return: None
+        """
         self.imageZ.set_data(self.mapZ)
         self.imageZ.set_extent(
             [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartZ.text()),
@@ -1237,10 +1333,25 @@ class mainGUI(QtWidgets.QMainWindow):
             self.config_confocal['scanner'] = 'galvo'
         elif self.ui.rbPiezo.isChecked():
             self.config_confocal['scanner'] = 'piezo'
-        self.update_ui_based_on_default()
-        self.update_current_position()
+        self.update_ui_based_on_default()  # update settings parameter based on scanning mode
+        self.update_current_position()  # update current position of the scanner
+        self.save_plot_to_cache()  # save demostrate plot and raw data to cache
+        self.load_plots_from_cache()  # load saved plot and raw data from cache
+        self.update_image()
+        self.update_image_ZScan()
 
-    # Run when close the program
+    # clean cache
+    def periodic_clear_cache(self, days=1):
+        del self.scanning_cache
+        # define time tag
+        now = time.time()
+        # define expire  limit
+        expiration_time = days * 86400
+        for filename in os.listdir(self.cache_dir):
+            file_path = os.path.join(self.cache_dir, filename)
+            if os.path.isfile(file_path) and now - os.path.getmtime(file_path) > expiration_time:
+                os.remove(file_path)  # 删除过期文件
+
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
         quit_msg = "Save parameters as Defaults?"
@@ -1249,9 +1360,11 @@ class mainGUI(QtWidgets.QMainWindow):
         if reply == QtWidgets.QMessageBox.Save:
             self.save_defaults()
             self.ExpConfocalClose.emit()
+            self.periodic_clear_cache(days=self.CACHE_LIFE)
             event.accept()
         elif reply == QtWidgets.QMessageBox.Discard:
             self.ExpConfocalClose.emit()
+            self.periodic_clear_cache(days=self.CACHE_LIFE)
             event.accept()
         else:
             event.ignore()
