@@ -31,7 +31,7 @@ class mainGUI(QtWidgets.QMainWindow):
     XY_MIN_GALVO = -0.4  # V
     XY_MAX_GALVO = 0.4  # V
     Z_MIN_PIEZO = 0.0  # um
-    Z_MAX_PIEZO = 30.0  # um
+    Z_MAX_PIEZO = 35.0  # um
     CACHE_LIFE = 7  # days
 
     def __init__(self, parent=None, hardware=None):
@@ -275,7 +275,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.maxThread.counts.connect(self.update_counts)
             self.maxThread.moved.connect(self.gone_to)
             # Initialize Max Thread Galvo
-            self.gmaxThread = MaxThread(self.hardware)
+            self.gmaxThread = MaxThread_galvo(self.hardware)
             self.gmaxThread.counts.connect(self.update_counts)
             self.gmaxThread.moved.connect(self.gone_to)
             # Initialize Data Thread
@@ -525,6 +525,18 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStepY.setEnabled(False)
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
+
+        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
+                                         float(self.ui.txtEndX.text()),
+                                         float(self.ui.txtStepX.text()))
+        self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
+                                         float(self.ui.txtEndY.text()),
+                                         float(self.ui.txtStepY.text()))
+        self.dThread.raw = None
+        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image_data)
+
         if self.ui.rbPiezo.isChecked():
             self.sThread.parameters = (float(self.ui.txtStartX.text()),
                                        float(self.ui.txtEndX.text()),
@@ -535,19 +547,20 @@ class mainGUI(QtWidgets.QMainWindow):
                                        float(self.ui.txtZcom.text()),
                                        float(self.ui.cbFreq.currentText())
                                        )
-            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                             float(self.ui.txtEndX.text()),
-                                             float(self.ui.txtStepX.text()))
-            self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
-                                             float(self.ui.txtEndY.text()),
-                                             float(self.ui.txtStepY.text()))
-            self.dThread.raw = None
-            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-            self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image_data)
+
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThread.parameters = (float(self.ui.txtStartX.text()),
+                                       float(self.ui.txtEndX.text()),
+                                       float(self.ui.txtStepX.text()),
+                                       float(self.ui.txtStartY.text()),
+                                       float(self.ui.txtEndY.text()),
+                                       float(self.ui.txtStepY.text()),
+                                       float(self.ui.txtZcom.text()),
+                                       float(self.ui.cbFreq.currentText())
+                                       )
+
+            self.gsThread.start()
 
     @QtCore.pyqtSlot()
     def scan_stop(self):
@@ -560,7 +573,7 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.sThread.running = False
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThread.running = False
 
     # function for z scan
     @QtCore.pyqtSlot()
@@ -687,6 +700,17 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
 
+        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
+                                         float(self.ui.txtEndX.text()),
+                                         float(self.ui.txtStepX.text()))
+        self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
+                                         float(self.ui.txtEndZ.text()),
+                                         float(self.ui.txtStepZ.text()))
+        self.dThread.raw = None
+        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image_data_ZScan)
+
         if self.ui.rbPiezo.isChecked():
             self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
@@ -697,19 +721,18 @@ class mainGUI(QtWidgets.QMainWindow):
                                         float(self.ui.txtYcom.text()),
                                         float(self.ui.cbFreq.currentText())
                                         )
-            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                             float(self.ui.txtEndX.text()),
-                                             float(self.ui.txtStepX.text()))
-            self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
-                                             float(self.ui.txtEndZ.text()),
-                                             float(self.ui.txtStepZ.text()))
-            self.dThread.raw = None
-            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-            self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image_data_ZScan)
             self.sThreadZ.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThreadZ.parameters = (float(self.ui.txtStartX.text()),
+                                        float(self.ui.txtEndX.text()),
+                                        float(self.ui.txtStepX.text()),
+                                        float(self.ui.txtStartZ.text()),
+                                        float(self.ui.txtEndZ.text()),
+                                        float(self.ui.txtStepZ.text()),
+                                        float(self.ui.txtYcom.text()),
+                                        float(self.ui.cbFreq.currentText())
+                                        )
+            self.gsThreadZ.start()
 
     def scan_stop_Z(self):
         self.ui.statusbar.showMessage('Scan stopping...')
@@ -721,7 +744,7 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.sThreadZ.running = False
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThreadZ.running = False
 
     # Cursor Group
     @QtCore.pyqtSlot()
@@ -800,9 +823,13 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def go_to_mid(self):
-        self.ui.txtXcom.setText('32.5')
-        self.ui.txtYcom.setText('32.5')
-        self.ui.txtZcom.setText('17.5')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 2, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 2, 3)))
+        self.ui.txtZcom.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 2, 3)))
         self.go_to()
 
     @QtCore.pyqtSlot()
@@ -826,7 +853,8 @@ class mainGUI(QtWidgets.QMainWindow):
             self.mThread.command = self.cursorPosition
             self.mThread.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gmThread.command = self.cursorPosition
+            self.gmThread.start()
 
     @QtCore.pyqtSlot()
     def mark_current_position(self):
@@ -876,8 +904,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
 
-        self.maxThread.step = round(float(self.ui.txtStep.text()), 3)
-        self.maxThread.start()
+        if self.ui.rbGalvo.isChecked():
+            self.gmaxThread.step_xy = round(float(self.ui.txtStepXY.text()), 3)
+            self.gmaxThread.step_z = round(float(self.ui.txtStep.text()), 3)
+            self.gmaxThread.start()
+        elif self.ui.rbPiezo.isChecked():
+            self.maxThread.step_xy = round(float(self.ui.txtStepXY.text()), 3)
+            self.maxThread.step_z = round(float(self.ui.txtStep.text()), 3)
+            self.maxThread.start()
 
     # Plot Group
     @QtCore.pyqtSlot()
