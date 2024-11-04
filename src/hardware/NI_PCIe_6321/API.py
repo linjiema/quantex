@@ -173,7 +173,7 @@ class OneTimeCounter_HardwareTimer():
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                    samps_per_chan=2)
 
-    def count_once(self):
+    def count_once(self) -> int:
         freq = self.count_freq
         self.counter_in.start()
         self.counter_out.start()
@@ -183,9 +183,9 @@ class OneTimeCounter_HardwareTimer():
         self.counter_in.stop()
         self.counter_out.stop()
         if cts_arr[0] > cts_arr[1]:
-            return (cts_arr[1] + 0xFFFFFFFF + 1 - cts_arr[0]) * freq
+            return int((cts_arr[1] + 0xFFFFFFFF + 1 - cts_arr[0]) * freq)
         else:
-            return (cts_arr[1] - cts_arr[0]) * freq
+            return int((cts_arr[1] - cts_arr[0]) * freq)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
