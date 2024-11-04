@@ -33,10 +33,14 @@ class MoveThread_galvo(QtCore.QThread):
         self.moved.emit(self.x_pos, self.y_pos, self.z_pos)
 
     def get_current_position(self):
-        pos = self._hardware.mover.read_position_single(channel=1), self._hardware.mover.read_position_single(channel=2), self._hardware.mover.read_position_single(channel=4)
-        return pos
+        pos_z = self._hardware.mover.read_position_single(channel=4)
+        pos_xy = self._hardware.scanner.read_current_position()
+        return pos_xy[0], pos_xy[1], pos_z
 
     def move_to_position(self, command=None):
-        self._hardware.mover.move_position_all(location=command)
+        self._hardware.scanner.go_to_x(position=command[0])
+        self._hardware.scanner.go_to_y(position=command[1])
+        self._hardware.mover.move_position_single(channel=4, location=command[2])
+
 
 

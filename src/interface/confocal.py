@@ -551,14 +551,14 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
             self.gsThread.parameters = (float(self.ui.txtStartX.text()),
-                                       float(self.ui.txtEndX.text()),
-                                       float(self.ui.txtStepX.text()),
-                                       float(self.ui.txtStartY.text()),
-                                       float(self.ui.txtEndY.text()),
-                                       float(self.ui.txtStepY.text()),
-                                       float(self.ui.txtZcom.text()),
-                                       float(self.ui.cbFreq.currentText())
-                                       )
+                                        float(self.ui.txtEndX.text()),
+                                        float(self.ui.txtStepX.text()),
+                                        float(self.ui.txtStartY.text()),
+                                        float(self.ui.txtEndY.text()),
+                                        float(self.ui.txtStepY.text()),
+                                        float(self.ui.txtZcom.text()),
+                                        float(self.ui.cbFreq.currentText())
+                                        )
 
             self.gsThread.start()
 
@@ -724,14 +724,14 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sThreadZ.start()
         elif self.ui.rbGalvo.isChecked():
             self.gsThreadZ.parameters = (float(self.ui.txtStartX.text()),
-                                        float(self.ui.txtEndX.text()),
-                                        float(self.ui.txtStepX.text()),
-                                        float(self.ui.txtStartZ.text()),
-                                        float(self.ui.txtEndZ.text()),
-                                        float(self.ui.txtStepZ.text()),
-                                        float(self.ui.txtYcom.text()),
-                                        float(self.ui.cbFreq.currentText())
-                                        )
+                                         float(self.ui.txtEndX.text()),
+                                         float(self.ui.txtStepX.text()),
+                                         float(self.ui.txtStartZ.text()),
+                                         float(self.ui.txtEndZ.text()),
+                                         float(self.ui.txtStepZ.text()),
+                                         float(self.ui.txtYcom.text()),
+                                         float(self.ui.cbFreq.currentText())
+                                         )
             self.gsThreadZ.start()
 
     def scan_stop_Z(self):
@@ -824,12 +824,12 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def go_to_mid(self):
         if self.ui.rbPiezo.isChecked():
-            self.ui.txtXcom.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 2, 3)))
-            self.ui.txtYcom.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 2, 3)))
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_PIEZO + self.XY_MIN_PIEZO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_PIEZO + self.XY_MIN_PIEZO) / 2, 3)))
         elif self.ui.rbGalvo.isChecked():
-            self.ui.txtXcom.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 2, 3)))
-            self.ui.txtYcom.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 2, 3)))
-        self.ui.txtZcom.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 2, 3)))
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_GALVO + self.XY_MIN_GALVO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_GALVO + self.XY_MIN_GALVO) / 2, 3)))
+        self.ui.txtZcom.setText(str(round((self.Z_MAX_PIEZO + self.Z_MIN_PIEZO) / 2, 3)))
         self.go_to()
 
     @QtCore.pyqtSlot()
