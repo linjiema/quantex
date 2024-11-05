@@ -267,7 +267,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sThreadZ.update.connect(self.scan_data_back_ZScan)
             self.sThreadZ.finished.connect(self.scan_stopped_ZScan)
             # Initialize XZ Scan Thread Galvo
-            self.gsThreadZ = XZScanThread(self.hardware)
+            self.gsThreadZ = XZScanThread_galvo(self.hardware)
             self.gsThreadZ.update.connect(self.scan_data_back_ZScan)
             self.gsThreadZ.finished.connect(self.scan_stopped_ZScan)
             # Initialize Max Thread
@@ -526,12 +526,18 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
 
-        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                         float(self.ui.txtEndX.text()),
-                                         float(self.ui.txtStepX.text()))
-        self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
-                                         float(self.ui.txtEndY.text()),
-                                         float(self.ui.txtStepY.text()))
+        self.dThread.xArr = numpy.linspace(start=float(self.ui.txtStartX.text()),
+                                           stop=float(self.ui.txtEndX.text()),
+                                           num=round((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) /
+                                                     float(self.ui.txtStepX.text())),
+                                           endpoint=True,
+                                           dtype=float)
+        self.dThread.yArr = numpy.linspace(start=float(self.ui.txtStartY.text()),
+                                           stop=float(self.ui.txtEndY.text()),
+                                           num=round((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) /
+                                                     float(self.ui.txtStepY.text())),
+                                           endpoint=True,
+                                           dtype=float)
         self.dThread.raw = None
         self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
         self.dThread.update.disconnect()
@@ -700,12 +706,19 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
 
-        self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                         float(self.ui.txtEndX.text()),
-                                         float(self.ui.txtStepX.text()))
-        self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
-                                         float(self.ui.txtEndZ.text()),
-                                         float(self.ui.txtStepZ.text()))
+        self.dThread.xArr = numpy.linspace(start=float(self.ui.txtStartX.text()),
+                                           stop=float(self.ui.txtEndX.text()),
+                                           num=round((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) /
+                                                     float(self.ui.txtStepX.text())),
+                                           endpoint=True,
+                                           dtype=float)
+        self.dThread.yArr = numpy.linspace(start=float(self.ui.txtStartZ.text()),
+                                           stop=float(self.ui.txtEndZ.text()),
+                                           num=round((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) /
+                                                     float(self.ui.txtStepZ.text())),
+                                           endpoint=True,
+                                           dtype=float)
+
         self.dThread.raw = None
         self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
         self.dThread.update.disconnect()
@@ -1261,6 +1274,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.update_current_position()
         try:
             self.actualData_xy = self.dThread.raw
         except:
@@ -1302,6 +1316,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.update_current_position()
         try:
             self.actualData_z = self.dThread.raw
         except:

@@ -285,7 +285,7 @@ class GScanner():
                                                   source='/Dev1/PFI13',
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                  samps_per_chan=int(self.sample_number))
+                                                  samps_per_chan=int(self.sample_number * 2))
         self.x_scanner.write(self.wave_form_x, auto_start=False)
         self.scan_mode_x = self.SCAN_MODE_SCANNING
 
@@ -294,7 +294,7 @@ class GScanner():
                                                   source='/Dev1/PFI13',
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                  samps_per_chan=int(self.sample_number))
+                                                  samps_per_chan=int(self.sample_number * 2))
         self.y_scanner.write(self.wave_form_y, auto_start=False)
         self.scan_mode_y = self.SCAN_MODE_SCANNING
 
@@ -345,6 +345,32 @@ class GScanner():
         position_temp = self.vol_to_position(voltage_temp)
         return position_temp
 
+    def recycle_x_scanner(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+        self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
+        self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.scan_mode_x = self.SCAN_MODE_SINGLE_POINT
+
+    def recycle_y_scanner(self):
+        if hasattr(self, 'y_scanner') and not self.is_closed_y:
+            self.y_scanner.close()
+        self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
+        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.scan_mode_y = self.SCAN_MODE_SINGLE_POINT
+
     def close(self):
         if hasattr(self, 'x_scanner') and not self.is_closed_x:
             self.x_scanner.close()
@@ -352,6 +378,18 @@ class GScanner():
         if hasattr(self, 'y_scanner') and not self.is_closed_y:
             self.y_scanner.close()
             self.is_closed_y = True
+
+    def generating_scan_array(self, start_point: float, end_point: float, line_rate: float) \
+            -> list[float]:
+        # point_num_each_line = round(200 / line_rate)
+        point_num_each_line = 200
+        wave_forward = np.linspace(start=start_point, stop=end_point, num=point_num_each_line,
+                                   endpoint=True, dtype=float)
+        wave_back = np.linspace(start=end_point, stop=start_point, num=point_num_each_line,
+                                endpoint=True, dtype=float)
+        full_wave = np.hstack((wave_forward, wave_back))
+        return list(full_wave)
+
 
 
 if __name__ == '__main__':

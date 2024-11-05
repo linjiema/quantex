@@ -19,7 +19,7 @@ class ConfocalScanThread_galvo(QtCore.QThread):
         self._hardware = hardware
         super().__init__(parent)  # Inherit the init method of parent class
         self.running = False
-        self.parameters = [0, 65, 0.65, 0, 65, 0.65, 0, 0]
+        self.parameters = [-0.4, 0.4, 0.008, -0.4, 0.4, 0.008, 0, 0]
         # [X_Start, X_End, X_Step, Y_Start, Y_End, Y_Step, Z_Position, Line_Frequency]
 
     def run(self):
@@ -31,34 +31,45 @@ class ConfocalScanThread_galvo(QtCore.QThread):
 
         # Define the parameters
         x_start, x_end, x_step, y_start, y_end, y_step = self.parameters[:6]
-        x_axis = np.arange(x_start, x_end, x_step)
-        y_axis = np.arange(y_start, y_end, y_step)
+        x_axis = np.linspace(start=x_start, stop=x_end, num=round((x_end - x_start) / x_step),
+                             endpoint=True, dtype=float)
+        y_axis = np.linspace(start=y_start, stop=y_end, num=round((y_end - y_start) / y_step),
+                             endpoint=True, dtype=float)
 
         # Send the scanning parameter to stage
-        wave_forward, wave_back = self._hardware.mover.generating_scan_array(channel=1,
-                                                                             start_point=x_start,
-                                                                             end_point=x_end,
-                                                                             line_rate=1
-                                                                             )
-
+        full_wave = self._hardware.scanner.generating_scan_array(start_point=x_start,
+                                                                 end_point=x_end,
+                                                                 line_rate=self.parameters[7]
+                                                                 )
         # Scanning process
         forward_back_status = True
         for y_points in y_axis:
             if self.running:
                 # Move to one location
-                self._hardware.mover.move_position_single(channel=2, location=y_points)
+                self._hardware.scanner.go_to_y(position=y_points)
                 while True:
                     try:
                         # Init all counting hardware
-                        self._hardware.triggered_location_sensor.init_task()
+                        self._hardware.scanner.wave_form_x = full_wave
+                        self._hardware.scanner.set_x_scan_param()
                         self._hardware.triggered_counter.init_task()
                         self._hardware.timer.init_task()
 
                         # Start scanning
-                        self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
+                        self._hardware.scanner.start_scan_x()
                         self._hardware.timer.start_timer()
-                        self._hardware.mover.scanning_single_line(channel=1, waveform=wave_forward)
-                        self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
+                        print(y_points)
+                        # get data
+                        posArr = full_wave[:len(full_wave) // 2]
+                        ctsArr = self._hardware.triggered_counter.get_counts_array()
+                        self._hardware.timer.recycle_timer()
+                        # go back to start point
+                        self._hardware.timer.init_task()
+                        self._hardware.timer.start_timer()
+                        self._hardware.scanner.wait_x_scan_finished()
+                        self._hardware.timer.recycle_timer()
+                        self._hardware.scanner.recycle_x_scanner()
+
                         '''
                         if forward_back_status:
                             self._hardware.mover.move_position_single(channel=1, location=wave_forward[0])
@@ -69,21 +80,17 @@ class ConfocalScanThread_galvo(QtCore.QThread):
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
                         '''
-                        print(y_points)
-                        # Processing the data
-                        posArr = self._hardware.triggered_location_sensor.get_location_data()
-                        ctsArr = self._hardware.triggered_counter.get_counts_array()
-                        self._hardware.timer.recycle_timer()
                         forward_back_status = bool(1 - forward_back_status)
                     except BaseException as e:
                         print(e, y_points)
-                        self._hardware.triggered_location_sensor.close()
+                        self.recycle_x_scanner()
+                        self.recycle_y_scanner()
                         self._hardware.triggered_counter.close()
                         self._hardware.timer.close()
                         return
                     break
 
-                self.update.emit(y_points, posArr, ctsArr)
+                self.update.emit(y_points, list(posArr), list(ctsArr))
             else:
                 print('Warning: Scanning is stopped!')
                 break

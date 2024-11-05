@@ -4,7 +4,4 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-print(1,2,3)
-print((1, 2, 3))
-print([1,2,3])
-print(tuple[1, 2, 3])
+print(np.linspace(start=1, stop=5, num=5, endpoint=True))
