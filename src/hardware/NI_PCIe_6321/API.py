@@ -11,47 +11,6 @@ import nidaqmx
 import nidaqmx.constants
 
 
-class GScanner():
-    def __init__(self):
-        connection_check()
-        self.wave_form_x = []
-        self.wave_form_y = []
-        self.current_x = 0.00
-        self.current_y = 0.00
-        self.sample_number = 200
-
-    def init_task_x(self):
-        self.x_scanner = nidaqmx.Task()
-        self.is_closed = False
-        self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
-                                                       name_to_assign_to_channel="",
-                                                       min_val=-5.0,
-                                                       max_val=5.0,
-                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
-                                                       custom_scale_name=""
-                                                       )
-        self.x_scanner.timing.cfg_samp_clk_timing(rate=1000,
-                                                  source='/Dev1/PFI13',
-                                                  active_edge=nidaqmx.constants.Edge.RISING,
-                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                  samps_per_chan=int(self.sample_number))
-
-        self.x_scanner.write(self.wave_form, auto_start=False, timeout=10.0)
-        self.x_scanner.start()
-
-    def stop_scan_x(self):
-        self.x_scanner.stop()
-
-    def go_to_x(self, position):
-        self.x_scanner.write(self.pos_to_volt(position), auto_start=False, timeout=10.0)
-        self.current_x = self.pos_to_volt_x(position)
-
-    def pos_to_volt_x(self, position):
-        # load a stored table to convert position to voltage
-        pass
-        return 0
-
-
 class TriggeredLocationSensor():
     def __init__(self):
         connection_check()
@@ -214,7 +173,7 @@ class OneTimeCounter_HardwareTimer():
                                                    sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                    samps_per_chan=2)
 
-    def count_once(self):
+    def count_once(self) -> int:
         freq = self.count_freq
         self.counter_in.start()
         self.counter_out.start()
@@ -224,9 +183,9 @@ class OneTimeCounter_HardwareTimer():
         self.counter_in.stop()
         self.counter_out.stop()
         if cts_arr[0] > cts_arr[1]:
-            return (cts_arr[1] + 0xFFFFFFFF + 1 - cts_arr[0]) * freq
+            return int((cts_arr[1] + 0xFFFFFFFF + 1 - cts_arr[0]) * freq)
         else:
-            return (cts_arr[1] - cts_arr[0]) * freq
+            return int((cts_arr[1] - cts_arr[0]) * freq)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
@@ -253,17 +212,221 @@ def connection_check():
         raise e
 
 
+class GScanner():
+    SCAN_MODE_SINGLE_POINT = 0
+    SCAN_MODE_SCANNING = 1
+
+    def __init__(self):
+        connection_check()
+        self.wave_form_x = []
+        self.wave_form_y = []
+        self.sample_number = 200
+        self.timing_rate = 1000
+        self.init_scanner()
+        self.scan_mode_x = self.SCAN_MODE_SINGLE_POINT
+        self.scan_mode_y = self.SCAN_MODE_SINGLE_POINT
+
+    def init_scanner(self):
+        self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
+        self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.is_closed_x = False
+        self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
+        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.is_closed_y = False
+
+    def go_to_x(self, position):
+        self.x_scanner.stop()
+        if self.scan_mode_x == self.SCAN_MODE_SCANNING:
+            self.x_scanner.close()
+            self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
+            self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                           name_to_assign_to_channel="",
+                                                           min_val=-5.0,
+                                                           max_val=5.0,
+                                                           units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                           custom_scale_name=""
+                                                           )
+            self.scan_mode_x = self.SCAN_MODE_SINGLE_POINT
+        self.x_scanner.write(self.pos_to_volt_x(position), auto_start=True, timeout=10.0)
+        self.x_scanner.wait_until_done()
+        self.x_scanner.stop()
+
+    def go_to_y(self, position):
+        self.y_scanner.stop()
+        if self.scan_mode_y == self.SCAN_MODE_SCANNING:
+            self.y_scanner.close()
+            self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
+            self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
+                                                           name_to_assign_to_channel="",
+                                                           min_val=-5.0,
+                                                           max_val=5.0,
+                                                           units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                           custom_scale_name=""
+                                                           )
+            self.scan_mode_y = self.SCAN_MODE_SINGLE_POINT
+        self.y_scanner.write(self.pos_to_volt_y(position), auto_start=True, timeout=10.0)
+        self.y_scanner.wait_until_done()
+        self.y_scanner.stop()
+
+    def set_x_scan_param(self):
+        self.x_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
+                                                  source='/Dev1/PFI13',
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                  samps_per_chan=int(self.sample_number * 2))
+        self.x_scanner.write(self.wave_form_x, auto_start=False)
+        self.scan_mode_x = self.SCAN_MODE_SCANNING
+
+    def set_y_scan_param(self):
+        self.y_scanner.timing.cfg_samp_clk_timing(rate=self.timing_rate,
+                                                  source='/Dev1/PFI13',
+                                                  active_edge=nidaqmx.constants.Edge.RISING,
+                                                  sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                  samps_per_chan=int(self.sample_number * 2))
+        self.y_scanner.write(self.wave_form_y, auto_start=False)
+        self.scan_mode_y = self.SCAN_MODE_SCANNING
+
+    def start_scan_x(self):
+        self.x_scanner.start()
+
+    def wait_x_scan_finished(self):
+        self.x_scanner.wait_until_done()
+        self.x_scanner.stop()
+
+    def stop_scan_x(self):
+        self.x_scanner.stop()
+
+    def start_scan_y(self):
+        self.y_scanner.start()
+
+    def wait_y_scan_finished(self):
+        self.y_scanner.wait_until_done()
+
+    def stop_scan_y(self):
+        self.y_scanner.stop()
+
+    def pos_to_volt_x(self, position):
+        # load a stored table to convert position to voltage
+        pass
+        return position
+
+    def pos_to_volt_y(self, position):
+        # load a stored table to convert position to voltage
+        pass
+        return position
+
+    def vol_to_position(self, xy_voltage: np.ndarray) -> np.ndarray:
+        """
+
+        :param xy_voltage:
+        :return:
+        """
+        return xy_voltage
+
+    def read_current_position(self) -> np.ndarray:
+        with nidaqmx.Task() as voltage_read:
+            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
+            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
+            voltage_read.timing.cfg_samp_clk_timing(rate=10000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                    samps_per_chan=5)
+            voltage_temp = np.average(voltage_read.read(number_of_samples_per_channel=5), axis=1)
+        position_temp = self.vol_to_position(voltage_temp)
+        return position_temp
+
+    def recycle_x_scanner(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+        self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
+        self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.scan_mode_x = self.SCAN_MODE_SINGLE_POINT
+
+    def recycle_y_scanner(self):
+        if hasattr(self, 'y_scanner') and not self.is_closed_y:
+            self.y_scanner.close()
+        self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
+        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                       name_to_assign_to_channel="",
+                                                       min_val=-5.0,
+                                                       max_val=5.0,
+                                                       units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                       custom_scale_name=""
+                                                       )
+        self.scan_mode_y = self.SCAN_MODE_SINGLE_POINT
+
+    def close(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+            self.is_closed_x = True
+        if hasattr(self, 'y_scanner') and not self.is_closed_y:
+            self.y_scanner.close()
+            self.is_closed_y = True
+
+    def generating_scan_array(self, start_point: float, end_point: float, line_rate: float) \
+            -> list[float]:
+        # point_num_each_line = round(200 / line_rate)
+        point_num_each_line = 200
+        wave_forward = np.linspace(start=start_point, stop=end_point, num=point_num_each_line,
+                                   endpoint=True, dtype=float)
+        wave_back = np.linspace(start=end_point, stop=start_point, num=point_num_each_line,
+                                endpoint=True, dtype=float)
+        full_wave = np.hstack((wave_forward, wave_back))
+        return list(full_wave)
+
+
+
 if __name__ == '__main__':
-    location = TriggeredLocationSensor()
-    sensor = TriggeredCounter()
+    scanner = GScanner()
 
-    timer = HardwareTimer()
-    sensor.init_task()
-    location.init_task()
-    timer.init_task()
-    timer.start_timer()
-    print(sensor.get_counts_array())
-    print(location.get_location_raw_data())
-    timer.close()
+    scanner.go_to_x(position=0.1)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
+    scanner.go_to_x(position=0.2)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
+    scanner.go_to_x(position=0.1)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
+    scanner.go_to_x(position=0.2)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
+    scanner.go_to_x(position=0.1)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
+    scanner.go_to_x(position=0.2)
+    time.sleep(0.1)
+    print(scanner.read_current_position())
 
+    time.sleep(0.1)
 
+    scanner.close()
+    # with nidaqmx.Task() as task:
+    #     task.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
+    #     task.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
+    #     task.timing.cfg_samp_clk_timing(rate=1000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+    #                                     samps_per_chan=5)
+    #     data = task.read(number_of_samples_per_channel=5)
+    #     print(data)
+    #     print(np.round(np.average(data, axis=1), 4))
+    #     [a, b] = np.average(data, axis=1)
+    #     print(a)
+    #     print(b)
+    #     print(type(np.average(data, axis=1)))
+    #     print(type(a))

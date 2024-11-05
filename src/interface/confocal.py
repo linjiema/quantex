@@ -6,6 +6,8 @@ import os.path
 import time
 import numpy
 import yaml
+import tempfile
+import pickle
 from ui.uipy.confocal import Ui_Confocal
 from PyQt5 import QtWidgets, QtCore
 import matplotlib
@@ -16,24 +18,43 @@ from matplotlib.widgets import Cursor
 from matplotlib import cm
 from collections import deque
 
-from src.threads.confocal_threads import CountThread, MoveThread, ConfocalScanThread, XZScanThread, MaxThread, DataThread
+from src.threads.confocal_threads import DataThread, MoveThread, MoveThread_galvo, ConfocalScanThread, \
+    ConfocalScanThread_galvo, CountThread, MaxThread, MaxThread_galvo, XZScanThread, XZScanThread_galvo
 
 import src.utils.logger as logger
 
 
 class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
+    XY_MIN_PIEZO = 0.0  # um
+    XY_MAX_PIEZO = 65.0  # um
+    XY_MIN_GALVO = -0.4  # V
+    XY_MAX_GALVO = 0.4  # V
+    Z_MIN_PIEZO = 0.0  # um
+    Z_MAX_PIEZO = 35.0  # um
+    CACHE_LIFE = 7  # days
+
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Confocal()
         self.ui.setupUi(self)
+        self.cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache\\confocal")
+        os.makedirs(self.cache_dir, exist_ok=True)
+        self.scanning_cache = {
+            "piezo_plot": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "piezo_raw": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "galvo_plot": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False),
+            "galvo_raw": tempfile.NamedTemporaryFile(dir=self.cache_dir, delete=False)
+        }
 
         # Load defaults
         self.load_defaults()
+
         # Initialize plots
         self.init_xy_scan_plot()
         self.init_z_scan_plot()
         self.init_counts_plot()
+
         # Initialize hardware
         self.hardware = hardware
         # Initialize Cursor Lines
@@ -53,6 +74,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Hardware Group
         self.ui.pbInitHW.clicked.connect(self.init_hardware)
         self.ui.pbCleanupHW.clicked.connect(self.cleanup_hardware)
+        self.ui.rbGalvo.toggled.connect(self.scanner_changed)
+        # self.ui.rbPiezo.toggled.connect(self.scanner_changed)
         # Laser Group
         self.ui.pbLaserOn.clicked.connect(self.laser_on)
         self.ui.pbLaserOff.clicked.connect(self.laser_off)
@@ -68,7 +91,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCenterZ.clicked.connect(self.set_center_range_Zscan)
         self.ui.pbStartZ.clicked.connect(self.scan_start_Z)
         self.ui.pbStopZ.clicked.connect(self.scan_stop_Z)
-
 
         # Cursor Group
         self.ui.pbNewCursor.clicked.connect(self.new_cursor)
@@ -87,7 +109,7 @@ class mainGUI(QtWidgets.QMainWindow):
         '''missing keep NV'''
         # Counts Group
         self.ui.pbCount.clicked.connect(self.count_start)
-        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_rate)
+        self.ui.cbCountFreq.currentIndexChanged[str].connect(self.change_count_rate)
         self.ui.pbMax.clicked.connect(self.maximize)
         # Plot Group XY
         self.ui.pbSaveData.clicked.connect(self.save_data)
@@ -120,17 +142,20 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         self.init_xy_dummy_map()
 
-    def init_xy_dummy_map(self):
+    def init_xy_dummy_data(self):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
         self.map = numpy.random.randint(0, 100, size=(yNum, xNum))
         self.map[30][40] = 100000
 
+    def init_xy_dummy_map(self):
+        self.init_xy_dummy_data()
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.map.max(),
+        self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
+                                                vmax=self.map.max(),
                                                 extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
                                                         float(self.ui.txtStartY.text()), float(self.ui.txtEndY.text())],
                                                 interpolation='nearest',
@@ -157,21 +182,26 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         self.init_z_dummy_map()
 
-    def init_z_dummy_map(self):
+    def init_z_dummy_data(self):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) / float(self.ui.txtStepZ.text()))
         self.mapZ = numpy.random.randint(0, 100, size=(yNum, xNum))
         self.mapZ[10][10] = 100000
 
+    def init_z_dummy_map(self):
+        self.init_z_dummy_data()
         # Initialize Map
         self.mapColor = 'gist_earth'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
-        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0, vmax=self.mapZ.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
-                                                interpolation='nearest',
-                                                origin='lower')
+        self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
+                                                  vmax=self.mapZ.max(),
+                                                  extent=[float(self.ui.txtStartX.text()),
+                                                          float(self.ui.txtEndX.text()),
+                                                          float(self.ui.txtStartZ.text()),
+                                                          float(self.ui.txtEndZ.text())],
+                                                  interpolation='nearest',
+                                                  origin='lower')
         # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
         self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
         self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
@@ -185,6 +215,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplPlot.setParent(self.ui.wMplCounts)
         self.ui.mplPlot.axes = fig.add_subplot(111)
         self.ui.mplPlot.setGeometry(QtCore.QRect(QtCore.QPoint(0, 0), self.ui.wMplCounts.size()))
+        # Initialize Dummy Count Data
+        self.init_counts_dummy_data()
 
     def init_counts_dummy_data(self):
         # Initialize Dummy Counts Data
@@ -203,24 +235,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.statusbar.showMessage('Initializing Hardware...')
         # Initialize...
         try:
-            # if self.hardware is None:
-            #     self.hardware = AllHardware()
-            # # Connect Piezo Stage
-            # status = self.hardware.mover.scan_devices()
-            # if status == 0:
-            #     self.hardware.mover.open_devices()
-            #     self.init_position()
-            # else:
-            #     print('Warning: Piezo stage hasn\'t been connected!')
-            self.hardware.init_all_device()
             self.hardware.init_mover()
             self.hardware.init_scanner()
             self.hardware.init_pulser()
             self.hardware.init_counter()
             self.hardware.init_ni()
             if self.hardware.mover_status:
-                self.init_position()
-
+                self.update_current_position()
+                self.ui.pbGetPos.setEnabled(True)
             # Initialize thread (Need to initialize hardware first!!)
             # Initialize Count Thread
             self.cThread = CountThread(self.hardware)
@@ -229,21 +251,36 @@ class mainGUI(QtWidgets.QMainWindow):
             # Initialize Move Thread
             self.mThread = MoveThread(self.hardware)
             self.mThread.moved.connect(self.gone_to)
+            # Initialize Move Thread Galvo
+            self.gmThread = MoveThread_galvo(self.hardware)
+            self.gmThread.moved.connect(self.gone_to)
             # Initialize Confocal Scan Thread
             self.sThread = ConfocalScanThread(self.hardware)
             self.sThread.update.connect(self.scan_data_back)
             self.sThread.finished.connect(self.scan_stopped)
+            # Initialize Confocal Scan Thread Galvo
+            self.gsThread = ConfocalScanThread_galvo(self.hardware)
+            self.gsThread.update.connect(self.scan_data_back)
+            self.gsThread.finished.connect(self.scan_stopped)
             # Initialize XZ Scan Thread
             self.sThreadZ = XZScanThread(self.hardware)
             self.sThreadZ.update.connect(self.scan_data_back_ZScan)
             self.sThreadZ.finished.connect(self.scan_stopped_ZScan)
+            # Initialize XZ Scan Thread Galvo
+            self.gsThreadZ = XZScanThread_galvo(self.hardware)
+            self.gsThreadZ.update.connect(self.scan_data_back_ZScan)
+            self.gsThreadZ.finished.connect(self.scan_stopped_ZScan)
             # Initialize Max Thread
             self.maxThread = MaxThread(self.hardware)
             self.maxThread.counts.connect(self.update_counts)
             self.maxThread.moved.connect(self.gone_to)
+            # Initialize Max Thread Galvo
+            self.gmaxThread = MaxThread_galvo(self.hardware)
+            self.gmaxThread.counts.connect(self.update_counts)
+            self.gmaxThread.moved.connect(self.gone_to)
             # Initialize Data Thread
             self.dThread = DataThread()
-            self.dThread.update.connect(self.update_image)
+            self.dThread.update.connect(self.update_image_data)
 
         except BaseException as e:
             print(e)
@@ -270,19 +307,19 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbCleanupHW.setEnabled(True)
 
         self.ui.statusbar.showMessage('Hardware Initialized Successfully.')
-
+        # set step move dic for move point
         self.stepMoveDic = {
             'x+': lambda: self.ui.txtXcom.setText(
-                str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepX.text()), 3))),
+                str(round(float(self.ui.txtXcom.text()) + float(self.ui.txtStepXY.text()), 3))),
 
             'x-': lambda: self.ui.txtXcom.setText(
-                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepX.text()), 3))),
+                str(round(float(self.ui.txtXcom.text()) - float(self.ui.txtStepXY.text()), 3))),
 
             'y+': lambda: self.ui.txtYcom.setText(
-                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepY.text()), 3))),
+                str(round(float(self.ui.txtYcom.text()) + float(self.ui.txtStepXY.text()), 3))),
 
             'y-': lambda: self.ui.txtYcom.setText(
-                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepY.text()), 3))),
+                str(round(float(self.ui.txtYcom.text()) - float(self.ui.txtStepXY.text()), 3))),
 
             'z+': lambda: self.ui.txtZcom.setText(
                 str(round(float(self.ui.txtZcom.text()) + float(self.ui.txtStep.text()), 3))),
@@ -290,14 +327,23 @@ class mainGUI(QtWidgets.QMainWindow):
             'z-': lambda: self.ui.txtZcom.setText(
                 str(round(float(self.ui.txtZcom.text()) - float(self.ui.txtStep.text()), 3)))}
 
-    def init_position(self):
-        x = self.hardware.mover.read_position_single(channel=1)
-        y = self.hardware.mover.read_position_single(channel=2)
-        z = self.hardware.mover.read_position_single(channel=4)
-        self.ui.txtX.setText(str(round(x, 3)))
-        self.ui.txtY.setText(str(round(y, 3)))
-        self.ui.txtZ.setText(str(round(z, 3)))
-        self.ui.pbGetPos.setEnabled(True)
+    def update_current_position(self) -> None:
+        """
+        get real position of piezo and galvo by measured the realtime position, then update the ui.
+        :return: None
+        """
+        try:
+            if self.ui.rbPiezo.isChecked():
+                x = self.hardware.mover.read_position_single(channel=1)
+                y = self.hardware.mover.read_position_single(channel=2)
+            elif self.ui.rbGalvo.isChecked():
+                x, y = self.hardware.scanner.read_current_position()
+            z = self.hardware.mover.read_position_single(channel=4)
+            self.ui.txtX.setText(str(round(x, 3)))
+            self.ui.txtY.setText(str(round(y, 3)))
+            self.ui.txtZ.setText(str(round(z, 3)))
+        except Exception as e:
+            logger.logger.info(e)
 
     @QtCore.pyqtSlot()
     def cleanup_hardware(self):
@@ -330,9 +376,6 @@ class mainGUI(QtWidgets.QMainWindow):
         __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
                        self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
                        self.hardware.timer_status, self.hardware.one_time_counter_status)
-        # print(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
-        #                self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
-        #                self.hardware.timer_status, self.hardware.one_time_counter_status)
         if __status == 0:
             self.ui.statusbar.showMessage('Hardware Reset Successfully.')
             # self.hardware = None
@@ -356,14 +399,23 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbLaserOff.setEnabled(False)
 
     # Scan Group
+    # function for xy scan
     @QtCore.pyqtSlot()
     def set_full_range(self):
-        self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('65')
-        self.ui.txtStepX.setText('0.65')
-        self.ui.txtStartY.setText('0')
-        self.ui.txtEndY.setText('65')
-        self.ui.txtStepY.setText('0.65')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStartY.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndY.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStartY.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndY.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -473,6 +525,24 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStepY.setEnabled(False)
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
+
+        self.dThread.xArr = numpy.linspace(start=float(self.ui.txtStartX.text()),
+                                           stop=float(self.ui.txtEndX.text()),
+                                           num=round((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) /
+                                                     float(self.ui.txtStepX.text())),
+                                           endpoint=True,
+                                           dtype=float)
+        self.dThread.yArr = numpy.linspace(start=float(self.ui.txtStartY.text()),
+                                           stop=float(self.ui.txtEndY.text()),
+                                           num=round((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) /
+                                                     float(self.ui.txtStepY.text())),
+                                           endpoint=True,
+                                           dtype=float)
+        self.dThread.raw = None
+        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image_data)
+
         if self.ui.rbPiezo.isChecked():
             self.sThread.parameters = (float(self.ui.txtStartX.text()),
                                        float(self.ui.txtEndX.text()),
@@ -483,19 +553,20 @@ class mainGUI(QtWidgets.QMainWindow):
                                        float(self.ui.txtZcom.text()),
                                        float(self.ui.cbFreq.currentText())
                                        )
-            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                             float(self.ui.txtEndX.text()),
-                                             float(self.ui.txtStepX.text()))
-            self.dThread.yArr = numpy.arange(float(self.ui.txtStartY.text()),
-                                             float(self.ui.txtEndY.text()),
-                                             float(self.ui.txtStepY.text()))
-            self.dThread.raw = None
-            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-            self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image)
+
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThread.parameters = (float(self.ui.txtStartX.text()),
+                                        float(self.ui.txtEndX.text()),
+                                        float(self.ui.txtStepX.text()),
+                                        float(self.ui.txtStartY.text()),
+                                        float(self.ui.txtEndY.text()),
+                                        float(self.ui.txtStepY.text()),
+                                        float(self.ui.txtZcom.text()),
+                                        float(self.ui.cbFreq.currentText())
+                                        )
+
+            self.gsThread.start()
 
     @QtCore.pyqtSlot()
     def scan_stop(self):
@@ -508,16 +579,25 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.sThread.running = False
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThread.running = False
 
+    # function for z scan
     @QtCore.pyqtSlot()
     def set_full_range_ZScan(self):
-        self.ui.txtStartX.setText('0')
-        self.ui.txtEndX.setText('65')
-        self.ui.txtStepX.setText('0.65')
-        self.ui.txtStartZ.setText('0')
-        self.ui.txtEndZ.setText('30')
-        self.ui.txtStepZ.setText('0.6')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
+            self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
+            self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
+            self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
 
     @QtCore.pyqtSlot()
     def select_range_ZScan(self):
@@ -528,10 +608,10 @@ class mainGUI(QtWidgets.QMainWindow):
 
         self._cid = []
         cid = self.ui.mplMapZ.mpl_connect('axes_enter_event',
-                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.CrossCursor))
+                                          lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.CrossCursor))
         self._cid.append(cid)
         cid = self.ui.mplMapZ.mpl_connect('axes_leave_event',
-                                         lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor))
+                                          lambda event: self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor))
         self._cid.append(cid)
         cid = self.ui.mplMapZ.mpl_connect('button_press_event', self.select_drag_start_Zscan)
         self._cid.append(cid)
@@ -590,7 +670,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def set_center_range_Zscan(self):
         x_val = round(float(self.ui.txtXcom.text()), 1)
         z_val = round(float(self.ui.txtZcom.text()), 1)
-        d = float(self.ui.txtRange.text())
+        d = float(self.ui.txtRangeZ.text())
         self.ui.txtStartX.setText(str(round(x_val - d / 2, 3)))
         self.ui.txtStartZ.setText(str(round(z_val - d / 2, 3)))
         self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
@@ -626,6 +706,24 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.rbPiezo.setEnabled(False)
         self.ui.rbGalvo.setEnabled(False)
 
+        self.dThread.xArr = numpy.linspace(start=float(self.ui.txtStartX.text()),
+                                           stop=float(self.ui.txtEndX.text()),
+                                           num=round((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) /
+                                                     float(self.ui.txtStepX.text())),
+                                           endpoint=True,
+                                           dtype=float)
+        self.dThread.yArr = numpy.linspace(start=float(self.ui.txtStartZ.text()),
+                                           stop=float(self.ui.txtEndZ.text()),
+                                           num=round((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) /
+                                                     float(self.ui.txtStepZ.text())),
+                                           endpoint=True,
+                                           dtype=float)
+
+        self.dThread.raw = None
+        self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
+        self.dThread.update.disconnect()
+        self.dThread.update.connect(self.update_image_data_ZScan)
+
         if self.ui.rbPiezo.isChecked():
             self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
@@ -636,19 +734,18 @@ class mainGUI(QtWidgets.QMainWindow):
                                         float(self.ui.txtYcom.text()),
                                         float(self.ui.cbFreq.currentText())
                                         )
-            self.dThread.xArr = numpy.arange(float(self.ui.txtStartX.text()),
-                                             float(self.ui.txtEndX.text()),
-                                             float(self.ui.txtStepX.text()))
-            self.dThread.yArr = numpy.arange(float(self.ui.txtStartZ.text()),
-                                             float(self.ui.txtEndZ.text()),
-                                             float(self.ui.txtStepZ.text()))
-            self.dThread.raw = None
-            self.dThread.map = numpy.zeros((len(self.dThread.yArr), len(self.dThread.xArr)), dtype=int)
-            self.dThread.update.disconnect()
-            self.dThread.update.connect(self.update_image_ZScan)
             self.sThreadZ.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThreadZ.parameters = (float(self.ui.txtStartX.text()),
+                                         float(self.ui.txtEndX.text()),
+                                         float(self.ui.txtStepX.text()),
+                                         float(self.ui.txtStartZ.text()),
+                                         float(self.ui.txtEndZ.text()),
+                                         float(self.ui.txtStepZ.text()),
+                                         float(self.ui.txtYcom.text()),
+                                         float(self.ui.cbFreq.currentText())
+                                         )
+            self.gsThreadZ.start()
 
     def scan_stop_Z(self):
         self.ui.statusbar.showMessage('Scan stopping...')
@@ -660,7 +757,7 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.sThreadZ.running = False
         elif self.ui.rbGalvo.isChecked():
-            pass
+            self.gsThreadZ.running = False
 
     # Cursor Group
     @QtCore.pyqtSlot()
@@ -739,9 +836,13 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def go_to_mid(self):
-        self.ui.txtXcom.setText('32.5')
-        self.ui.txtYcom.setText('32.5')
-        self.ui.txtZcom.setText('17.5')
+        if self.ui.rbPiezo.isChecked():
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_PIEZO + self.XY_MIN_PIEZO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_PIEZO + self.XY_MIN_PIEZO) / 2, 3)))
+        elif self.ui.rbGalvo.isChecked():
+            self.ui.txtXcom.setText(str(round((self.XY_MAX_GALVO + self.XY_MIN_GALVO) / 2, 3)))
+            self.ui.txtYcom.setText(str(round((self.XY_MAX_GALVO + self.XY_MIN_GALVO) / 2, 3)))
+        self.ui.txtZcom.setText(str(round((self.Z_MAX_PIEZO + self.Z_MIN_PIEZO) / 2, 3)))
         self.go_to()
 
     @QtCore.pyqtSlot()
@@ -765,8 +866,8 @@ class mainGUI(QtWidgets.QMainWindow):
             self.mThread.command = self.cursorPosition
             self.mThread.start()
         elif self.ui.rbGalvo.isChecked():
-            pass
-
+            self.gmThread.command = self.cursorPosition
+            self.gmThread.start()
 
     @QtCore.pyqtSlot()
     def mark_current_position(self):
@@ -797,7 +898,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.cThread.running = False
 
     @QtCore.pyqtSlot(str)
-    def change_rate(self, s):
+    def change_count_rate(self, s):
         new_freq = eval(s)
         self.cThread.count_freq = new_freq
         self.cThread.count_freq_changed = True
@@ -816,10 +917,82 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbZup.setEnabled(False)
         self.ui.pbCount.setEnabled(False)
 
-        self.maxThread.step = round(float(self.ui.txtStep.text()), 3)
-        self.maxThread.start()
+        if self.ui.rbGalvo.isChecked():
+            self.gmaxThread.step_xy = round(float(self.ui.txtStepXY.text()), 3)
+            self.gmaxThread.step_z = round(float(self.ui.txtStep.text()), 3)
+            self.gmaxThread.start()
+        elif self.ui.rbPiezo.isChecked():
+            self.maxThread.step_xy = round(float(self.ui.txtStepXY.text()), 3)
+            self.maxThread.step_z = round(float(self.ui.txtStep.text()), 3)
+            self.maxThread.start()
 
     # Plot Group
+    @QtCore.pyqtSlot()
+    def save_plot_to_cache(self):
+        # save temp data to galvo file
+        if self.ui.rbPiezo.isChecked():
+            with open(self.scanning_cache["galvo_plot"].name, 'wb') as f:
+                pickle.dump(self.map, f)
+                pickle.dump(self.mapZ, f)
+            with open(self.scanning_cache["galvo_raw"].name, 'wb') as f:
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData_z, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+        # save temp data to piezo file
+        elif self.ui.rbGalvo.isChecked():
+            with open(self.scanning_cache["piezo_plot"].name, 'wb') as f:
+                pickle.dump(self.map, f)
+                pickle.dump(self.mapZ, f)
+            with open(self.scanning_cache["piezo_raw"].name, 'wb') as f:
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+                if hasattr(self, "actualData"):
+                    pickle.dump(self.actualData_z, f)
+                else:
+                    pickle.dump(0, f)  # set raw_data to 0 for later check when loading
+
+    @QtCore.pyqtSlot()
+    def load_plots_from_cache(self):
+        if self.ui.rbPiezo.isChecked():
+            with open(self.scanning_cache["piezo_plot"].name, 'rb') as f:
+                try:
+                    self.map = pickle.load(f)
+                    self.mapZ = pickle.load(f)
+                except EOFError:
+                    self.init_xy_dummy_data()
+                    self.init_z_dummy_data()
+                else:
+                    with open(self.scanning_cache["piezo_raw"].name, 'rb') as f:
+                        self.actualData = pickle.load(f)
+                        self.actualData_z = pickle.load(f)
+                    if self.actualData == 0:
+                        del self.actualData
+                    if self.actualData_z == 0:
+                        del self.actualData_z
+        elif self.ui.rbGalvo.isChecked():
+            with open(self.scanning_cache["galvo_plot"].name, 'rb') as f:
+                try:
+                    self.map = pickle.load(f)
+                    self.mapZ = pickle.load(f)
+                except EOFError:
+                    self.init_xy_dummy_data()
+                    self.init_z_dummy_data()
+                else:
+                    with open(self.scanning_cache["galvo_raw"].name, 'rb') as f:
+                        self.actualData = pickle.load(f)
+                        self.actualData_z = pickle.load(f)
+                    if self.actualData == 0:
+                        del self.actualData
+                    if self.actualData_z == 0:
+                        del self.actualData_z
+
     @QtCore.pyqtSlot()
     def save_data(self):
         try:
@@ -838,7 +1011,6 @@ class mainGUI(QtWidgets.QMainWindow):
             return
         self.save_data_uni()
 
-
     def save_data_uni(self):
         directory = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', "", "Text (*.txt)")
         directory = str(directory[0].replace('/', '\\'))
@@ -849,7 +1021,6 @@ class mainGUI(QtWidgets.QMainWindow):
             f.close()
         else:
             sys.stderr.write('No file selected\n')
-
 
     @QtCore.pyqtSlot()
     def replot_image(self):
@@ -882,12 +1053,14 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplMapZ.figure.clear()
         self.ui.mplMapZ.axes = self.ui.mplMapZ.figure.add_subplot(111)
         self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ,
-                                                cmap=cm.get_cmap(self.mapColor),
-                                                vmin=0, vmax=self.mapZ.max(),
-                                                extent=[float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()),
-                                                        float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())],
-                                                interpolation='nearest',
-                                                origin='lower')
+                                                  cmap=cm.get_cmap(self.mapColor),
+                                                  vmin=0, vmax=self.mapZ.max(),
+                                                  extent=[float(self.ui.txtStartX.text()),
+                                                          float(self.ui.txtEndX.text()),
+                                                          float(self.ui.txtStartZ.text()),
+                                                          float(self.ui.txtEndZ.text())],
+                                                  interpolation='nearest',
+                                                  origin='lower')
         # See https://matplotlib.org/gallery/images_contours_and_fields/interpolation_methods.html for interpolation
 
         self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
@@ -931,54 +1104,93 @@ class mainGUI(QtWidgets.QMainWindow):
         if location != '':
             self.load_defaults(location)
 
-
     def load_defaults(self, config_path='config/config_confocal.yaml'):
         current_path = os.path.dirname(os.path.abspath(__file__))
         CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
         self.config_confocal = load_config(config_path=CONFIG_file)
-        self.ui.txtStartX.setText(str(self.config_confocal['scan']['x']['start']))
-        self.ui.txtStartY.setText(str(self.config_confocal['scan']['y']['start']))
-        self.ui.txtStartZ.setText(str(self.config_confocal['scan']['z']['start']))
-        self.ui.txtEndX.setText(str(self.config_confocal['scan']['x']['end']))
-        self.ui.txtEndY.setText(str(self.config_confocal['scan']['y']['end']))
-        self.ui.txtEndZ.setText(str(self.config_confocal['scan']['z']['end']))
-        self.ui.txtStepX.setText(str(self.config_confocal['scan']['x']['step']))
-        self.ui.txtStepY.setText(str(self.config_confocal['scan']['y']['step']))
-        self.ui.txtStepZ.setText(str(self.config_confocal['scan']['z']['step']))
-        self.ui.txtStep.setText(str(self.config_confocal['move']['step']))
-        self.ui.txtXcom.setText(str(self.config_confocal['cursor']['x']))
-        self.ui.txtYcom.setText(str(self.config_confocal['cursor']['y']))
-        self.ui.txtZcom.setText(str(self.config_confocal['cursor']['z']))
-        self.ui.txtRange.setText(str(self.config_confocal['scan']['range']))
-        if self.config_confocal['scanner'] == 'piezo':
-            self.ui.rbPiezo.setChecked(True)
-        elif self.config_confocal['scanner'] == 'galvo':
-            self.ui.rbGalvo.setChecked(True)
+        self.update_ui_based_on_default()
 
     @QtCore.pyqtSlot()
     def save_defaults(self, config_path='config/config_confocal.yaml'):
-        self.config_confocal['scan']['x']['start'] = float(self.ui.txtStartX.text())
-        self.config_confocal['scan']['y']['start'] = float(self.ui.txtStartY.text())
-        self.config_confocal['scan']['z']['start'] = float(self.ui.txtStartZ.text())
-        self.config_confocal['scan']['x']['end'] = float(self.ui.txtEndX.text())
-        self.config_confocal['scan']['y']['end'] = float(self.ui.txtEndY.text())
-        self.config_confocal['scan']['z']['end'] = float(self.ui.txtEndZ.text())
-        self.config_confocal['scan']['x']['step'] = float(self.ui.txtStepX.text())
-        self.config_confocal['scan']['y']['step'] = float(self.ui.txtStepY.text())
-        self.config_confocal['scan']['z']['step'] = float(self.ui.txtStepZ.text())
-        self.config_confocal['move']['step'] = float(self.ui.txtStep.text())
-        self.config_confocal['cursor']['x'] = float(self.ui.txtXcom.text())
-        self.config_confocal['cursor']['y'] = float(self.ui.txtYcom.text())
-        self.config_confocal['cursor']['z'] = float(self.ui.txtZcom.text())
-        self.config_confocal['scan']['range'] = float(self.ui.txtRange.text())
-        if self.ui.rbPiezo.isChecked():
-            self.config_confocal['scanner'] = 'piezo'
-        elif self.ui.rbGalvo.isChecked():
-            self.config_confocal['scanner'] = 'galvo'
+        self.update_default_based_on_ui()
         current_path = os.path.dirname(os.path.abspath(__file__))
         CONFIG_file = os.path.join(os.path.dirname(os.path.dirname(current_path)), config_path)
         save_config(config=self.config_confocal, config_path=CONFIG_file)
 
+    def update_ui_based_on_default(self):
+        if self.config_confocal['scanner'] == 'piezo':
+            self.ui.rbPiezo.setChecked(True)
+            self.ui.txtStartX.setText(str(self.config_confocal['piezo_scan']['x']['start']))
+            self.ui.txtStartY.setText(str(self.config_confocal['piezo_scan']['y']['start']))
+            self.ui.txtStartZ.setText(str(self.config_confocal['piezo_scan']['z']['start']))
+            self.ui.txtEndX.setText(str(self.config_confocal['piezo_scan']['x']['end']))
+            self.ui.txtEndY.setText(str(self.config_confocal['piezo_scan']['y']['end']))
+            self.ui.txtEndZ.setText(str(self.config_confocal['piezo_scan']['z']['end']))
+            self.ui.txtStepX.setText(str(self.config_confocal['piezo_scan']['x']['step']))
+            self.ui.txtStepY.setText(str(self.config_confocal['piezo_scan']['y']['step']))
+            self.ui.txtStepZ.setText(str(self.config_confocal['piezo_scan']['z']['step']))
+            self.ui.txtRange.setText(str(self.config_confocal['piezo_scan']['range']))
+            self.ui.txtXcom.setText(str(self.config_confocal['piezo_scan']['cursor']['x']))
+            self.ui.txtYcom.setText(str(self.config_confocal['piezo_scan']['cursor']['y']))
+            self.ui.txtZcom.setText(str(self.config_confocal['piezo_scan']['cursor']['z']))
+            self.ui.txtStepXY.setText(str(self.config_confocal['move']['piezo_xy_step']))
+            self.ui.cbFreq.setEnabled(False)
+        elif self.config_confocal['scanner'] == 'galvo':
+            self.ui.rbGalvo.setChecked(True)
+            self.ui.txtStartX.setText(str(self.config_confocal['galvo_scan']['x']['start']))
+            self.ui.txtStartY.setText(str(self.config_confocal['galvo_scan']['y']['start']))
+            self.ui.txtStartZ.setText(str(self.config_confocal['galvo_scan']['z']['start']))
+            self.ui.txtEndX.setText(str(self.config_confocal['galvo_scan']['x']['end']))
+            self.ui.txtEndY.setText(str(self.config_confocal['galvo_scan']['y']['end']))
+            self.ui.txtEndZ.setText(str(self.config_confocal['galvo_scan']['z']['end']))
+            self.ui.txtStepX.setText(str(self.config_confocal['galvo_scan']['x']['step']))
+            self.ui.txtStepY.setText(str(self.config_confocal['galvo_scan']['y']['step']))
+            self.ui.txtStepZ.setText(str(self.config_confocal['galvo_scan']['z']['step']))
+            self.ui.txtRange.setText(str(self.config_confocal['galvo_scan']['range']))
+            self.ui.txtXcom.setText(str(self.config_confocal['galvo_scan']['cursor']['x']))
+            self.ui.txtYcom.setText(str(self.config_confocal['galvo_scan']['cursor']['y']))
+            self.ui.txtZcom.setText(str(self.config_confocal['galvo_scan']['cursor']['z']))
+            self.ui.txtStepXY.setText(str(self.config_confocal['move']['galvo_xy_step']))
+            self.ui.cbFreq.setEnabled(True)
+            self.ui.cbFreq.setCurrentIndex(int(self.config_confocal['galvo_scan']['line_frequency_index']))
+        self.ui.txtStep.setText(str(self.config_confocal['move']['z_step']))
+        self.ui.txtRangeZ.setText(str(self.config_confocal['z_scan_range']))
+
+    def update_default_based_on_ui(self):
+        if self.config_confocal['scanner'] == 'piezo':
+            self.config_confocal['piezo_scan']['x']['start'] = float(self.ui.txtStartX.text())
+            self.config_confocal['piezo_scan']['y']['start'] = float(self.ui.txtStartY.text())
+            self.config_confocal['piezo_scan']['z']['start'] = float(self.ui.txtStartZ.text())
+            self.config_confocal['piezo_scan']['x']['end'] = float(self.ui.txtEndX.text())
+            self.config_confocal['piezo_scan']['y']['end'] = float(self.ui.txtEndY.text())
+            self.config_confocal['piezo_scan']['z']['end'] = float(self.ui.txtEndZ.text())
+            self.config_confocal['piezo_scan']['x']['step'] = float(self.ui.txtStepX.text())
+            self.config_confocal['piezo_scan']['y']['step'] = float(self.ui.txtStepY.text())
+            self.config_confocal['piezo_scan']['z']['step'] = float(self.ui.txtStepZ.text())
+            self.config_confocal['piezo_scan']['range'] = float(self.ui.txtRange.text())
+            self.config_confocal['piezo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
+            self.config_confocal['piezo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
+            self.config_confocal['piezo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+            self.config_confocal['move']['piezo_xy_step'] = float(self.ui.txtStepXY.text())
+        elif self.config_confocal['scanner'] == 'galvo':
+            self.config_confocal['galvo_scan']['x']['start'] = float(self.ui.txtStartX.text())
+            self.config_confocal['galvo_scan']['y']['start'] = float(self.ui.txtStartY.text())
+            self.config_confocal['galvo_scan']['z']['start'] = float(self.ui.txtStartZ.text())
+            self.config_confocal['galvo_scan']['x']['end'] = float(self.ui.txtEndX.text())
+            self.config_confocal['galvo_scan']['y']['end'] = float(self.ui.txtEndY.text())
+            self.config_confocal['galvo_scan']['z']['end'] = float(self.ui.txtEndZ.text())
+            self.config_confocal['galvo_scan']['x']['step'] = float(self.ui.txtStepX.text())
+            self.config_confocal['galvo_scan']['y']['step'] = float(self.ui.txtStepY.text())
+            self.config_confocal['galvo_scan']['z']['step'] = float(self.ui.txtStepZ.text())
+            self.config_confocal['galvo_scan']['range'] = float(self.ui.txtRange.text())
+            self.config_confocal['galvo_scan']['cursor']['x'] = float(self.ui.txtXcom.text())
+            self.config_confocal['galvo_scan']['cursor']['y'] = float(self.ui.txtYcom.text())
+            self.config_confocal['galvo_scan']['cursor']['z'] = float(self.ui.txtZcom.text())
+            self.config_confocal['move']['galvo_xy_step'] = float(self.ui.txtStepXY.text())
+            self.config_confocal['galvo_scan']['line_frequency_index'] = int(self.ui.cbFreq.currentIndex())
+            self.config_confocal['galvo_scan']['line_frequency_value'] = float(self.ui.cbFreq.currentText())
+        self.config_confocal['move']['z_step'] = float(self.ui.txtStep.text())
+        self.config_confocal['z_scan_range'] = float(self.ui.txtRangeZ.text())
 
     # Thread methods
     # cThread
@@ -1062,6 +1274,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.update_current_position()
         try:
             self.actualData_xy = self.dThread.raw
         except:
@@ -1103,6 +1316,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.update_current_position()
         try:
             self.actualData_z = self.dThread.raw
         except:
@@ -1111,10 +1325,17 @@ class mainGUI(QtWidgets.QMainWindow):
     # dThread
     # Run when signal 'update' emit
     @QtCore.pyqtSlot(numpy.ndarray)
-    def update_image(self, map_array):
+    def update_image_data(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
         print('updating...', time.perf_counter())
         self.map = map_array
+        self.update_image()
+
+    def update_image(self) -> None:
+        """
+        Update image basing on self.map data
+        :return: None
+        """
         self.image.set_data(self.map)
         self.image.set_extent(
             [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartY.text()),
@@ -1130,10 +1351,16 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.mplMap.draw()
 
     @QtCore.pyqtSlot(numpy.ndarray)
-    def update_image_ZScan(self, map_array):
+    def update_image_data_ZScan(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
         print('updating...', time.perf_counter())
         self.mapZ = map_array
+
+    def update_image_ZScan(self) -> None:
+        """
+        Update image basing on self.mapZ data
+        :return: None
+        """
         self.imageZ.set_data(self.mapZ)
         self.imageZ.set_extent(
             [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartZ.text()),
@@ -1148,7 +1375,32 @@ class mainGUI(QtWidgets.QMainWindow):
         self.imageZ.set_clim(0, self.mapZ.max())
         self.ui.mplMapZ.draw()
 
-    # Run when close the program
+    @QtCore.pyqtSlot()
+    def scanner_changed(self):
+        self.update_default_based_on_ui()
+        if self.ui.rbGalvo.isChecked():
+            self.config_confocal['scanner'] = 'galvo'
+        elif self.ui.rbPiezo.isChecked():
+            self.config_confocal['scanner'] = 'piezo'
+        self.update_ui_based_on_default()  # update settings parameter based on scanning mode
+        self.update_current_position()  # update current position of the scanner
+        self.save_plot_to_cache()  # save demostrate plot and raw data to cache
+        self.load_plots_from_cache()  # load saved plot and raw data from cache
+        self.update_image()
+        self.update_image_ZScan()
+
+    # clean cache
+    def periodic_clear_cache(self, days=1):
+        del self.scanning_cache
+        # define time tag
+        now = time.time()
+        # define expire  limit
+        expiration_time = days * 86400
+        for filename in os.listdir(self.cache_dir):
+            file_path = os.path.join(self.cache_dir, filename)
+            if os.path.isfile(file_path) and now - os.path.getmtime(file_path) > expiration_time:
+                os.remove(file_path)  # 删除过期文件
+
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
         quit_msg = "Save parameters as Defaults?"
@@ -1157,9 +1409,11 @@ class mainGUI(QtWidgets.QMainWindow):
         if reply == QtWidgets.QMessageBox.Save:
             self.save_defaults()
             self.ExpConfocalClose.emit()
+            self.periodic_clear_cache(days=self.CACHE_LIFE)
             event.accept()
         elif reply == QtWidgets.QMessageBox.Discard:
             self.ExpConfocalClose.emit()
+            self.periodic_clear_cache(days=self.CACHE_LIFE)
             event.accept()
         else:
             event.ignore()

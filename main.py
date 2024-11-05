@@ -25,29 +25,27 @@ class mainGUI(QtWidgets.QMainWindow):
     def connect_pb_all(self):
         # experiment interface group
         self.ui.pbExpConfocal.clicked.connect(self.open_confocal_interface)
-
-        # hardware group
-        self.ui.pbPiezoInit.clicked.connect(self.init_piezo_stage)
-        self.ui.pbPiezoReset.clicked.connect(self.reset_piezo_stage)
-        self.ui.pbGalvoInit.clicked.connect(self.init_galvo_mirror)
-        self.ui.pbGalvoReset.clicked.connect(self.reset_galvo_mirror)
-        self.ui.pbPulseGenInit.clicked.connect(self.init_pulser)
-        self.ui.pbPulseGenReset.clicked.connect(self.reset_pulser)
-        self.ui.pbTaggerInit.clicked.connect(self.init_timetagger)
-        self.ui.pbTaggerReset.clicked.connect(self.reset_timetagger)
-        self.ui.pbDaqInit.clicked.connect(self.init_nidaq)
-        self.ui.pbDaqReset.clicked.connect(self.reset_nidaq)
-        self.ui.pbMWInit.clicked.connect(self.init_mw_source)
-        self.ui.pbMWReset.clicked.connect(self.reset_mw_source)
-        self.ui.pbRotatorInit.clicked.connect(self.init_rotator)
-        self.ui.pbRotatorReset.clicked.connect(self.reset_rotator)
-        self.ui.pbInitAll.clicked.connect(self.init_all_hardware)
-        self.ui.pbResetAll.clicked.connect(self.reset_all_hardware)
-
+        # pb button connect
+        self.ui.pbPiezoInit.clicked.connect(self.hardware.init_mover)
+        self.ui.pbPiezoReset.clicked.connect(self.hardware.reset_mover)
+        self.ui.pbGalvoInit.clicked.connect(self.hardware.init_scanner)
+        self.ui.pbGalvoReset.clicked.connect(self.hardware.reset_scanner)
+        self.ui.pbPulseGenInit.clicked.connect(lambda: self.hardware.init_pulser())
+        self.ui.pbPulseGenReset.clicked.connect(self.hardware.reset_pulser)
+        self.ui.pbTaggerInit.clicked.connect(self.hardware.init_counter)
+        self.ui.pbTaggerReset.clicked.connect(self.hardware.reset_counter)
+        self.ui.pbDaqInit.clicked.connect(self.hardware.init_ni)
+        self.ui.pbDaqReset.clicked.connect(self.hardware.reset_ni)
+        self.ui.pbMWInit.clicked.connect(blank_function)
+        self.ui.pbMWReset.clicked.connect(blank_function)
+        self.ui.pbRotatorInit.clicked.connect(blank_function)
+        self.ui.pbRotatorReset.clicked.connect(blank_function)
+        self.ui.pbInitAll.clicked.connect(self.hardware.init_all_device)
+        self.ui.pbResetAll.clicked.connect(self.hardware.cleanup)
+        # connect device status update signal to handling function
         self.hardware.DeviceStatusUpdate.connect(self.update_hardware_status)
 
-
-    # data processing group
+    # function for processing input hardware status signal
     @QtCore.pyqtSlot(str, bool, name='DeviceStatusUpdate')
     def update_hardware_status(self, device, status):
         if device == 'mover':
@@ -72,70 +70,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.ui.rbRotatorConnect.setChecked(status), self.ui.rbRotatorDisconnect.setChecked(not status)
             self.ui.pbRotatorInit.setEnabled(not status), self.ui.pbRotatorReset.setEnabled
 
-
-
-    def init_piezo_stage(self):
-        self.hardware.init_mover()
-
-    def reset_piezo_stage(self):
-        self.hardware.reset_mover()
-
-    def init_galvo_mirror(self):
-        self.hardware.init_scanner()
-
-    def reset_galvo_mirror(self):
-        self.hardware.reset_scanner()
-
-    def init_pulser(self):
-        self.hardware.init_pulser()
-
-    def reset_pulser(self):
-        self.hardware.reset_pulser()
-
-    def init_timetagger(self):
-        self.hardware.init_counter()
-
-    def reset_timetagger(self):
-        self.hardware.reset_counter()
-
-    def init_nidaq(self):
-        self.hardware.init_triggered_counter()
-        self.hardware.init_triggered_location_sensor()
-        self.hardware.init_timer()
-        self.hardware.init_one_time_counter()
-
-        if self.hardware.triggered_counter_status and self.hardware.triggered_location_sensor_status and \
-                self.hardware.timer_status and self.hardware.one_time_counter_status:
-            self.update_hardware_status('NIDAQ', True)
-
-    def reset_nidaq(self):
-        self.hardware.reset_triggered_counter()
-        self.hardware.reset_triggered_location_sensor()
-        self.hardware.reset_timer()
-        self.hardware.reset_one_time_counter()
-
-        if not self.hardware.triggered_counter_status and not self.hardware.triggered_location_sensor_status and \
-                not self.hardware.timer_status and not self.hardware.one_time_counter_status:
-            self.update_hardware_status('NIDAQ', False)
-
-    def init_mw_source(self):
-        pass
-
-    def reset_mw_source(self):
-        pass
-
-    def init_rotator(self):
-        pass
-
-    def reset_rotator(self):
-        pass
-
-    def init_all_hardware(self):
-        self.hardware.init_all_device()
-
-    def reset_all_hardware(self):
-        self.hardware.cleanup()
-
+    # function for handling experiment interface
     def open_confocal_interface(self):
         if self.confocal_interface is None:
             self.confocal_interface = confocal_interface(hardware=self.hardware)
@@ -149,16 +84,21 @@ class mainGUI(QtWidgets.QMainWindow):
     def confocal_interface_closed(self):
         self.confocal_interface = None
 
+    # function for close event
     @QtCore.pyqtSlot(QtCore.QEvent)
     def closeEvent(self, event):
         quit_message = 'Do you want to quit?'
         reply = QtWidgets.QMessageBox.question(self, 'Message', quit_message, QtWidgets.QMessageBox.Yes |
                                                QtWidgets.QMessageBox.Cancel)
         if reply == QtWidgets.QMessageBox.Yes:
-            self.reset_all_hardware()
+            self.hardware.cleanup()
             event.accept()
         else:
             event.ignore()
+
+
+def blank_function():
+    pass
 
 
 if __name__ == '__main__':

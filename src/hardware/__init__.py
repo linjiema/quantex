@@ -8,7 +8,7 @@ from src.hardware.XMT_E70D4.API_Ser import XMT
 # from src.hardware.SynthUSB3 import SynthUSB3
 from src.hardware.Swabian_Pulse_Streamer.API import PulseGenerator
 from src.hardware.Swabian_TimeTagger20.API import TimeTagger20
-from src.hardware.NI_PCIe_6321.API import TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
+from src.hardware.NI_PCIe_6321.API import GScanner, TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
     OneTimeCounter_HardwareTimer
 
 '''
@@ -88,6 +88,8 @@ class DeviceManager(QtCore.QObject):
         self.reset_counter()
         self.reset_ni()
 
+    # function for all individual device
+
     def init_mover(self):
         if not self.mover_status:
             try:
@@ -98,7 +100,7 @@ class DeviceManager(QtCore.QObject):
                     raise ValueError('Piezo stage hasn\'t been connected!')
             except BaseException as e:
                 self.mover = None
-                logger.logger.warning(f"Warning: Mover init failed! {e}")
+                logger.logger.info(f"Mover init failed! {e}")
             else:
                 self.mover_status = 1
                 self.DeviceStatusUpdate.emit('mover', self.mover_status)
@@ -108,7 +110,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.mover.close_devices()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Mover reset failed! {e}")
+                logger.logger.info(f"Mover reset failed! {e}")
             else:
                 self.mover = None
                 self.mover_status = 0
@@ -117,10 +119,9 @@ class DeviceManager(QtCore.QObject):
     def init_scanner(self):
         if not self.scanner_status:
             try:
-                # self.scanner =
-                pass
+                self.scanner = GScanner()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Scanner init failed! {e}")
+                logger.logger.info(f"Scanner init failed! {e}")
             else:
                 self.scanner_status = 1
                 self.DeviceStatusUpdate.emit('scanner', self.scanner_status)
@@ -128,10 +129,9 @@ class DeviceManager(QtCore.QObject):
     def reset_scanner(self):
         if self.scanner_status:
             try:
-                # self.scanner =
-                pass
+                self.scanner.close()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Scanner reset failed! {e}")
+                logger.logger.info(f"Scanner reset failed! {e}")
             else:
                 self.scanner = None
                 self.scanner_status = 0
@@ -142,7 +142,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.pulser = PulseGenerator(serial=serial)
             except BaseException as e:
-                logger.logger.warning(f"Warning: Pulser init failed! {e}")
+                logger.logger.warning(f"Pulser init failed! {e}")
             else:
                 self.pulser_status = 1
                 self.DeviceStatusUpdate.emit('pulser', self.pulser_status)
@@ -152,7 +152,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.pulser.reset_pulse_generator()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Pulser reset failed! {e}")
+                logger.logger.warning(f"Pulser reset failed! {e}")
             else:
                 self.pulser = None
                 self.pulser_status = 0
@@ -163,7 +163,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.counter = TimeTagger20(serial=serial)
             except BaseException as e:
-                logger.logger.warning(f"Warning: Counter init failed! {e}")
+                logger.logger.info(f"Counter init failed! {e}")
             else:
                 self.counter_status = 1
                 self.DeviceStatusUpdate.emit('counter', self.counter_status)
@@ -173,7 +173,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.counter.free_tt()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Counter reset failed! {e}")
+                logger.logger.info(f"Counter reset failed! {e}")
             else:
                 self.counter = None
                 self.counter_status = 0
@@ -184,7 +184,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.triggered_counter = TriggeredCounter()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Triggered_Counter init failed! {e}")
+                logger.logger.info(f"Triggered_Counter init failed! {e}")
             else:
                 self.triggered_counter_status = 1
 
@@ -193,7 +193,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.triggered_counter.close()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Triggered_Counter reset failed! {e}")
+                logger.logger.info(f"Triggered_Counter reset failed! {e}")
             else:
                 self.triggered_counter = None
                 self.triggered_counter_status = 0
@@ -203,7 +203,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.triggered_location_sensor = TriggeredLocationSensor()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Triggered location sensor init failed! {e}")
+                logger.logger.info(f"Triggered location sensor init failed! {e}")
             else:
                 self.triggered_location_sensor_status = 1
 
@@ -212,7 +212,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.triggered_location_sensor.close()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Triggered location sensor reset failed! {e}")
+                logger.logger.info(f"Triggered location sensor reset failed! {e}")
             else:
                 self.triggered_location_sensor = None
                 self.triggered_location_sensor_status = 0
@@ -222,7 +222,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.timer = HardwareTimer()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Timer init failed! {e}")
+                logger.logger.info(f"Timer init failed! {e}")
             else:
                 self.timer_status = 1
 
@@ -231,7 +231,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.timer.close()
             except BaseException as e:
-                logger.logger.warning(f"Warning: Timer reset failed! {e}")
+                logger.logger.info(f"Timer reset failed! {e}")
             else:
                 self.timer = None
                 self.timer_status = 0
@@ -241,7 +241,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.one_time_counter = OneTimeCounter_HardwareTimer()
             except BaseException as e:
-                logger.logger.warning(f"Warning: One time counter init failed! {e}")
+                logger.logger.info(f"One time counter init failed! {e}")
             else:
                 self.one_time_counter_status = 1
 
@@ -250,7 +250,7 @@ class DeviceManager(QtCore.QObject):
             try:
                 self.one_time_counter.close()
             except BaseException as e:
-                logger.logger.warning(f"Warning: One time counter reset failed! {e}")
+                logger.logger.info(f"One time counter reset failed! {e}")
             else:
                 self.one_time_counter = None
                 self.one_time_counter_status = 0
