@@ -391,6 +391,286 @@ class GScanner():
         return list(full_wave)
 
 
+class GatedCounter():
+    """
+    Gated Counter for Reference Counter and Signal Counter.
+    Reference Counter: Counter 2
+        Source terminal: PFI 0
+        Sample Clock terminal: PFI 13
+        Gate terminal: PFI 9
+    Signal Counter: Counter 3
+        Source terminal: PFI 0
+        Sample Clock terminal: PFI 13
+        Gate terminal: PFI 1
+
+    """
+
+    def __init__(self):
+        pass
+
+    def init_task(self):
+        """
+        Init Reference Counter and Signal Counter.
+        :return: None
+        """
+        # Init counter for reference signal
+        self.gated_counter_ref = nidaqmx.Task('gated_counter_ref')
+        self.gated_counter_ref.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
+                                                                   name_to_assign_to_channel="",
+                                                                   edge=nidaqmx.constants.Edge.RISING,
+                                                                   initial_count=0,
+                                                                   count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        self.gated_counter_ref.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
+        self.gated_counter_ref.timing.cfg_samp_clk_timing(rate=1000000,
+                                                          source='/Dev1/PFI13',
+                                                          active_edge=nidaqmx.constants.Edge.RISING,
+                                                          sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                          samps_per_chan=2)
+        # Activate and Assign Gate
+        self.gated_counter_ref.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
+        self.gated_counter_ref.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI9'
+        self.gated_counter_ref.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+
+        # Init counter for counter signal
+        self.gated_counter_sig = nidaqmx.Task('gated_counter_sig')
+        self.gated_counter_sig.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr3',
+                                                                   name_to_assign_to_channel="",
+                                                                   edge=nidaqmx.constants.Edge.RISING,
+                                                                   initial_count=0,
+                                                                   count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        self.gated_counter_sig.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
+        self.gated_counter_sig.timing.cfg_samp_clk_timing(rate=1000000,
+                                                          source='/Dev1/PFI13',
+                                                          active_edge=nidaqmx.constants.Edge.RISING,
+                                                          sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                          samps_per_chan=2)
+        # Activate and Assign Gate
+        self.gated_counter_sig.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
+        self.gated_counter_sig.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI1'
+        self.gated_counter_sig.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+
+    def start_task(self):
+        """
+        Start the Task of Reference Counter and Signal Counter.
+        :return: None
+        """
+        self.gated_counter_ref.start()
+        self.gated_counter_sig.start()
+
+    def get_counts(self):
+        """
+        Get the counts data from Reference Counter and Signal Counter, and close the counter.
+        :return: ref_counts, sig_counts
+        """
+        self.gated_counter_sig.wait_until_done(timeout=360.0)
+        self.gated_counter_ref.wait_until_done(timeout=360.0)
+        sig = self.gated_counter_sig.read(number_of_samples_per_channel=2)
+        ref = self.gated_counter_ref.read(number_of_samples_per_channel=2)
+        # print(ref, sig)
+        self.close()
+        return ref[0], sig[0]
+
+    def close(self):
+        """
+        Close Reference Counter and Signal Counter.
+        :return: None
+        """
+        self.gated_counter_ref.close()
+        self.gated_counter_sig.close()
+
+
+class SampleTriggerOutput():
+    """
+    Counter for output the Sample Trigger when receive specific number of pulses.
+    Counter Output: Counter 1
+        Source terminal: PFI 4
+        Output terminal: PFI 13
+    """
+
+    def __init__(self):
+        # The number of output delay (How many sequence you want)
+        self.average = 50000
+
+    def init_task(self):
+        """
+        Init the counter output and set parameters.
+        :return: None
+        """
+        self.sample_trigger_output = nidaqmx.Task('sample_trigger_output')
+        self.sample_trigger_output.co_channels.add_co_pulse_chan_ticks(counter='Dev1/ctr1',
+                                                                       source_terminal='/Dev1/PFI4',
+                                                                       name_to_assign_to_channel="",
+                                                                       idle_state=nidaqmx.constants.Level.LOW,
+                                                                       initial_delay=self.average,
+                                                                       low_ticks=2,
+                                                                       high_ticks=2,
+                                                                       )
+        self.sample_trigger_output.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                              samps_per_chan=2)
+
+    def start_task(self):
+        """
+        Start the Task.
+        :return: None
+        """
+        self.sample_trigger_output.start()
+
+    def recycle_task(self):
+        """
+        Close the task when the trigger generation is done.
+        :return: None
+        """
+        self.sample_trigger_output.wait_until_done(timeout=360.0)
+        self.sample_trigger_output.close()
+
+    def close(self):
+        """
+        Close the Task anyway.
+        :return: None
+        """
+        self.sample_trigger_output.close()
+
+    def reset_average_time(self, new_average=50000):
+        """
+        Change the output delay number
+        :param new_average: The number of output delay (How many sequence you want)
+        :return: None
+        """
+        self.average = new_average
+
+
+class counter_for_rotation():
+    def __init__(self):
+        """
+        Init the sample point for the counter.
+        """
+        self.sample_point = 120
+
+    def init_task(self):
+        """
+        Init the counter for rotation.
+        """
+        # Set timer for record the time based on the internal clock
+        self.timer = nidaqmx.Task()
+        self.timer.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr1',
+                                                       name_to_assign_to_channel="",
+                                                       edge=nidaqmx.constants.Edge.RISING,
+                                                       initial_count=0,
+                                                       count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        # set the source terminal to the internal clock
+        self.timer.ci_channels[0].ci_count_edges_term = '/Dev1/100kHzTimebase'
+        # set the sample clock to the external trigger
+        self.timer.timing.cfg_samp_clk_timing(rate=1e5,
+                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                              active_edge=nidaqmx.constants.Edge.RISING,
+                                              sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                              samps_per_chan=self.sample_point + 1)
+        # set the digital filter for the sample clock
+        self.timer.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.timer.timing.samp_clk_dig_fltr_enable = True
+
+        # set counter for record the counts of the photon_ref
+        self.triggered_counter_ref = nidaqmx.Task()
+        self.triggered_counter_ref.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
+                                                                       name_to_assign_to_channel="",
+                                                                       edge=nidaqmx.constants.Edge.RISING,
+                                                                       initial_count=0,
+                                                                       count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        # set the source terminal to the SPCM input
+        self.triggered_counter_ref.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
+        # set the sample clock to the external trigger
+        self.triggered_counter_ref.timing.cfg_samp_clk_timing(rate=1e5,
+                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              active_edge=nidaqmx.constants.Edge.RISING,
+                                                              sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                              samps_per_chan=self.sample_point + 1)
+        # set the digital filter for the sample clock
+        self.triggered_counter_ref.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.triggered_counter_ref.timing.samp_clk_dig_fltr_enable = True
+        # Activate and Assign Gate
+        self.triggered_counter_ref.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
+        self.triggered_counter_ref.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI9'
+        self.triggered_counter_ref.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+
+        # set counter for record the counts of the photon_sig
+        self.triggered_counter_sig = nidaqmx.Task()
+        self.triggered_counter_sig.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr3',
+                                                                       name_to_assign_to_channel="",
+                                                                       edge=nidaqmx.constants.Edge.RISING,
+                                                                       initial_count=0,
+                                                                       count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
+        # set the source terminal to the SPCM input
+        self.triggered_counter_sig.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
+        # set the sample clock to the external trigger
+        self.triggered_counter_sig.timing.cfg_samp_clk_timing(rate=1e5,
+                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              active_edge=nidaqmx.constants.Edge.RISING,
+                                                              sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                              samps_per_chan=self.sample_point + 1)
+        # set the digital filter for the sample clock
+        self.triggered_counter_sig.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.triggered_counter_sig.timing.samp_clk_dig_fltr_enable = True
+        # Activate and Assign Gate
+        self.triggered_counter_sig.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
+        self.triggered_counter_sig.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI1'
+        self.triggered_counter_sig.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+
+    def start_task(self):
+        """
+        Start the counter for rotation.
+        """
+        self.timer.start()
+        self.triggered_counter_ref.start()
+        self.triggered_counter_sig.start()
+
+    def get_counts_and_time(self) -> (np.ndarray, np.ndarray, np.ndarray):
+        """
+        Get the counts data from Reference Counter and Signal Counter, and close the counter.
+        :return: ref_counts, sig_counts, time
+        """
+        self.triggered_counter_ref.wait_until_done(timeout=360.0)
+        self.triggered_counter_sig.wait_until_done(timeout=360.0)
+        self.timer.wait_until_done(timeout=360.0)
+
+        _cts_raw_ref = np.array(self.triggered_counter_ref.read(number_of_samples_per_channel=self.sample_point + 1))
+        _cts_raw_sig = np.array(self.triggered_counter_sig.read(number_of_samples_per_channel=self.sample_point + 1))
+        # print('cts_raw_ref:', _cts_raw_ref)
+        # print('cts_raw_sig:', _cts_raw_sig)
+        if not np.where(_cts_raw_ref < 0)[0].size == 0:
+            for index in np.where(_cts_raw_ref < 0)[0]:
+                _cts_raw_ref[index] = 0xFFFFFFFF + 1 + _cts_raw_ref[index]
+        if not np.where(_cts_raw_sig < 0)[0].size == 0:
+            for index in np.where(_cts_raw_sig < 0)[0]:
+                _cts_raw_sig[index] = 0xFFFFFFFF + 1 + _cts_raw_sig[index]
+
+        _time_raw = np.array(self.timer.read(number_of_samples_per_channel=self.sample_point + 1))
+        # print('time_raw:', _time_raw)
+        if not np.where(_time_raw < 0)[0].size == 0:
+            for index in np.where(_time_raw < 0)[0]:
+                _time_raw[index] = 0xFFFFFFFF + 1 + _time_raw[index]
+
+        _cts_ref = np.diff(_cts_raw_ref)
+        _cts_sig = np.diff(_cts_raw_sig)
+        _time = np.diff(_time_raw) / 1e2  # unit: ms
+        self.close()
+        # print('cts_raw_ref:', _cts_raw_ref)
+        # print('cts_raw_sig:', _cts_raw_sig)
+        # print('time_raw:', _time_raw)
+        #
+        # print('cts_ref:', _cts_ref)
+        # print('cts_sig:', _cts_sig)
+        # print('time:', _time)
+        # print('cps:', _cts_ref*1e3/_time)
+        return _cts_ref, _cts_sig, _time
+
+    def close(self):
+        """
+        Close all counter.
+        """
+        self.timer.close()
+        self.triggered_counter_ref.close()
+        self.triggered_counter_sig.close()
+
 
 if __name__ == '__main__':
     scanner = GScanner()
