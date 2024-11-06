@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\pbblab\PycharmProjects\afm-confocal\ui\ui_files\confocal.ui'
+# Form implementation generated from reading ui file 'C:\Users\eee\PycharmProjects\quantex\ui\ui_files\confocal\mainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -592,3 +592,13 @@ class Ui_Confocal(object):
         self.actionSave_As.setText(_translate("Confocal", "Save As"))
         self.actionSave_Defaults.setText(_translate("Confocal", "Save Defaults"))
         self.actionOpen_Defaults.setText(_translate("Confocal", "Open Defaults"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Confocal = QtWidgets.QMainWindow()
+    ui = Ui_Confocal()
+    ui.setupUi(Confocal)
+    Confocal.show()
+    sys.exit(app.exec_())

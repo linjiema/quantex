@@ -8,7 +8,7 @@ import numpy
 import yaml
 import tempfile
 import pickle
-from ui.uipy.confocal import Ui_Confocal
+from ui.uipy.confocal.mainWindow import Ui_Confocal
 from PyQt5 import QtWidgets, QtCore
 import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
