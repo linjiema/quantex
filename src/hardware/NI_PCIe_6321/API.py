@@ -406,7 +406,7 @@ class GatedCounter():
     """
 
     def __init__(self):
-        pass
+        connection_check()
 
     def init_task(self):
         """
@@ -488,6 +488,7 @@ class SampleTriggerOutput():
     """
 
     def __init__(self):
+        connection_check()
         # The number of output delay (How many sequence you want)
         self.average = 50000
 
@@ -544,6 +545,7 @@ class counter_for_rotation():
         """
         Init the sample point for the counter.
         """
+        connection_check()
         self.sample_point = 120
 
     def init_task(self):
