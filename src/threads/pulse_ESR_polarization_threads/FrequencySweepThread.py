@@ -9,7 +9,7 @@ This Thread is used to do the Frequency Sweep experiment.
 from PyQt5 import QtCore
 import time
 from nidaqmx.errors import *
-from Threads.TrackThread import TrackThread
+from src.threads.pulse_ESR_polarization_threads.TrackThread import TrackThread
 import numpy as np
 import random
 

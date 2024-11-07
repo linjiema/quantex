@@ -5,7 +5,7 @@
 from PyQt5 import QtCore
 import time
 from nidaqmx.errors import *
-from Threads.RotationMonitorThread import RotationMonitorThread
+from src.threads.pulse_ESR_polarization_threads.RotationMonitorThread import RotationMonitorThread
 import numpy as np
 import random
 

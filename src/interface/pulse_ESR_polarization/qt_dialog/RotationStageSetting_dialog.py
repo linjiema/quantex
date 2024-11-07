@@ -9,18 +9,26 @@ This work need the pyUI file of RotationStageSetting
 
 import sys
 import os
+from pathlib import Path
 
 from ui.uipy.pulse_ESR_polarization.RotationStageSettings import Ui_Settings
 from PyQt5 import QtCore, QtWidgets
 
 
+def find_project_root(current_path, marker_files=("README.md", ".git")):
+    for parent in current_path.parents:
+        if any((parent / marker).exists() for marker in marker_files):
+            print(parent)
+            return parent
+    return current_path
+
+
 class RotationStageSetting_GUI(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        os.chdir(os.path.dirname(__file__))
-
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Settings()
         self.ui.setupUi(self)
+        self.project_dir = find_project_root(current_path=Path(__file__).resolve())
 
         self.ui.buttonBox.accepted.connect(self.save_and_accept)
         self.ui.buttonBox.rejected.connect(self.reject)
@@ -32,8 +40,8 @@ class RotationStageSetting_GUI(QtWidgets.QDialog):
         Load the settings stored in './Cache/Settings,rotation_settings.txt'.
         """
         # Load rotation stage settings
-        dir_rotation_settings = os.path.abspath(
-            os.path.join(os.path.dirname("__file__"), os.path.pardir, 'Cache/Settings/rotation_settings.txt'))
+        dir_rotation_settings = os.path.join(self.project_dir,
+                                             'config\\config_pulse_ESR_polarization\\Settings\\rotation_settings.txt')
         with open(dir_rotation_settings, 'r') as f_rotation_settings:
             file_read = f_rotation_settings.readlines()
             dic_rotation_settings = {}
@@ -70,8 +78,8 @@ class RotationStageSetting_GUI(QtWidgets.QDialog):
             dic_rotation_ttl_set.get(key).setCheckState(value)
 
     def save_and_accept(self):
-        dir_rotation_settings = os.path.abspath(
-            os.path.join(os.path.dirname("__file__"), os.path.pardir, 'Cache/Settings/rotation_settings.txt'))
+        dir_rotation_settings = os.path.join(self.project_dir,
+                                             'config\\config_pulse_ESR_polarization\\Settings\\rotation_settings.txt')
         rotation_settings_list = [
             ('MOVE_SPEED', self.ui.leMovingSpeed.text()),
             ('MOVE_ACCELERATION', self.ui.leMovingAcceleration.text()),
@@ -87,9 +95,9 @@ class RotationStageSetting_GUI(QtWidgets.QDialog):
                 f_rotation_settings.write(rotation_settings[0] + '=' + rotation_settings[1] + '\n')
             for rotation_ttl_settings in rotation_ttl_settings_list:
                 if rotation_ttl_settings[1] is True:
-                    f_rotation_settings.write(rotation_ttl_settings[0] + '=' + 'ENABLED'+ '\n')
+                    f_rotation_settings.write(rotation_ttl_settings[0] + '=' + 'ENABLED' + '\n')
                 elif rotation_ttl_settings[1] is False:
-                    f_rotation_settings.write(rotation_ttl_settings[0] + '=' + 'DISABLED'+ '\n')
+                    f_rotation_settings.write(rotation_ttl_settings[0] + '=' + 'DISABLED' + '\n')
 
         # accept function
         self.accept()

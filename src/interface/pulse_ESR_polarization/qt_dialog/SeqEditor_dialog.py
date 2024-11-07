@@ -9,6 +9,7 @@ This work need the pyUI file of SeqEditor
 
 import sys
 import os
+from pathlib import Path
 
 from ui.uipy.pulse_ESR_polarization.SeqEditor import Ui_SeqEditor
 from PyQt5 import QtCore, QtWidgets
@@ -17,9 +18,17 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
+def find_project_root(current_path, marker_files=("README.md", ".git")):
+    for parent in current_path.parents:
+        if any((parent / marker).exists() for marker in marker_files):
+            print(parent)
+            return parent
+    return current_path
+
+
 class SeqEditor_GUI(QtWidgets.QDialog):
     def __init__(self, seq_dir=None, parent=None):
-        os.chdir(os.path.dirname(__file__))
+        self.project_dir = find_project_root(current_path=Path(__file__).resolve())
         # Set up UI
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_SeqEditor()
@@ -80,14 +89,13 @@ class SeqEditor_GUI(QtWidgets.QDialog):
         :param directory: The abs dir of the Seq file
         :return: None
         """
-        # Move to the dir where this file at
-        os.chdir(os.path.dirname(__file__))
         # Load the dir
         if directory is False:  # If do not have income dir
-            # Move to the Directory of Pulse Seq
-            os.chdir(os.path.join(os.path.dirname("__file__"), os.path.pardir, 'Cache/PulseSeq'))
             # Get the abs path of the pulse File
-            _directory = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Pulse Sequence', '', 'Text (*.txt)')
+            dir_pulse_seq = os.path.join(self.project_dir,
+                                         'config\\config_pulse_ESR_polarization\\PulseSeq')
+            _directory = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Pulse Sequence',
+                                                               dir_pulse_seq, 'Text (*.txt)')
             _directory = str(_directory[0].replace('/', '\\'))
         else:
             _directory = directory
@@ -110,22 +118,20 @@ class SeqEditor_GUI(QtWidgets.QDialog):
             self.seq_dir = _directory
         else:
             sys.stderr.write('No file is selected!\n')
-        # Back to the normal dir
-        os.chdir(os.path.dirname(__file__))
 
     def save_seq(self):
         """
         Call this method when push the 'Save' button.
         :return: None
         """
-        # Move to the dir where this file at
-        os.chdir(os.path.dirname(__file__))
-        # Move to the dir of the Pulse Seq
-        os.chdir(os.path.join(os.path.dirname("__file__"), os.path.pardir, 'Cache/PulseSeq'))
+        # Get the abs path of the pulse File
+        dir_pulse_seq = os.path.join(self.project_dir,
+                                     'config\\config_pulse_ESR_polarization\\PulseSeq')
         # Get the name of the file
         self.seq_name = self.ui.leSeqName.text()
+        path_pulse_seq = os.path.join(dir_pulse_seq, self.seq_name)
         # Get the dir of SaveSeq
-        dir_save_seq = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', self.seq_name, 'Text (*.txt)')
+        dir_save_seq = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file', path_pulse_seq, 'Text (*.txt)')
         dir_save_seq = str(dir_save_seq[0].replace('/', '\\'))
         # Save the seq in file
         if dir_save_seq != '':
@@ -368,7 +374,8 @@ class SeqEditor_GUI(QtWidgets.QDialog):
     def save_dir_and_accept(self):
         # Get the name of the file
         self.seq_name = self.ui.leSeqName.text()
-        dir_save_seq = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'Cache/temp/' + self.seq_name + '.txt'))
+        dir_save_seq = os.path.join(self.project_dir,
+                                    'cache\\cache_pulse_ESR_polarization\\temp\\' + self.seq_name + '.txt')
         # Save the seq in file
         if dir_save_seq != '':
             with open(dir_save_seq, 'w') as f_save_seq:
@@ -387,4 +394,3 @@ if __name__ == '__main__':
     myWindow.show()
 
     sys.exit(app.exec_())
-
