@@ -14,9 +14,9 @@ from pathlib import Path
 from ui.uipy.pulse_ESR_polarization.MainWindowRotation import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
 
-from qt_dialog.Settings_dialog import Setting_GUI as SettingsDialog
-from qt_dialog.SeqEditor_dialog import SeqEditor_GUI as SeqEditorDialog
-from qt_dialog.RotationStageSetting_dialog import RotationStageSetting_GUI as RotationStageSettingDialog
+from src.interface.pulse_ESR_polarization.qt_dialog.Settings_dialog import Setting_GUI as SettingsDialog
+from src.interface.pulse_ESR_polarization.qt_dialog.SeqEditor_dialog import SeqEditor_GUI as SeqEditorDialog
+from src.interface.pulse_ESR_polarization.qt_dialog.RotationStageSetting_dialog import RotationStageSetting_GUI as RotationStageSettingDialog
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -1116,7 +1116,7 @@ class mainGUI(QtWidgets.QMainWindow):
             self.hardware.init_mw_source()
             self.hardware.init_scanner()
             # Init microwave source
-            self.hardware.mw_source.init_port()
+            self.hardware.init_mw_source()
             self.hardware.mw_source.switch(state=False)
             # Initialize Threads
             # Pass hardware to Threads and connect the function

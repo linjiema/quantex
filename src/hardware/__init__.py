@@ -79,7 +79,10 @@ class DeviceManager(QtCore.QObject):
         self.init_scanner()
         self.init_pulser(serial=pulser_serial)
         self.init_counter(serial=counter_serial)
+        self.init_mw_source()
+        self.init_rotator()
         self.init_ni()
+
         '''
         print(self.mover_status, self.scanner_status, self.pulser_status, self.counter_status, self.triggered_counter_status,
               self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
@@ -98,6 +101,8 @@ class DeviceManager(QtCore.QObject):
         self.reset_scanner()
         self.reset_pulser()
         self.reset_counter()
+        self.reset_mw_source()
+        self.reset_rotator()
         self.reset_ni()
 
     # function for all individual device
@@ -195,6 +200,7 @@ class DeviceManager(QtCore.QObject):
         if not self.mw_source_status:
             try:
                 self.mw_source = SynthNVPro()
+                self.mw_source.init_port()
             except BaseException as e:
                 logger.logger.info(f"MW_source init failed! {e}")
             else:

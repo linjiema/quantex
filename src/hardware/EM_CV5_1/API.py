@@ -5,7 +5,7 @@ import numpy as np
 
 
 class RotationStage:
-    PORT_NUM = 'COM9'
+    PORT_NUM = 'COM4'
 
     def __init__(self):
         origin_path = os.getcwd()

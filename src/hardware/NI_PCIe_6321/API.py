@@ -448,6 +448,7 @@ class GatedCounter():
         self.gated_counter_sig.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
         self.gated_counter_sig.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI1'
         self.gated_counter_sig.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+        self.is_closed = False
 
     def start_task(self):
         """
@@ -468,15 +469,18 @@ class GatedCounter():
         ref = self.gated_counter_ref.read(number_of_samples_per_channel=2)
         # print(ref, sig)
         self.close()
-        return ref[0], sig[0]
+        return int(ref[0]), int(sig[0])
 
     def close(self):
         """
         Close Reference Counter and Signal Counter.
         :return: None
         """
-        self.gated_counter_ref.close()
-        self.gated_counter_sig.close()
+        if hasattr(self, 'gated_counter_ref') and not self.is_closed:
+            self.gated_counter_ref.close()
+            self.gated_counter_sig.close()
+            self.is_closed = True
+
 
 
 class SampleTriggerOutput():
@@ -508,6 +512,7 @@ class SampleTriggerOutput():
                                                                        )
         self.sample_trigger_output.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=2)
+        self.is_closed = False
 
     def start_task(self):
         """
@@ -523,13 +528,16 @@ class SampleTriggerOutput():
         """
         self.sample_trigger_output.wait_until_done(timeout=360.0)
         self.sample_trigger_output.close()
+        self.is_closed = True
 
     def close(self):
         """
         Close the Task anyway.
         :return: None
         """
-        self.sample_trigger_output.close()
+        if hasattr(self, 'sample_trigger_output') and not self.is_closed:
+            self.sample_trigger_output.close()
+            self.is_closed = True
 
     def reset_average_time(self, new_average=50000):
         """
@@ -616,6 +624,7 @@ class counter_for_rotation():
         self.triggered_counter_sig.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
         self.triggered_counter_sig.triggers.pause_trigger.dig_lvl_src = '/Dev1/PFI1'
         self.triggered_counter_sig.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
+        self.is_closed = False
 
     def start_task(self):
         """
@@ -669,9 +678,11 @@ class counter_for_rotation():
         """
         Close all counter.
         """
-        self.timer.close()
-        self.triggered_counter_ref.close()
-        self.triggered_counter_sig.close()
+        if hasattr(self, 'timer') and not self.is_closed:
+            self.timer.close()
+            self.triggered_counter_ref.close()
+            self.triggered_counter_sig.close()
+            self.is_closed = True
 
 
 if __name__ == '__main__':
