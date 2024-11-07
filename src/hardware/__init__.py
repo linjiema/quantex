@@ -8,8 +8,10 @@ from src.hardware.XMT_E70D4.API_Ser import XMT
 # from src.hardware.SynthUSB3 import SynthUSB3
 from src.hardware.Swabian_Pulse_Streamer.API import PulseGenerator
 from src.hardware.Swabian_TimeTagger20.API import TimeTagger20
+from src.hardware.SynthNVPro.API import SynthNVPro
+from src.hardware.EM_CV5_1.API import RotationStage
 from src.hardware.NI_PCIe_6321.API import GScanner, TriggeredLocationSensor, TriggeredCounter, HardwareTimer, \
-    OneTimeCounter_HardwareTimer
+    OneTimeCounter_HardwareTimer, GatedCounter, SampleTriggerOutput, counter_for_rotation
 
 '''
 class AllHardware():
@@ -53,6 +55,10 @@ class DeviceManager(QtCore.QObject):
         self.pulser_status = 0
         self.counter = None
         self.counter_status = 0
+        self.mw_source = None
+        self.mw_source_status = 0
+        self.rotator = None
+        self.rotator_status = 0
         self.triggered_counter = None
         self.triggered_counter_status = 0
         self.triggered_location_sensor = None
@@ -61,13 +67,22 @@ class DeviceManager(QtCore.QObject):
         self.timer_status = 0
         self.one_time_counter = None
         self.one_time_counter_status = 0
+        self.gate_counter = None
+        self.gate_counter_status = 0
+        self.sample_trigger = None
+        self.sample_trigger_status = 0
+        self.counter_rotation = None
+        self.counter_rotation_status = 0
 
     def init_all_device(self, pulser_serial='00-26-32-f0-92-26', counter_serial="2208000ZCM"):
         self.init_mover()
         self.init_scanner()
         self.init_pulser(serial=pulser_serial)
         self.init_counter(serial=counter_serial)
+        self.init_mw_source()
+        self.init_rotator()
         self.init_ni()
+
         '''
         print(self.mover_status, self.scanner_status, self.pulser_status, self.counter_status, self.triggered_counter_status,
               self.triggered_location_sensor_status, self.timer_status, self.one_time_counter_status)
@@ -86,6 +101,8 @@ class DeviceManager(QtCore.QObject):
         self.reset_scanner()
         self.reset_pulser()
         self.reset_counter()
+        self.reset_mw_source()
+        self.reset_rotator()
         self.reset_ni()
 
     # function for all individual device
@@ -179,6 +196,51 @@ class DeviceManager(QtCore.QObject):
                 self.counter_status = 0
                 self.DeviceStatusUpdate.emit('counter', self.counter_status)
 
+    def init_mw_source(self):
+        if not self.mw_source_status:
+            try:
+                self.mw_source = SynthNVPro()
+                self.mw_source.init_port()
+            except BaseException as e:
+                logger.logger.info(f"MW_source init failed! {e}")
+            else:
+                self.mw_source_status = 1
+                self.DeviceStatusUpdate.emit('MW', self.mw_source_status)
+
+    def reset_mw_source(self):
+        if self.mw_source_status:
+            try:
+                self.mw_source.switch(state=False)
+                self.mw_source.clean_up()
+            except BaseException as e:
+                logger.logger.info(f"MW_source reset failed! {e}")
+            else:
+                self.mw_source = None
+                self.mw_source_status = 0
+                self.DeviceStatusUpdate.emit('MW', self.mw_source_status)
+
+    def init_rotator(self):
+        if not self.rotator_status:
+            try:
+                self.rotator = RotationStage()
+                self.rotator.open()
+            except BaseException as e:
+                logger.logger.info(f"Rotator init failed! {e}")
+            else:
+                self.rotator_status = 1
+                self.DeviceStatusUpdate.emit('rotator', self.rotator_status)
+
+    def reset_rotator(self):
+        if self.rotator_status:
+            try:
+                self.rotator.close()
+            except BaseException as e:
+                logger.logger.info(f"Rotator reset failed! {e}")
+            else:
+                self.rotator = None
+                self.rotator_status = 0
+                self.DeviceStatusUpdate.emit('rotator', self.rotator_status)
+
     def init_triggered_counter(self):
         if not self.triggered_counter_status:
             try:
@@ -255,13 +317,75 @@ class DeviceManager(QtCore.QObject):
                 self.one_time_counter = None
                 self.one_time_counter_status = 0
 
+    def init_gate_counter(self):
+        if not self.gate_counter_status:
+            try:
+                self.gate_counter = GatedCounter()
+            except BaseException as e:
+                logger.logger.info(f"Gate counter init failed! {e}")
+            else:
+                self.gate_counter_status = 1
+
+    def reset_gate_counter(self):
+        if self.gate_counter_status:
+            try:
+                self.gate_counter.close()
+            except BaseException as e:
+                logger.logger.info(f"Gated counter reset failed! {e}")
+            else:
+                self.gate_counter = None
+                self.gate_counter_status = 0
+
+    def init_sample_trigger(self):
+        if not self.sample_trigger_status:
+            try:
+                self.sample_trigger = SampleTriggerOutput()
+            except BaseException as e:
+                logger.logger.info(f"Sample Trigger Output init failed! {e}")
+            else:
+                self.sample_trigger_status = 1
+
+    def reset_sample_trigger(self):
+        if self.sample_trigger_status:
+            try:
+                self.sample_trigger.close()
+            except BaseException as e:
+                logger.logger.info(f"Sample Trigger Output reset failed! {e}")
+            else:
+                self.sample_trigger = None
+                self.sample_trigger_status = 0
+
+    def init_counter_rotation(self):
+        if not self.counter_rotation_status:
+            try:
+                self.counter_rotation = counter_for_rotation()
+            except BaseException as e:
+                logger.logger.info(f"Counter for rotation init failed! {e}")
+            else:
+                self.counter_rotation_status = 1
+
+    def reset_counter_rotation(self):
+        if self.counter_rotation_status:
+            try:
+                self.counter_rotation.close()
+            except BaseException as e:
+                logger.logger.info(f"Counter for rotation reset failed! {e}")
+            else:
+                self.counter_rotation = None
+                self.counter_rotation_status = 0
+
     def init_ni(self):
         self.init_triggered_counter()
         self.init_triggered_location_sensor()
         self.init_timer()
         self.init_one_time_counter()
+        self.init_gate_counter()
+        self.init_sample_trigger()
+        self.init_counter_rotation()
+
         if self.triggered_counter_status and self.triggered_location_sensor_status and \
-                self.timer_status and self.one_time_counter_status:
+                self.timer_status and self.one_time_counter_status and self.gate_counter_status and \
+                self.sample_trigger_status and self.counter_rotation_status:
             self.DeviceStatusUpdate.emit('NIDAQ', True)
 
     def reset_ni(self):
@@ -269,7 +393,11 @@ class DeviceManager(QtCore.QObject):
         self.reset_triggered_location_sensor()
         self.reset_timer()
         self.reset_one_time_counter()
+        self.reset_gate_counter()
+        self.reset_sample_trigger()
+        self.reset_counter_rotation()
         if not self.triggered_counter_status and not self.triggered_location_sensor_status and \
-                not self.timer_status and not self.one_time_counter_status:
+                not self.timer_status and not self.one_time_counter_status and not self.gate_counter_status and \
+                not self.sample_trigger_status and not self.counter_rotation_status:
             self.DeviceStatusUpdate.emit('NIDAQ', False)
 

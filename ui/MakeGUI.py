@@ -7,22 +7,27 @@ from os import path
 
 directory = path.dirname(path.abspath(__file__))
 
-ui_dir = path.join(directory, "ui_files")
-uipy_dir = path.join(directory, "uipy")
+source_dir = path.join(directory, "ui_files")
+target_dir = path.join(directory, "uipy")
 
-
-for root, dirs, files in os.walk(ui_dir):
+for root, dirs, files in os.walk(source_dir):
     for file in files:
-        if file.endswith(".ui"):
-            ui_file_path = path.join(root, file)
-            # Get the relative path of the .ui file from the ui_files directory
-            relative_path = path.relpath(ui_file_path, ui_dir)
-            # Construct the output file path in the uipy directory, replacing .ui with UI.py
-            output_file_relative = path.splitext(relative_path)[0] + ".py"
-            output_file_path = path.join(uipy_dir, output_file_relative)
-            # Ensure the output directory exists
-            output_dir = path.dirname(output_file_path)
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            # Call pyuic5 to generate the .py file
-            subprocess.call(["pyuic5", ui_file_path, "-o", output_file_path])
+        if file.endswith('.ui'):
+            # get the relative path of the .ui file from the source_dir
+            relative_path = os.path.relpath(root, source_dir)
+
+            # construct the output directory in the target_dir
+            output_dir = os.path.join(target_dir, relative_path)
+            os.makedirs(output_dir, exist_ok=True)
+
+            # create __init__.py file
+            init_file = os.path.join(output_dir, '__init__.py')
+            if not os.path.exists(init_file):
+                open(init_file, 'a').close()
+
+            # construct the input and output file paths
+            input_file = os.path.join(root, file)
+            output_file = os.path.join(output_dir, file.replace('.ui', '.py'))
+
+            # call pyuic5 to generate the .py file
+            subprocess.run(['pyuic5', '-x', input_file, '-o', output_file])

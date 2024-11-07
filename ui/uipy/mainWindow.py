@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\pbblab\PycharmProjects\afm-confocal\ui\ui_files\mainWindow.ui'
+# Form implementation generated from reading ui file 'C:\Users\eee\PycharmProjects\quantex\ui\ui_files\mainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -324,3 +324,13 @@ class Ui_MainWindow(object):
         self.rbGalvoDisconnect.setText(_translate("MainWindow", "Disconnected"))
         self.pbInitAll.setText(_translate("MainWindow", "Init All Device"))
         self.pbResetAll.setText(_translate("MainWindow", "Reset All Device"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
