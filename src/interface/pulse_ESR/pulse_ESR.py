@@ -36,7 +36,7 @@ def find_project_root(current_path, marker_files=("README.md", ".git")):
 class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpESRClose = QtCore.pyqtSignal(name='ExpESRClose')
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
         # Setup GUI
         self.ui = Ui_MainWindow()
@@ -55,7 +55,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.init_seq_plot()  # Init the plot for Pulse Sequence
         self.init_track_plot()  # Init the plot for Tracking
         # Hardware
-        self.hardware = None
+        self.hardware = hardware
 
     # Methods for initialization
     def connect_methods(self):
@@ -195,12 +195,13 @@ class mainGUI(QtWidgets.QMainWindow):
         setting_dialog = SettingsDialog()
         # Get the exit state
         val = setting_dialog.exec_()
-        # Move back to the dir that the Main Thread belongs to
-        os.chdir(os.path.dirname(__file__))
         # Reload the Settings again if click 'OK' in Setting Dialog
         if val == 1:
             self.load_delay_settings()
             self.load_scanning_settings(state=self.ui.checkBoxUseScan.isChecked())
+            self.ui.statusbar.showMessage('Settings saved.')
+        elif val == 0:
+            self.ui.statusbar.showMessage('Settings withdraw.')
 
     def load_defaults(self):
         """
@@ -210,9 +211,9 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         # Load Microwave Defaults
         # Get the absolute path of the Microwave Defaults
-        dir_mw_defaults = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'Cache/Defaults/microwave_defaults.txt')
-        )
+        dir_mw_defaults = os.path.join(self.project_dir,
+                                       'config\\config_pulse_ESR\\Defaults\\microwave_defaults.txt')
+
         # Read the Microwave Defaults
         with open(dir_mw_defaults, 'r') as f_mw_defaults:
             dic_mw_defaults = {}
@@ -234,9 +235,8 @@ class mainGUI(QtWidgets.QMainWindow):
 
         # Load Time Defaults
         # Get the absolute path of the Time Defaults
-        dir_time_defaults = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'Cache/Defaults/time_defaults.txt')
-        )
+        dir_time_defaults = os.path.join(self.project_dir,
+                                         'config\\config_pulse_ESR\\Defaults\\time_defaults.txt')
         # Read the Time Defaults
         with open(dir_time_defaults, 'r') as f_time_defaults:
             dic_time_defaults = {}
@@ -270,9 +270,8 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         # Save Microwave Defaults
         # Get the absolute path of the Microwave Defaults File
-        dir_mw_defaults = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'Cache/Defaults/microwave_defaults.txt')
-        )
+        dir_mw_defaults = os.path.join(self.project_dir,
+                                       'config\\config_pulse_ESR\\Defaults\\microwave_defaults.txt')
         # Read the Microwave Defaults from the GUI
         mw_defaults_list = [
             ('FREQUENCY', self.ui.leFixedFreqSetting.text()),
@@ -288,9 +287,8 @@ class mainGUI(QtWidgets.QMainWindow):
 
         # Save Time Defaults
         # Get the absolute path of the Time Defaults File
-        dir_time_defaults = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'Cache/Defaults/time_defaults.txt')
-        )
+        dir_time_defaults = os.path.join(self.project_dir,
+                                         'config\\config_pulse_ESR\\Defaults\\time_defaults.txt')
         # Read the Time Defaults from the GUI
         time_defaults_list = [
             ('START', self.ui.leTimeStart.text()),
@@ -315,9 +313,8 @@ class mainGUI(QtWidgets.QMainWindow):
         :return: None
         """
         # Get the absolute path of the delay settings
-        dir_delay = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'Cache/Settings/delay_settings.txt')
-        )
+        dir_delay = os.path.join(self.project_dir,
+                                 'config\\config_pulse_ESR\\Settings\\delay_settings.txt')
         # Read the Time Defaults into dir
         with open(dir_delay, 'r') as f_delay:
             self.dic_delay = {}
@@ -339,9 +336,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Load Frequency Sweep Settings if do Frequency Sweep
         if state is True:
             # Get the absolute path of the Frequency Sweep Settings
-            dir_freq_sweep_settings = os.path.abspath(
-                os.path.join(os.path.dirname("__file__"), 'Cache/Settings/freq_sweep_settings.txt')
-            )
+            dir_freq_sweep_settings = os.path.join(self.project_dir,
+                                                   'config\\config_pulse_ESR\\Settings\\freq_sweep_settings.txt')
             # Read the Frequency Sweep Settings
             with open(dir_freq_sweep_settings, 'r') as f_freq_sweep_settings:
                 dic_freq_sweep_settings = {}
@@ -362,9 +358,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Load Time Sweep Settings if do Time Sweep
         else:
             # Get the absolute path of the Time Sweep Settings
-            dir_time_sweep_settings = os.path.abspath(
-                os.path.join(os.path.dirname("__file__"), 'Cache/Settings/time_sweep_settings.txt')
-            )
+            dir_time_sweep_settings = os.path.join(self.project_dir,
+                                                   'config\\config_pulse_ESR\\Settings\\time_sweep_settings.txt')
             # Read the Time Sweep Settings
             with open(dir_time_sweep_settings, 'r') as f_time_sweep_settings:
                 dic_time_sweep_settings = {}
@@ -395,9 +390,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Save Frequency Sweep Settings if do Frequency Sweep
         if state is True:
             # Get the absolute path of the Frequency Sweep Settings
-            dir_freq_sweep_settings = os.path.abspath(
-                os.path.join(os.path.dirname("__file__"), 'Cache/Settings/freq_sweep_settings.txt')
-            )
+            dir_freq_sweep_settings = os.path.join(self.project_dir,
+                                                   'config\\config_pulse_ESR\\Settings\\freq_sweep_settings.txt')
             # Read the Frequency Sweep Settings from the GUI
             freq_sweep_settings_list = [
                 ('LOOP_NUM', self.ui.leTotalLoopNum.text()),
@@ -411,9 +405,8 @@ class mainGUI(QtWidgets.QMainWindow):
         # Save Time Sweep Settings if do Time Sweep
         else:
             # Get the absolute path of the Time Sweep Settings
-            dir_time_sweep_settings = os.path.abspath(
-                os.path.join(os.path.dirname("__file__"), 'Cache/Settings/time_sweep_settings.txt')
-            )
+            dir_time_sweep_settings = os.path.join(self.project_dir,
+                                                   'config\\config_pulse_ESR\\Settings\\time_sweep_settings.txt')
             # Read the Time Sweep Settings from the GUI
             time_sweep_settings_list = [
                 ('LOOP_NUM', self.ui.leTotalLoopNum.text()),
@@ -438,12 +431,16 @@ class mainGUI(QtWidgets.QMainWindow):
         except BaseException:
             sys.stderr.write('No data to be saved!\n')
             return
-        # Move the dir to 'Cache/Data' (default location for saving data)
-        os.chdir(os.path.join(os.path.dirname("__file__"), 'Cache/Data'))
+
+        # Get saving file path
+        dir_data = os.path.join(self.project_dir,
+                                'data\\data_pulse_ESR')
+        file_name = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+        file_path = os.path.join(dir_data, file_name)
         # Call the dialog for saving data, get dir from it
         dir_save_data = QtWidgets.QFileDialog.getSaveFileName(self, 'Enter save file',
-                                                              time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-                                                              'Text (*.txt)')
+                                                              file_path, 'Text (*.txt)')
+
         self.saved_data[4][1] = self.ui.leCurrentLoopNum.text()
         self.saved_data[4][3] = self.ui.leCurrentPointNum.text()
         # Reshape the dir
@@ -466,8 +463,6 @@ class mainGUI(QtWidgets.QMainWindow):
                                           str(each_datapoint[2]) + '\t' + str(each_datapoint[3]) + '\n')
         else:
             sys.stderr.write('No File is saved!\n')
-        # Move the dir back to the dir that the Main Thread belongs to
-        os.chdir(os.path.dirname(__file__))
 
     def init_raw_data(self, state):
         """
@@ -566,8 +561,8 @@ class mainGUI(QtWidgets.QMainWindow):
         If click 'OK' in SeqEditor Dialog, call the method to load the new seq.
         :return: None
         """
-        # Create a temp file for save this sequence temporary
-        seq_dir_temp = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Cache/temp/Untitled.txt'))
+        seq_dir_temp = os.path.join(self.project_dir,
+                                    'cache\\cache_pulse_ESR\\temp\\Untitled.txt')
         # New a file for saving the seq
         with open(seq_dir_temp, 'w') as f_new:
             pass
@@ -575,8 +570,6 @@ class mainGUI(QtWidgets.QMainWindow):
         seq_editor_dialog = SeqEditorDialog(seq_dir=seq_dir_temp, parent=self)
         # Get the exit status
         val = seq_editor_dialog.exec_()
-        # Move the dir back to the dir where the main Thread are located at
-        os.chdir(os.path.dirname(__file__))
         # Load the new seq if click 'OK' in SeqEditor Dialog
         if val == 1:
             self.seq_dir = seq_editor_dialog.seq_dir
@@ -590,8 +583,6 @@ class mainGUI(QtWidgets.QMainWindow):
         # Open the SeqEditor Dialog and pass the Pulse Sequence into it
         seq_editor_dialog = SeqEditorDialog(seq_dir=self.seq_dir, parent=self)
         val = seq_editor_dialog.exec_()
-        # Move the dir back to the dir where the main Thread are located at
-        os.chdir(os.path.dirname(__file__))
         # Load the new seq if click 'OK' in SeqEditor Dialog
         if val == 1:
             self.seq_dir = seq_editor_dialog.seq_dir
@@ -605,13 +596,15 @@ class mainGUI(QtWidgets.QMainWindow):
         :return: None
         """
         if seq_dir is False:
-            # Move to seq file dir
-            os.chdir(os.path.join(os.path.dirname("__file__"), 'Cache/PulseSeq'))
+            # Get seq file dir
+            default_path = os.path.join(self.project_dir,
+                                        'config\\config_pulse_ESR\\PulseSeq')
             # Get the directory
-            dir_pulse_seq_load = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Sequence', '', 'Text files(*.txt)')
+            dir_pulse_seq_load = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Sequence',
+                                                                       default_path,
+                                                                       'Text files(*.txt)')
             dir_pulse_seq_load = str(dir_pulse_seq_load[0].replace('/', '\\'))
             # Move back to file dir
-            os.chdir(os.path.dirname(__file__))
         else:
             dir_pulse_seq_load = seq_dir
         # Load Sequence
@@ -760,8 +753,13 @@ class mainGUI(QtWidgets.QMainWindow):
         :return: None
         """
         # Stop animate
-        self.ui.seq_fig.close_event()
-        self.update_pulse_seq_plot()
+        try:
+            self.ui.seq_fig.close_event()
+        except BaseException as e:
+            pass
+        else:
+            self.update_pulse_seq_plot()
+
         # Reset the button
         self.ui.pbAnimateSeq.clicked.disconnect()
         self.ui.pbAnimateSeq.clicked.connect(self.animate_seq_start)
@@ -917,14 +915,13 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         self.ui.statusbar.showMessage('Initializing Hardware...')
         try:
-            if self.hardware is None:
-                self.hardware = AllHardware()
-            # Connect Piezo Stage
-            status = self.hardware.mover.scan_devices()
-            if status == 0:
-                self.hardware.mover.open_devices()
+            self.hardware.init_pulser()
+            self.hardware.init_counter()
+            self.hardware.init_ni()
+            self.hardware.init_mw_source()
+            self.hardware.init_scanner()
             # Init microwave source
-            self.hardware.mw_source.init_port()
+            self.hardware.init_mw_source()
             self.hardware.mw_source.switch(state=False)
             # Initialize Threads
             # Pass hardware to Threads and connect the function
@@ -946,6 +943,10 @@ class mainGUI(QtWidgets.QMainWindow):
             print(e)
             self.ui.statusbar.showMessage('Hardware Initialization Failed')
             return
+        try:
+            self.hardware.init_mover()
+        except BaseException as e:
+            self.ui.statusbar.showMessage('Piezo Stage Initialization Failed')
 
         # Enable Buttons
         # Data Group
@@ -980,17 +981,19 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         # Reset all the hardware: Microwave Source
         self.ui.statusbar.showMessage('Reset Hardware...')
-        try:
-            # Reset Hardware
-            self.hardware.cleanup()
-            # Reset Microwave Source
-            self.hardware.mw_source.switch(state=False)
-            self.hardware.mw_source.clean_up()
+        self.hardware.reset_pulser()
+        self.hardware.reset_counter()
+        self.hardware.reset_ni()
+        self.hardware.reset_mw_source()
+        self.hardware.reset_scanner()
+        self.hardware.reset_mover()
 
-        except BaseException as e:
-            print(e)
-            self.ui.statusbar.showMessage('Hardware Reset Failed')
-            return
+        __status = max(self.hardware.mover_status, self.hardware.scanner_status, self.hardware.pulser_status,
+                       self.hardware.counter_status, self.hardware.triggered_location_sensor_status,
+                       self.hardware.timer_status, self.hardware.one_time_counter_status,
+                       self.hardware.mw_source_status)
+        if __status == 0:
+            self.ui.statusbar.showMessage('Hardware Reset Successfully.')
         # Enable Buttons
         # Data Group
         self.ui.pbSaveData.setEnabled(False)
@@ -1305,8 +1308,10 @@ class mainGUI(QtWidgets.QMainWindow):
                                                QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
         if reply == QtWidgets.QMessageBox.Save:
             self.save_defaults()
+            self.ExpESRClose.emit()
             event.accept()
         elif reply == QtWidgets.QMessageBox.Discard:
+            self.ExpESRClose.emit()
             event.accept()
         else:
             event.ignore()

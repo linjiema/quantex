@@ -30,7 +30,6 @@ from src.threads.pulse_ESR_polarization_threads import FrequencySweepThread, Tim
 def find_project_root(current_path, marker_files=("README.md", ".git")):
     for parent in current_path.parents:
         if any((parent / marker).exists() for marker in marker_files):
-            print(parent)
             return parent
     return current_path
 
@@ -794,7 +793,6 @@ class mainGUI(QtWidgets.QMainWindow):
             # Get seq file dir
             default_path = os.path.join(self.project_dir,
                                         'config\\config_pulse_ESR_polarization\\PulseSeq')
-            print(default_path)
             # Get the directory
             dir_pulse_seq_load = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Sequence',
                                                                        default_path,
