@@ -286,7 +286,8 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                   samps_per_chan=int(self.sample_number * 2))
-        self.x_scanner.write(self.wave_form_x, auto_start=False)
+        scan_wave_form = [self.pos_to_volt_x(pos) for pos in self.wave_form_x]
+        self.x_scanner.write(scan_wave_form, auto_start=False)
         self.scan_mode_x = self.SCAN_MODE_SCANNING
 
     def set_y_scan_param(self):
@@ -295,7 +296,8 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                   samps_per_chan=int(self.sample_number * 2))
-        self.y_scanner.write(self.wave_form_y, auto_start=False)
+        scan_wave_form = [self.pos_to_volt_y(pos) for pos in self.wave_form_y]
+        self.y_scanner.write(scan_wave_form, auto_start=False)
         self.scan_mode_y = self.SCAN_MODE_SCANNING
 
     def start_scan_x(self):
@@ -319,13 +321,13 @@ class GScanner():
 
     def pos_to_volt_x(self, position):
         # load a stored table to convert position to voltage
-        pass
-        return position
+        voltage = position / 1000
+        return voltage
 
     def pos_to_volt_y(self, position):
         # load a stored table to convert position to voltage
-        pass
-        return position
+        voltage = position / 1000
+        return voltage
 
     def vol_to_position(self, xy_voltage: np.ndarray) -> np.ndarray:
         """
@@ -333,7 +335,8 @@ class GScanner():
         :param xy_voltage:
         :return:
         """
-        return xy_voltage
+        xy_position = xy_voltage * 1000
+        return xy_position
 
     def read_current_position(self) -> np.ndarray:
         with nidaqmx.Task() as voltage_read:

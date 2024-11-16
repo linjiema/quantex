@@ -19,7 +19,7 @@ class XZScanThread_galvo(QtCore.QThread):
         self._hardware = hardware
         super().__init__(parent)  # Inherit the init method of parent class
         self.running = False
-        self.parameters = [-0.4, 0.4, 0.008, 0, 35, 0.35, 0, 0]
+        self.parameters = [-400, 400, 8, 0, 35, 0.35, 0, 0]
         # [X_Start, X_End, X_Step, Z_Start, Z_End, Z_Step, Y_Position, Line_Frequency]
 
     def run(self):

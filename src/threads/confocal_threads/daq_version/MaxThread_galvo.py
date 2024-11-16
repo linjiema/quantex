@@ -20,7 +20,7 @@ class MaxThread_galvo(QtCore.QThread):
         super().__init__(parent)
         self._hardware = hardware
         self.count_freq = 10  # Hz
-        self.step_xy = 0.001  # Micron
+        self.step_xy = 1  # mV
         self.step_z = 0.1  # Micron
 
     def run(self):

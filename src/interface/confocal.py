@@ -28,8 +28,8 @@ class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
     XY_MIN_PIEZO = 0.0  # um
     XY_MAX_PIEZO = 65.0  # um
-    XY_MIN_GALVO = -0.4  # V
-    XY_MAX_GALVO = 0.4  # V
+    XY_MIN_GALVO = -400  # mV
+    XY_MAX_GALVO = 400  # mV
     Z_MIN_PIEZO = 0.0  # um
     Z_MAX_PIEZO = 35.0  # um
     CACHE_LIFE = 7  # days
