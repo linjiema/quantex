@@ -26,7 +26,7 @@ class ConfocalScanThread(QtCore.QThread):
         self.running = True
 
         # Move to Goal layer
-        print('move to goal layer')
+        # print('move to goal layer')
         self._hardware.mover.move_position_single(channel=4, location=self.parameters[6])
 
         # Define the parameters
@@ -71,7 +71,7 @@ class ConfocalScanThread(QtCore.QThread):
                             self._hardware.timer.start_timer()
                             self._hardware.mover.scanning_single_line(channel=1, waveform=wave_back)
                         '''
-                        print(y_points)
+                        # print(y_points)
                         # Processing the data
                         posArr = self._hardware.triggered_location_sensor.get_location_data()
                         ctsArr = self._hardware.triggered_counter.get_counts_array()

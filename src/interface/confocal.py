@@ -516,7 +516,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.tabScanControl.setTabEnabled(1, False)
         self.ui.pbFullRange.setEnabled(False)
         self.ui.pbSelectRange.setEnabled(False)
-        self.ui.pbCount.setEnabled(False)
         self.ui.txtStartX.setEnabled(False)
         self.ui.txtEndX.setEnabled(False)
         self.ui.txtStepX.setEnabled(False)
@@ -1249,6 +1248,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def scan_stopped(self):
+        self.ui.statusbar.clearMessage()
         self.ui.statusbar.showMessage('Scanning stopped.')
         self.ui.pbCount.setEnabled(True)
         self.ui.pbGoTo.setEnabled(True)
@@ -1274,6 +1274,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(1, True)
         self.update_current_position()
         try:
             self.actualData_xy = self.dThread.raw
@@ -1291,6 +1292,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def scan_stopped_ZScan(self):
+        self.ui.statusbar.clearMessage()
         self.ui.statusbar.showMessage('Scanning stopped.')
         self.ui.pbCount.setEnabled(True)
         self.ui.pbGoTo.setEnabled(True)
@@ -1316,6 +1318,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(0, True)
         self.update_current_position()
         try:
             self.actualData_z = self.dThread.raw
@@ -1327,7 +1330,7 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image_data(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
-        print('updating...', time.perf_counter())
+        # print('updating...', time.perf_counter())
         self.map = map_array
         self.update_image()
 
@@ -1353,8 +1356,9 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image_data_ZScan(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
-        print('updating...', time.perf_counter())
+        # print('updating...', time.perf_counter())
         self.mapZ = map_array
+        self.update_image_ZScan()
 
     def update_image_ZScan(self) -> None:
         """
