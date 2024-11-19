@@ -26,7 +26,7 @@ class XZScanThread_galvo(QtCore.QThread):
         self.running = True
 
         # Move to Goal layer
-        print('move to goal layer')
+        # print('move to goal layer')
         self._hardware.mover.move_position_single(channel=2, location=self.parameters[6])
 
         # Define the parameters
@@ -58,7 +58,7 @@ class XZScanThread_galvo(QtCore.QThread):
                         # Start scanning
                         self._hardware.scanner.start_scan_x()
                         self._hardware.timer.start_timer()
-                        print(z_points)
+                        # print(z_points)
                         # get data
                         posArr = full_wave[:len(full_wave) // 2]
                         ctsArr = self._hardware.triggered_counter.get_counts_array()
