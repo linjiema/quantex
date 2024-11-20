@@ -340,8 +340,20 @@ class GScanner():
 
     def read_current_position(self) -> np.ndarray:
         with nidaqmx.Task() as voltage_read:
-            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
-            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
+            self.location_sensor.ai_channels.add_ai_voltage_chan(physical_channel='Dev1/ai5',
+                                                                 name_to_assign_to_channel="",
+                                                                 terminal_config=nidaqmx.constants.TerminalConfiguration.DIFF,
+                                                                 min_val=-10.0,
+                                                                 max_val=10.0,
+                                                                 units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                                 custom_scale_name=""
+                                                                 )
+            voltage_read.ai_channels.add_ai_voltage_chan(physical_channel="Dev1/_ao0_vs_aognd",
+                                                         min_val=-1.0,
+                                                         max_val=1.0)
+            voltage_read.ai_channels.add_ai_voltage_chan(physical_channel="Dev1/_ao1_vs_aognd",
+                                                         min_val=-1.0,
+                                                         max_val=1.0)
             voltage_read.timing.cfg_samp_clk_timing(rate=10000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                     samps_per_chan=5)
             voltage_temp = np.average(voltage_read.read(number_of_samples_per_channel=5), axis=1)
