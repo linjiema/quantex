@@ -886,6 +886,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbMax.setEnabled(False)
         self.ui.pbKeepNV.setEnabled(False)
         self.ui.pbStart.setEnabled(False)
+        self.ui.pbStartZ.setEnabled(False)
         self.ui.pbCount.setText('Off')
 
         self.cThread.start()
@@ -1213,6 +1214,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbMax.setEnabled(True)
         self.ui.pbKeepNV.setEnabled(True)
         self.ui.pbStart.setEnabled(True)
+        self.ui.pbStartZ.setEnabled(True)
         self.ui.pbCount.setText('On')
         self.ui.pbCount.clicked.disconnect()
         self.ui.pbCount.clicked.connect(self.count_start)
