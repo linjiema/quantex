@@ -152,7 +152,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def init_xy_dummy_map(self):
         self.init_xy_dummy_data()
         # Initialize Map
-        self.mapColor = 'gist_earth'
+        self.mapColor = 'inferno'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
         self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
                                                 vmax=self.map.max(),
@@ -192,7 +192,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def init_z_dummy_map(self):
         self.init_z_dummy_data()
         # Initialize Map
-        self.mapColor = 'gist_earth'
+        self.mapColor = 'inferno'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
         self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
                                                   vmax=self.mapZ.max(),
