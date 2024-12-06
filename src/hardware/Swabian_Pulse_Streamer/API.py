@@ -27,7 +27,8 @@ class PulseGenerator:
         self.device_serial = serial
         try:
             # try to connect to the device
-            self.pulser = PulseStreamer(self.get_ip())
+            # self.pulser = PulseStreamer(self.get_ip())
+            self.pulser = PulseStreamer(findPulseStreamers(self.device_serial)[0][0])
         except BaseException as e:
             raise e
         else:
@@ -252,10 +253,12 @@ if __name__ == '__main__':
     # pulse_generator.laser_on()
     # time.sleep(30)
     # pulse_generator.laser_off()
-    pulse_generator.test()
-    pulse_generator.start_output()
-    time.sleep(2)
-    pulse_generator.stop_output()
+    # pulse_generator.test()
+    # pulse_generator.start_output()
+    # time.sleep(2)
+    # pulse_generator.stop_output()
+    # pulse_generator.pulser.setAnalogCalibration(dc_offset_a0=0, dc_offset_a1=0.0142, slope_a0=1, slope_a1=1.1024848)
+    print(pulse_generator.pulser.getAnalogCalibration())
 
 
     # pulse_generator.reset_pulse_generator()
