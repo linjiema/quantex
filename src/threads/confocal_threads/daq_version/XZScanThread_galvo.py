@@ -26,8 +26,8 @@ class XZScanThread_galvo(QtCore.QThread):
         self.running = True
 
         # Move to Goal layer
-        # print('move to goal layer')
-        self._hardware.mover.move_position_single(channel=2, location=self.parameters[6])
+        # print('move to goal layer')\
+        self._hardware.scanner.go_to_y(position=self.parameters[6])
 
         # Define the parameters
         x_start, x_end, x_step, z_start, z_end, z_step = self.parameters[:6]
