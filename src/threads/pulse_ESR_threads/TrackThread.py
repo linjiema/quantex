@@ -20,7 +20,7 @@ class TrackThread(QtCore.QThread):
         self._hardware = hardware
         self.count_freq = 10  # Hz
         self.step_xy = 0.5  # mV
-        self.step_z = 0.1  # Micron
+        self.step_z = 0.2  # Micron
 
     def run(self):
         self._hardware.one_time_counter.count_freq = self.count_freq
