@@ -71,7 +71,7 @@ class TriggeredCounter():
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
-        self.counter.timing.cfg_samp_clk_timing(rate=400,
+        self.counter.timing.cfg_samp_clk_timing(rate=100000,
                                                 source='/Dev1/PFI13',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
@@ -119,8 +119,9 @@ class HardwareTimer():
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
-        self.counter_out.close()
-        self.init_task()
+        if hasattr(self, 'counter_out'):
+            self.counter_out.close()
+            self.init_task()
 
     def start_timer(self):
         self.counter_out.start()

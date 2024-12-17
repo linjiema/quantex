@@ -543,6 +543,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.dThread.update.connect(self.update_image_data)
 
         if self.ui.rbPiezo.isChecked():
+            self.dThread.sample_rate = 200
             self.sThread.parameters = (float(self.ui.txtStartX.text()),
                                        float(self.ui.txtEndX.text()),
                                        float(self.ui.txtStepX.text()),
@@ -555,6 +556,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
+            self.dThread.sample_rate = int(self.ui.cbFreq.currentText()) * 200
             self.gsThread.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
                                         float(self.ui.txtStepX.text()),

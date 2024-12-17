@@ -24,6 +24,8 @@ class XZScanThread_galvo(QtCore.QThread):
 
     def run(self):
         self.running = True
+        # set timer frequency
+        self._hardware.timer.change_freq(new_freq=int(200 * self.parameters[7]))
 
         # Move to Goal layer
         # print('move to goal layer')\
