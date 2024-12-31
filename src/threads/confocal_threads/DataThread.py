@@ -74,11 +74,16 @@ class DataThread(QtCore.QThread):
         else:
             self.raw = np.append(self.raw, line_raw, axis=0)
 
+        # update data
+        self.update.emit(self.map)
+
+        '''
         # Update the image with 1 second interval
         t = time.perf_counter()
         if t - self.lastUpdateTime > 1:
             self.update.emit(self.map)
             self.lastUpdateTime = t
+        '''
 
         self.running = False
 
