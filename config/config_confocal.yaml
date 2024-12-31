@@ -3,7 +3,7 @@ galvo_scan:
     x: 0.0
     y: 0.0
     z: 17.5
-  line_frequency_index: 5
+  line_frequency_index: 4
   line_frequency_value: 20.0
   range: 100.0
   x:

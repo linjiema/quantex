@@ -64,6 +64,7 @@ class TriggeredCounter():
 
     def __init__(self):
         connection_check()
+        self.sample_number = 200
 
     def init_task(self):
         self.counter = nidaqmx.Task(new_task_name='Triggered_Counter')
@@ -77,12 +78,12 @@ class TriggeredCounter():
                                                 source='/Dev1/PFI13',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                samps_per_chan=200)
+                                                samps_per_chan=self.sample_number)
         self.counter.start()
 
     def get_counts_array(self):
         self.counter.wait_until_done()
-        cts_arr_raw = self.counter.read(number_of_samples_per_channel=200)
+        cts_arr_raw = self.counter.read(number_of_samples_per_channel=self.sample_number)
         self.counter.close()
         del self.counter
         self.is_closed = True
@@ -310,6 +311,44 @@ class GScanner():
         self.y_scanner.write(scan_wave_form, auto_start=False)
         self.scan_mode_y = self.SCAN_MODE_SCANNING
 
+    def init_xy_fast_scanner(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+            del self.x_scanner
+        if hasattr(self, 'y_scanner') and not self.is_closed_y:
+            self.y_scanner.close()
+            del self.y_scanner
+
+        self.xy_fast_scan = nidaqmx.Task(new_task_name='xy_fast_scanner')
+
+        self.xy_fast_scan.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                          name_to_assign_to_channel="x_channel",
+                                                          min_val=-5.0,
+                                                          max_val=5.0,
+                                                          units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                          custom_scale_name=""
+                                                          )
+        self.xy_fast_scan.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
+                                                          name_to_assign_to_channel="y_channel",
+                                                          min_val=-5.0,
+                                                          max_val=5.0,
+                                                          units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                          custom_scale_name=""
+                                                          )
+
+    def set_xy_fast_scan_param(self):
+        pass
+
+    def start_xy_fast_scan(self):
+        self.xy_fast_scan.start()
+
+    def wait_xy_fast_scan_finished(self):
+        self.xy_fast_scan.wait_until_done()
+        self.xy_fast_scan.stop()
+        self.xy_fast_scan.close()
+        del self.xy_fast_scan
+        self.init_scanner()
+
     def start_scan_x(self):
         self.x_scanner.start()
 
@@ -501,7 +540,6 @@ class GatedCounter():
             self.is_closed = True
 
 
-
 class SampleTriggerOutput():
     """
     Counter for output the Sample Trigger when receive specific number of pulses.
@@ -611,7 +649,8 @@ class counter_for_rotation():
         self.triggered_counter_ref.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
         # set the sample clock to the external trigger
         self.triggered_counter_ref.timing.cfg_samp_clk_timing(rate=1e5,
-                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              source='/Dev1/PFI2',
+                                                              # set the terminal to external trigger
                                                               active_edge=nidaqmx.constants.Edge.RISING,
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)
@@ -634,7 +673,8 @@ class counter_for_rotation():
         self.triggered_counter_sig.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
         # set the sample clock to the external trigger
         self.triggered_counter_sig.timing.cfg_samp_clk_timing(rate=1e5,
-                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              source='/Dev1/PFI2',
+                                                              # set the terminal to external trigger
                                                               active_edge=nidaqmx.constants.Edge.RISING,
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)

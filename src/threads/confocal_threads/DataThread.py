@@ -59,7 +59,7 @@ class DataThread(QtCore.QThread):
 
             cts_temp = self.countsData[closest_index]
 
-            picked_counts.append(cts_temp * self.sample_rate)
+            picked_counts.append(cts_temp * self.sample_rate * 2)
 
         # Find the location in y axis
         y_index = list(self.yArr).index(self.y)

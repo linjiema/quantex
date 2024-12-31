@@ -45,6 +45,7 @@ class XZScanThread_galvo(QtCore.QThread):
                                                                  )
         # Scanning process
         forward_back_status = True
+        self._hardware.triggered_counter.sample_number = 200
         for z_points in z_axis:
             if self.running:
                 # Move to one location
