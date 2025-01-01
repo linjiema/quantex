@@ -223,7 +223,10 @@ class DeviceManager(QtCore.QObject):
         if not self.rotator_status:
             try:
                 self.rotator = RotationStage()
-                self.rotator.open()
+                status = self.rotator.open()
+                if status == -1:
+                    self.rotator = None
+                    raise ValueError('Rotator hasn\'t been connected!')
             except BaseException as e:
                 logger.logger.info(f"Rotator init failed! {e}")
             else:

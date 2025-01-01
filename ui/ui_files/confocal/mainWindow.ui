@@ -1080,11 +1080,6 @@
       </item>
       <item>
        <property name="text">
-        <string>4</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>5</string>
        </property>
       </item>
@@ -1100,11 +1095,6 @@
       </item>
       <item>
        <property name="text">
-        <string>40</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>50</string>
        </property>
       </item>
@@ -1115,17 +1105,7 @@
       </item>
       <item>
        <property name="text">
-        <string>500</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>1000</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>2000</string>
+        <string>200</string>
        </property>
       </item>
      </widget>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\eee\PycharmProjects\quantex\ui\ui_files\confocal\mainWindow.ui'
+# Form implementation generated from reading ui file 'C:\Users\pbblab\PycharmProjects\afm-confocal\ui\ui_files\confocal\mainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -299,10 +299,6 @@ class Ui_Confocal(object):
         self.cbFreq.addItem("")
         self.cbFreq.addItem("")
         self.cbFreq.addItem("")
-        self.cbFreq.addItem("")
-        self.cbFreq.addItem("")
-        self.cbFreq.addItem("")
-        self.cbFreq.addItem("")
         self.gbXYScanner = QtWidgets.QGroupBox(self.gbScan)
         self.gbXYScanner.setGeometry(QtCore.QRect(10, 20, 141, 51))
         self.gbXYScanner.setObjectName("gbXYScanner")
@@ -546,16 +542,12 @@ class Ui_Confocal(object):
         self.label_16.setText(_translate("Confocal", "Step Frequency (Hz)"))
         self.cbFreq.setItemText(0, _translate("Confocal", "1"))
         self.cbFreq.setItemText(1, _translate("Confocal", "2"))
-        self.cbFreq.setItemText(2, _translate("Confocal", "4"))
-        self.cbFreq.setItemText(3, _translate("Confocal", "5"))
-        self.cbFreq.setItemText(4, _translate("Confocal", "10"))
-        self.cbFreq.setItemText(5, _translate("Confocal", "20"))
-        self.cbFreq.setItemText(6, _translate("Confocal", "40"))
-        self.cbFreq.setItemText(7, _translate("Confocal", "50"))
-        self.cbFreq.setItemText(8, _translate("Confocal", "100"))
-        self.cbFreq.setItemText(9, _translate("Confocal", "500"))
-        self.cbFreq.setItemText(10, _translate("Confocal", "1000"))
-        self.cbFreq.setItemText(11, _translate("Confocal", "2000"))
+        self.cbFreq.setItemText(2, _translate("Confocal", "5"))
+        self.cbFreq.setItemText(3, _translate("Confocal", "10"))
+        self.cbFreq.setItemText(4, _translate("Confocal", "20"))
+        self.cbFreq.setItemText(5, _translate("Confocal", "50"))
+        self.cbFreq.setItemText(6, _translate("Confocal", "100"))
+        self.cbFreq.setItemText(7, _translate("Confocal", "200"))
         self.gbXYScanner.setTitle(_translate("Confocal", "XY Scanner"))
         self.rbGalvo.setText(_translate("Confocal", "Galvo"))
         self.rbPiezo.setText(_translate("Confocal", "Piezo"))
