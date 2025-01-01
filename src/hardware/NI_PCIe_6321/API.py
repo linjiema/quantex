@@ -16,7 +16,7 @@ class TriggeredLocationSensor():
         connection_check()
 
     def init_task(self):
-        self.location_sensor = nidaqmx.Task()
+        self.location_sensor = nidaqmx.Task(new_task_name='Triggered_Location_sensor')
         self.is_closed = False
         self.location_sensor.ai_channels.add_ai_voltage_chan(physical_channel='Dev1/ai5',
                                                              name_to_assign_to_channel="",
@@ -38,6 +38,7 @@ class TriggeredLocationSensor():
         self.location_sensor.wait_until_done()
         location_raw = self.location_sensor.read(number_of_samples_per_channel=200)
         self.location_sensor.close()
+        del self.location_sensor
         self.is_closed = True
         return location_raw
 
@@ -51,6 +52,7 @@ class TriggeredLocationSensor():
     def close(self):
         if hasattr(self, 'location_sensor') and not self.is_closed:
             self.location_sensor.close()
+            del self.location_sensor
             self.is_closed = True
 
 
@@ -62,26 +64,28 @@ class TriggeredCounter():
 
     def __init__(self):
         connection_check()
+        self.sample_number = 200
 
     def init_task(self):
-        self.counter = nidaqmx.Task()
+        self.counter = nidaqmx.Task(new_task_name='Triggered_Counter')
         self.is_closed = False
         self.counter.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
                                                          name_to_assign_to_channel="",
                                                          edge=nidaqmx.constants.Edge.RISING,
                                                          initial_count=0,
                                                          count_direction=nidaqmx.constants.CountDirection.COUNT_UP)
-        self.counter.timing.cfg_samp_clk_timing(rate=400,
+        self.counter.timing.cfg_samp_clk_timing(rate=100000,
                                                 source='/Dev1/PFI13',
                                                 active_edge=nidaqmx.constants.Edge.RISING,
                                                 sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                samps_per_chan=200)
+                                                samps_per_chan=self.sample_number)
         self.counter.start()
 
     def get_counts_array(self):
         self.counter.wait_until_done()
-        cts_arr_raw = self.counter.read(number_of_samples_per_channel=200)
+        cts_arr_raw = self.counter.read(number_of_samples_per_channel=self.sample_number)
         self.counter.close()
+        del self.counter
         self.is_closed = True
 
         deq = collections.deque(cts_arr_raw)
@@ -95,6 +99,7 @@ class TriggeredCounter():
     def close(self):
         if hasattr(self, 'counter') and not self.is_closed:
             self.counter.close()
+            del self.counter
             self.is_closed = True
 
 
@@ -104,7 +109,7 @@ class HardwareTimer():
         self.count_freq = 200
 
     def init_task(self):
-        self.counter_out = nidaqmx.Task()
+        self.counter_out = nidaqmx.Task(new_task_name='HW_Timer')
         self.is_closed = False
         self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',
                                                             name_to_assign_to_channel="",
@@ -119,20 +124,24 @@ class HardwareTimer():
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
-        self.counter_out.close()
-        self.init_task()
+        if hasattr(self, 'counter_out'):
+            self.counter_out.close()
+            self.init_task()
 
     def start_timer(self):
         self.counter_out.start()
 
     def recycle_timer(self):
-        self.counter_out.wait_until_done()
-        self.counter_out.close()
-        self.is_closed = True
+        if hasattr(self, 'counter_out') and not self.is_closed:
+            self.counter_out.wait_until_done()
+            self.counter_out.close()
+            del self.counter_out
+            self.is_closed = True
 
     def close(self):
         if hasattr(self, 'counter_out') and not self.is_closed:
             self.counter_out.close()
+            del self.counter_out
             self.is_closed = True
 
 
@@ -148,7 +157,7 @@ class OneTimeCounter_HardwareTimer():
 
     def init_task(self):
         # Output as timer
-        self.counter_out = nidaqmx.Task()
+        self.counter_out = nidaqmx.Task(new_task_name='HW_Timer_onetime_out')
         self.counter_out.co_channels.add_co_pulse_chan_freq(counter='Dev1/ctr1',
                                                             name_to_assign_to_channel="",
                                                             units=nidaqmx.constants.FrequencyUnits.HZ,
@@ -160,7 +169,7 @@ class OneTimeCounter_HardwareTimer():
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                     samps_per_chan=2)
         # Input as counter
-        self.counter_in = nidaqmx.Task()
+        self.counter_in = nidaqmx.Task(new_task_name='HW_Timer_onetime_in')
         self.is_closed = False
         self.counter_in.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
                                                             name_to_assign_to_channel="",
@@ -196,6 +205,8 @@ class OneTimeCounter_HardwareTimer():
         if hasattr(self, 'counter_in') and not self.is_closed:
             self.counter_in.close()
             self.counter_out.close()
+            del self.counter_in
+            del self.counter_out
             self.is_closed = True
 
 
@@ -286,7 +297,8 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                   samps_per_chan=int(self.sample_number * 2))
-        self.x_scanner.write(self.wave_form_x, auto_start=False)
+        scan_wave_form = [self.pos_to_volt_x(pos) for pos in self.wave_form_x]
+        self.x_scanner.write(scan_wave_form, auto_start=False)
         self.scan_mode_x = self.SCAN_MODE_SCANNING
 
     def set_y_scan_param(self):
@@ -295,8 +307,47 @@ class GScanner():
                                                   active_edge=nidaqmx.constants.Edge.RISING,
                                                   sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                   samps_per_chan=int(self.sample_number * 2))
-        self.y_scanner.write(self.wave_form_y, auto_start=False)
+        scan_wave_form = [self.pos_to_volt_y(pos) for pos in self.wave_form_y]
+        self.y_scanner.write(scan_wave_form, auto_start=False)
         self.scan_mode_y = self.SCAN_MODE_SCANNING
+
+    def init_xy_fast_scanner(self):
+        if hasattr(self, 'x_scanner') and not self.is_closed_x:
+            self.x_scanner.close()
+            del self.x_scanner
+        if hasattr(self, 'y_scanner') and not self.is_closed_y:
+            self.y_scanner.close()
+            del self.y_scanner
+
+        self.xy_fast_scan = nidaqmx.Task(new_task_name='xy_fast_scanner')
+
+        self.xy_fast_scan.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+                                                          name_to_assign_to_channel="x_channel",
+                                                          min_val=-5.0,
+                                                          max_val=5.0,
+                                                          units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                          custom_scale_name=""
+                                                          )
+        self.xy_fast_scan.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
+                                                          name_to_assign_to_channel="y_channel",
+                                                          min_val=-5.0,
+                                                          max_val=5.0,
+                                                          units=nidaqmx.constants.VoltageUnits.VOLTS,
+                                                          custom_scale_name=""
+                                                          )
+
+    def set_xy_fast_scan_param(self):
+        pass
+
+    def start_xy_fast_scan(self):
+        self.xy_fast_scan.start()
+
+    def wait_xy_fast_scan_finished(self):
+        self.xy_fast_scan.wait_until_done()
+        self.xy_fast_scan.stop()
+        self.xy_fast_scan.close()
+        del self.xy_fast_scan
+        self.init_scanner()
 
     def start_scan_x(self):
         self.x_scanner.start()
@@ -319,13 +370,13 @@ class GScanner():
 
     def pos_to_volt_x(self, position):
         # load a stored table to convert position to voltage
-        pass
-        return position
+        voltage = position / 1000
+        return voltage
 
     def pos_to_volt_y(self, position):
         # load a stored table to convert position to voltage
-        pass
-        return position
+        voltage = position / 1000
+        return voltage
 
     def vol_to_position(self, xy_voltage: np.ndarray) -> np.ndarray:
         """
@@ -333,15 +384,20 @@ class GScanner():
         :param xy_voltage:
         :return:
         """
-        return xy_voltage
+        xy_position = xy_voltage * 1000
+        return xy_position
 
     def read_current_position(self) -> np.ndarray:
-        with nidaqmx.Task() as voltage_read:
-            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao0_vs_aognd")
-            voltage_read.ai_channels.add_ai_voltage_chan("Dev1/_ao1_vs_aognd")
-            voltage_read.timing.cfg_samp_clk_timing(rate=10000, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=5)
-            voltage_temp = np.average(voltage_read.read(number_of_samples_per_channel=5), axis=1)
+        with nidaqmx.Task(new_task_name='Read_GS_Position') as voltage_read:
+            voltage_read.ai_channels.add_ai_voltage_chan(physical_channel="Dev1/_ao0_vs_aognd",
+                                                         min_val=-1.0,
+                                                         max_val=1.0)
+            voltage_read.ai_channels.add_ai_voltage_chan(physical_channel="Dev1/_ao1_vs_aognd",
+                                                         min_val=-1.0,
+                                                         max_val=1.0)
+            voltage_read.timing.cfg_samp_clk_timing(rate=200, sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
+                                                    samps_per_chan=10)
+            voltage_temp = np.average(voltage_read.read(number_of_samples_per_channel=10), axis=1)
         position_temp = self.vol_to_position(voltage_temp)
         return position_temp
 
@@ -479,8 +535,9 @@ class GatedCounter():
         if hasattr(self, 'gated_counter_ref') and not self.is_closed:
             self.gated_counter_ref.close()
             self.gated_counter_sig.close()
+            del self.gated_counter_ref
+            del self.gated_counter_sig
             self.is_closed = True
-
 
 
 class SampleTriggerOutput():
@@ -528,6 +585,7 @@ class SampleTriggerOutput():
         """
         self.sample_trigger_output.wait_until_done(timeout=360.0)
         self.sample_trigger_output.close()
+        del self.sample_trigger_output
         self.is_closed = True
 
     def close(self):
@@ -537,6 +595,7 @@ class SampleTriggerOutput():
         """
         if hasattr(self, 'sample_trigger_output') and not self.is_closed:
             self.sample_trigger_output.close()
+            del self.sample_trigger_output
             self.is_closed = True
 
     def reset_average_time(self, new_average=50000):
@@ -561,7 +620,7 @@ class counter_for_rotation():
         Init the counter for rotation.
         """
         # Set timer for record the time based on the internal clock
-        self.timer = nidaqmx.Task()
+        self.timer = nidaqmx.Task(new_task_name='Rotation_Timer')
         self.timer.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr1',
                                                        name_to_assign_to_channel="",
                                                        edge=nidaqmx.constants.Edge.RISING,
@@ -580,7 +639,7 @@ class counter_for_rotation():
         self.timer.timing.samp_clk_dig_fltr_enable = True
 
         # set counter for record the counts of the photon_ref
-        self.triggered_counter_ref = nidaqmx.Task()
+        self.triggered_counter_ref = nidaqmx.Task(new_task_name='Rotation_counter_ref')
         self.triggered_counter_ref.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr2',
                                                                        name_to_assign_to_channel="",
                                                                        edge=nidaqmx.constants.Edge.RISING,
@@ -590,7 +649,8 @@ class counter_for_rotation():
         self.triggered_counter_ref.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
         # set the sample clock to the external trigger
         self.triggered_counter_ref.timing.cfg_samp_clk_timing(rate=1e5,
-                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              source='/Dev1/PFI2',
+                                                              # set the terminal to external trigger
                                                               active_edge=nidaqmx.constants.Edge.RISING,
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)
@@ -603,7 +663,7 @@ class counter_for_rotation():
         self.triggered_counter_ref.triggers.pause_trigger.dig_lvl_when = nidaqmx.constants.Level.LOW
 
         # set counter for record the counts of the photon_sig
-        self.triggered_counter_sig = nidaqmx.Task()
+        self.triggered_counter_sig = nidaqmx.Task(new_task_name='Rotation_counter_sig')
         self.triggered_counter_sig.ci_channels.add_ci_count_edges_chan(counter='Dev1/ctr3',
                                                                        name_to_assign_to_channel="",
                                                                        edge=nidaqmx.constants.Edge.RISING,
@@ -613,7 +673,8 @@ class counter_for_rotation():
         self.triggered_counter_sig.ci_channels[0].ci_count_edges_term = '/Dev1/PFI0'
         # set the sample clock to the external trigger
         self.triggered_counter_sig.timing.cfg_samp_clk_timing(rate=1e5,
-                                                              source='/Dev1/PFI2',  # set the terminal to external trigger
+                                                              source='/Dev1/PFI2',
+                                                              # set the terminal to external trigger
                                                               active_edge=nidaqmx.constants.Edge.RISING,
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)
@@ -682,6 +743,9 @@ class counter_for_rotation():
             self.timer.close()
             self.triggered_counter_ref.close()
             self.triggered_counter_sig.close()
+            del self.timer
+            del self.triggered_counter_ref
+            del self.triggered_counter_sig
             self.is_closed = True
 
 

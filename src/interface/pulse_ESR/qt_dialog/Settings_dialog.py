@@ -44,7 +44,7 @@ class Setting_GUI(QtWidgets.QDialog):
         """
         # Load Frequency Sweep Settings
         dir_freq_sweep_settings = os.path.join(self.project_dir,
-                                               'config\\config_pulse_ESR_polarization\\Settings\\freq_sweep_settings.txt')
+                                               'config\\config_pulse_ESR\\Settings\\freq_sweep_settings.txt')
         with open(dir_freq_sweep_settings, 'r') as f_freq_sweep_settings:
             dic_freq_sweep_settings = {}
             for line in f_freq_sweep_settings.readlines():
@@ -61,7 +61,7 @@ class Setting_GUI(QtWidgets.QDialog):
 
         # Load Time Sweep Settings
         dir_time_sweep_settings = os.path.join(self.project_dir,
-                                               'config\\config_pulse_ESR_polarization\\Settings\\time_sweep_settings.txt')
+                                               'config\\config_pulse_ESR\\Settings\\time_sweep_settings.txt')
         with open(dir_time_sweep_settings, 'r') as f_time_sweep_settings:
             dic_time_sweep_settings = {}
             for line in f_time_sweep_settings.readlines():
@@ -78,7 +78,7 @@ class Setting_GUI(QtWidgets.QDialog):
 
         # Load Delay Settings
         dir_delay_settings = os.path.join(self.project_dir,
-                                          'config\\config_pulse_ESR_polarization\\Settings\\delay_settings.txt')
+                                          'config\\config_pulse_ESR\\Settings\\delay_settings.txt')
         with open(dir_delay_settings, 'r') as f_delay_settings:
             dic_delay_settings = {}
             for line in f_delay_settings.readlines():
@@ -99,7 +99,7 @@ class Setting_GUI(QtWidgets.QDialog):
         """
         # Save Frequency Sweep Settings
         dir_freq_sweep_settings = os.path.join(self.project_dir,
-                                               'config\\config_pulse_ESR_polarization\\Settings\\freq_sweep_settings.txt')
+                                               'config\\config_pulse_ESR\\Settings\\freq_sweep_settings.txt')
         freq_sweep_settings_list = [
             ('LOOP_NUM', self.ui.lineEditFreqSetNumOfLoop.text()),
             ('AVERAGE_NUM', self.ui.lineEditFreqSetNumOfAverage.text())
@@ -110,7 +110,7 @@ class Setting_GUI(QtWidgets.QDialog):
 
         # Save Time Sweep Settings
         dir_time_sweep_settings = os.path.join(self.project_dir,
-                                               'config\\config_pulse_ESR_polarization\\Settings\\time_sweep_settings.txt')
+                                               'config\\config_pulse_ESR\\Settings\\time_sweep_settings.txt')
         time_sweep_settings_list = [
             ('LOOP_NUM', self.ui.lineEditTimeSetNumOfLoop.text()),
             ('AVERAGE_NUM', self.ui.lineEditTimeSetNumOfAverage.text())
@@ -121,7 +121,7 @@ class Setting_GUI(QtWidgets.QDialog):
 
         # Save Delay Settings
         dir_delay_settings = os.path.join(self.project_dir,
-                                          'config\\config_pulse_ESR_polarization\\Settings\\delay_settings.txt')
+                                          'config\\config_pulse_ESR\\Settings\\delay_settings.txt')
         delay_settings_list = [
             ('AOM', self.ui.lineEditAOMDelayTime.text()),
             ('MW', self.ui.lineEditMWDelayTime.text())

@@ -26,7 +26,7 @@ class XZScanThread(QtCore.QThread):
         self.running = True
 
         # Move to Goal layer
-        print('move to goal layer')
+        # print('move to goal layer')
         self._hardware.mover.move_position_single(channel=2, location=self.parameters[6])
 
         # Define the parameters

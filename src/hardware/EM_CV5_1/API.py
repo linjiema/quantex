@@ -43,6 +43,7 @@ class RotationStage:
                                 ctypes.c_int(1),
                                 ctypes.c_char_p(bytes("EM-RP60", "utf-8")),
                                 ctypes.c_int(1))
+        return self.device
 
     def set_ttl_input(self, enable=0):
         """

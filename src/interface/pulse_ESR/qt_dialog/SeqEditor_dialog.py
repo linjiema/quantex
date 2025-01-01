@@ -128,7 +128,7 @@ class SeqEditor_GUI(QtWidgets.QDialog):
         """
         # Get the abs path of the pulse File
         dir_pulse_seq = os.path.join(self.project_dir,
-                                     'config\\config_pulse_ESR_polarization\\PulseSeq')
+                                     'config\\config_pulse_ESR\\PulseSeq')
         # Get the name of the file
         self.seq_name = self.ui.leSeqName.text()
         path_pulse_seq = os.path.join(dir_pulse_seq, self.seq_name)

@@ -754,7 +754,7 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         # Stop animate
         try:
-            self.ui.seq_fig.close_event()
+            self.ani.event_source.stop()
         except BaseException as e:
             pass
         else:

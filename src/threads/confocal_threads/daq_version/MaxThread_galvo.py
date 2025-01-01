@@ -20,7 +20,7 @@ class MaxThread_galvo(QtCore.QThread):
         super().__init__(parent)
         self._hardware = hardware
         self.count_freq = 10  # Hz
-        self.step_xy = 0.001  # Micron
+        self.step_xy = 1  # mV
         self.step_z = 0.1  # Micron
 
     def run(self):
@@ -38,7 +38,6 @@ class MaxThread_galvo(QtCore.QThread):
                         self._hardware.mover.read_position_single(channel=4))
 
     def scan_galvo(self, _channel, step):
-        print('scan_channel:', _channel)
         if _channel == 1:
             pos = self._hardware.scanner.read_current_position()[0]
             pos_list = np.arange(start=pos - 3 * step, stop=pos + 3 * step, step=step)

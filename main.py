@@ -38,7 +38,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbGalvoReset.clicked.connect(self.hardware.reset_scanner)
         self.ui.pbPulseGenInit.clicked.connect(lambda: self.hardware.init_pulser())
         self.ui.pbPulseGenReset.clicked.connect(self.hardware.reset_pulser)
-        self.ui.pbTaggerInit.clicked.connect(self.hardware.init_counter)
+        self.ui.pbTaggerInit.clicked.connect(lambda: self.hardware.init_counter())
         self.ui.pbTaggerReset.clicked.connect(self.hardware.reset_counter)
         self.ui.pbDaqInit.clicked.connect(self.hardware.init_ni)
         self.ui.pbDaqReset.clicked.connect(self.hardware.reset_ni)
@@ -46,7 +46,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbMWReset.clicked.connect(self.hardware.reset_mw_source)
         self.ui.pbRotatorInit.clicked.connect(self.hardware.init_rotator)
         self.ui.pbRotatorReset.clicked.connect(self.hardware.reset_rotator)
-        self.ui.pbInitAll.clicked.connect(self.hardware.init_all_device)
+        self.ui.pbInitAll.clicked.connect(lambda: self.hardware.init_all_device())
         self.ui.pbResetAll.clicked.connect(self.hardware.cleanup)
         # connect device status update signal to handling function
         self.hardware.DeviceStatusUpdate.connect(self.update_hardware_status)

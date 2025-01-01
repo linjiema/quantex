@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\eee\PycharmProjects\quantex\ui\ui_files\pulse_ESR_polarization\Settings.ui'
+# Form implementation generated from reading ui file 'C:\Users\pbblab\PycharmProjects\afm-confocal\ui\ui_files\pulse_ESR_polarization\Settings.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #

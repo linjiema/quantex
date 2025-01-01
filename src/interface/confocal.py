@@ -28,8 +28,8 @@ class mainGUI(QtWidgets.QMainWindow):
     SIGNAL_ExpConfocalClose = QtCore.pyqtSignal(name='ExpConfocalClose')
     XY_MIN_PIEZO = 0.0  # um
     XY_MAX_PIEZO = 65.0  # um
-    XY_MIN_GALVO = -0.4  # V
-    XY_MAX_GALVO = 0.4  # V
+    XY_MIN_GALVO = -400  # mV
+    XY_MAX_GALVO = 400  # mV
     Z_MIN_PIEZO = 0.0  # um
     Z_MAX_PIEZO = 35.0  # um
     CACHE_LIFE = 7  # days
@@ -152,7 +152,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def init_xy_dummy_map(self):
         self.init_xy_dummy_data()
         # Initialize Map
-        self.mapColor = 'gist_earth'
+        self.mapColor = 'inferno'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
         self.image = self.ui.mplMap.axes.imshow(self.map, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
                                                 vmax=self.map.max(),
@@ -192,7 +192,7 @@ class mainGUI(QtWidgets.QMainWindow):
     def init_z_dummy_map(self):
         self.init_z_dummy_data()
         # Initialize Map
-        self.mapColor = 'gist_earth'
+        self.mapColor = 'inferno'
         # See https://matplotlib.org/tutorials/colors/colormaps.html for colormap
         self.imageZ = self.ui.mplMapZ.axes.imshow(self.mapZ, cmap=matplotlib.colormaps.get_cmap(self.mapColor), vmin=0,
                                                   vmax=self.mapZ.max(),
@@ -516,7 +516,6 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.tabScanControl.setTabEnabled(1, False)
         self.ui.pbFullRange.setEnabled(False)
         self.ui.pbSelectRange.setEnabled(False)
-        self.ui.pbCount.setEnabled(False)
         self.ui.txtStartX.setEnabled(False)
         self.ui.txtEndX.setEnabled(False)
         self.ui.txtStepX.setEnabled(False)
@@ -544,6 +543,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.dThread.update.connect(self.update_image_data)
 
         if self.ui.rbPiezo.isChecked():
+            self.dThread.sample_rate = 200
             self.sThread.parameters = (float(self.ui.txtStartX.text()),
                                        float(self.ui.txtEndX.text()),
                                        float(self.ui.txtStepX.text()),
@@ -556,6 +556,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
+            self.dThread.sample_rate = int(self.ui.cbFreq.currentText()) * 200
             self.gsThread.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
                                         float(self.ui.txtStepX.text()),
@@ -887,6 +888,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbMax.setEnabled(False)
         self.ui.pbKeepNV.setEnabled(False)
         self.ui.pbStart.setEnabled(False)
+        self.ui.pbStartZ.setEnabled(False)
         self.ui.pbCount.setText('Off')
 
         self.cThread.start()
@@ -1214,6 +1216,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.pbMax.setEnabled(True)
         self.ui.pbKeepNV.setEnabled(True)
         self.ui.pbStart.setEnabled(True)
+        self.ui.pbStartZ.setEnabled(True)
         self.ui.pbCount.setText('On')
         self.ui.pbCount.clicked.disconnect()
         self.ui.pbCount.clicked.connect(self.count_start)
@@ -1249,6 +1252,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def scan_stopped(self):
+        self.ui.statusbar.clearMessage()
         self.ui.statusbar.showMessage('Scanning stopped.')
         self.ui.pbCount.setEnabled(True)
         self.ui.pbGoTo.setEnabled(True)
@@ -1274,6 +1278,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(1, True)
         self.update_current_position()
         try:
             self.actualData_xy = self.dThread.raw
@@ -1291,6 +1296,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def scan_stopped_ZScan(self):
+        self.ui.statusbar.clearMessage()
         self.ui.statusbar.showMessage('Scanning stopped.')
         self.ui.pbCount.setEnabled(True)
         self.ui.pbGoTo.setEnabled(True)
@@ -1316,6 +1322,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setEnabled(True)
         self.ui.txtEndY.setEnabled(True)
         self.ui.txtStepY.setEnabled(True)
+        self.ui.tabScanControl.setTabEnabled(0, True)
         self.update_current_position()
         try:
             self.actualData_z = self.dThread.raw
@@ -1327,7 +1334,7 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image_data(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
-        print('updating...', time.perf_counter())
+        # print('updating...', time.perf_counter())
         self.map = map_array
         self.update_image()
 
@@ -1353,8 +1360,9 @@ class mainGUI(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(numpy.ndarray)
     def update_image_data_ZScan(self, map_array: numpy.ndarray):
         self.ui.statusbar.showMessage('updating...' + str(time.perf_counter()))
-        print('updating...', time.perf_counter())
+        # print('updating...', time.perf_counter())
         self.mapZ = map_array
+        self.update_image_ZScan()
 
     def update_image_ZScan(self) -> None:
         """
