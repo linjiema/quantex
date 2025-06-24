@@ -16,7 +16,8 @@ from PyQt5 import QtWidgets, QtCore
 
 from src.interface.pulse_ESR_polarization.qt_dialog.Settings_dialog import Setting_GUI as SettingsDialog
 from src.interface.pulse_ESR_polarization.qt_dialog.SeqEditor_dialog import SeqEditor_GUI as SeqEditorDialog
-from src.interface.pulse_ESR_polarization.qt_dialog.RotationStageSetting_dialog import RotationStageSetting_GUI as RotationStageSettingDialog
+from src.interface.pulse_ESR_polarization.qt_dialog.RotationStageSetting_dialog import \
+    RotationStageSetting_GUI as RotationStageSettingDialog
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -1236,6 +1237,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.set_rel_move_mode()
 
     def start_rot_experiment(self):
+        # Set rotation stage scan param
+        self.set_rotation_param_scan()
         # Set Microwave Source
         self.set_power()
         # Set Microwave Source
@@ -1267,6 +1270,7 @@ class mainGUI(QtWidgets.QMainWindow):
         cps_sig = cts_signal * 1e3 / scan_time
         self.update_rotation_plot(ref=cps_ref, sig=cps_sig)
         # set pb buttons
+        self.set_rotation_param_move()
         self.ui.pbRotationPointScan.setEnabled(True)
         self.ui.pbRotationMax.setEnabled(True)
         self.ui.pbRotation2D.setEnabled(True)
@@ -1827,7 +1831,9 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sig_plot.set_data(self.freq_sweep, self.sig_ave)
             self.ui.data_fig.axes.set_xlabel('Frequency (MHz)')
             self.ui.data_fig.axes.set_ylabel('Counts')
-            self.ui.data_fig.axes.set_xlim(np.min(self.freq_sweep) * 0.99, np.max(self.freq_sweep) * 1.01)
+            self.ui.data_fig.axes.set_xlim(
+                np.min(self.freq_sweep) - (np.max(self.freq_sweep) - np.min(self.freq_sweep)) * 0.01,
+                np.max(self.freq_sweep) + (np.max(self.freq_sweep) - np.min(self.freq_sweep)) * 0.01)
             self.ui.data_fig.axes.set_xscale("linear")
 
         else:
@@ -1835,7 +1841,9 @@ class mainGUI(QtWidgets.QMainWindow):
             self.sig_plot.set_data(self.time_sweep, self.sig_ave)
             self.ui.data_fig.axes.set_xlabel('Time (ns)')
             self.ui.data_fig.axes.set_ylabel('Counts')
-            self.ui.data_fig.axes.set_xlim(np.min(self.time_sweep) * 0.99, np.max(self.time_sweep) * 1.01)
+            self.ui.data_fig.axes.set_xlim(
+                np.min(self.time_sweep) - (np.max(self.time_sweep) - np.min(self.time_sweep)) * 0.01,
+                np.max(self.time_sweep) + (np.max(self.time_sweep) - np.min(self.time_sweep)) * 0.01)
             if self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex()) == 'Exponential':
                 self.ui.data_fig.axes.set_xscale("log")
             else:

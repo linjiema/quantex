@@ -111,6 +111,7 @@ class ConfocalScanThread_galvo(QtCore.QThread):
 
     def fast_scan(self):
         pass
+        # TODO: Implement fast scan
         '''
         # set parameter
         try:
