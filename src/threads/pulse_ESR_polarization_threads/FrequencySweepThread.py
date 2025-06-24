@@ -129,7 +129,7 @@ class FrequencySweepThread(QtCore.QThread):
         # At the end of the scanning, set running status to False
         self.running_status = False
         # Sleep 1 second to update the data again
-        time.sleep(1)
+        time.sleep(0.25)
         # If the point_num and loop_num meet the following condition, means the scanning fully finish
         if self.point_num[0] == 0 and self.loop_num[0] == self.loop_num[1]:
             # Update the last data

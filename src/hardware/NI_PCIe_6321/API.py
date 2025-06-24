@@ -198,7 +198,10 @@ class OneTimeCounter_HardwareTimer():
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
+        self.counter_in.close()
         self.counter_out.close()
+        del self.counter_in
+        del self.counter_out
         self.init_task()
 
     def close(self):
@@ -261,6 +264,7 @@ class GScanner():
         self.x_scanner.stop()
         if self.scan_mode_x == self.SCAN_MODE_SCANNING:
             self.x_scanner.close()
+            del self.x_scanner
             self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
             self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
                                                            name_to_assign_to_channel="",
@@ -278,6 +282,7 @@ class GScanner():
         self.y_scanner.stop()
         if self.scan_mode_y == self.SCAN_MODE_SCANNING:
             self.y_scanner.close()
+            del self.y_scanner
             self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
             self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
                                                            name_to_assign_to_channel="",
@@ -404,6 +409,7 @@ class GScanner():
     def recycle_x_scanner(self):
         if hasattr(self, 'x_scanner') and not self.is_closed_x:
             self.x_scanner.close()
+            del self.x_scanner
         self.x_scanner = nidaqmx.Task(new_task_name='x_scanner')
         self.x_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
                                                        name_to_assign_to_channel="",
@@ -417,8 +423,9 @@ class GScanner():
     def recycle_y_scanner(self):
         if hasattr(self, 'y_scanner') and not self.is_closed_y:
             self.y_scanner.close()
+            del self.y_scanner
         self.y_scanner = nidaqmx.Task(new_task_name='y_scanner')
-        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao0',
+        self.y_scanner.ao_channels.add_ao_voltage_chan(physical_channel='Dev1/ao1',
                                                        name_to_assign_to_channel="",
                                                        min_val=-5.0,
                                                        max_val=5.0,
@@ -430,9 +437,11 @@ class GScanner():
     def close(self):
         if hasattr(self, 'x_scanner') and not self.is_closed_x:
             self.x_scanner.close()
+            del self.x_scanner
             self.is_closed_x = True
         if hasattr(self, 'y_scanner') and not self.is_closed_y:
             self.y_scanner.close()
+            del self.y_scanner
             self.is_closed_y = True
 
     def generating_scan_array(self, start_point: float, end_point: float, line_rate: float) \
@@ -519,8 +528,8 @@ class GatedCounter():
         Get the counts data from Reference Counter and Signal Counter, and close the counter.
         :return: ref_counts, sig_counts
         """
-        self.gated_counter_sig.wait_until_done(timeout=360.0)
-        self.gated_counter_ref.wait_until_done(timeout=360.0)
+        self.gated_counter_sig.wait_until_done(timeout=1200.0)
+        self.gated_counter_ref.wait_until_done(timeout=1200.0)
         sig = self.gated_counter_sig.read(number_of_samples_per_channel=2)
         ref = self.gated_counter_ref.read(number_of_samples_per_channel=2)
         # print(ref, sig)
@@ -635,7 +644,7 @@ class counter_for_rotation():
                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                               samps_per_chan=self.sample_point + 1)
         # set the digital filter for the sample clock
-        self.timer.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.timer.timing.samp_clk_dig_fltr_min_pulse_width = 5e-6
         self.timer.timing.samp_clk_dig_fltr_enable = True
 
         # set counter for record the counts of the photon_ref
@@ -655,7 +664,7 @@ class counter_for_rotation():
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)
         # set the digital filter for the sample clock
-        self.triggered_counter_ref.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.triggered_counter_ref.timing.samp_clk_dig_fltr_min_pulse_width = 5e-6
         self.triggered_counter_ref.timing.samp_clk_dig_fltr_enable = True
         # Activate and Assign Gate
         self.triggered_counter_ref.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
@@ -679,7 +688,7 @@ class counter_for_rotation():
                                                               sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                                               samps_per_chan=self.sample_point + 1)
         # set the digital filter for the sample clock
-        self.triggered_counter_sig.timing.samp_clk_dig_fltr_min_pulse_width = 1e-6
+        self.triggered_counter_sig.timing.samp_clk_dig_fltr_min_pulse_width = 5e-6
         self.triggered_counter_sig.timing.samp_clk_dig_fltr_enable = True
         # Activate and Assign Gate
         self.triggered_counter_sig.triggers.pause_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_LEVEL
