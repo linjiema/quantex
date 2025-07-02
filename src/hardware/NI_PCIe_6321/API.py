@@ -107,6 +107,7 @@ class HardwareTimer():
     def __init__(self):
         connection_check()
         self.count_freq = 200
+        self.sample_number = 200  # Number of samples per line
 
     def init_task(self):
         self.counter_out = nidaqmx.Task(new_task_name='HW_Timer')
@@ -120,10 +121,16 @@ class HardwareTimer():
                                                             duty_cycle=0.5
                                                             )
         self.counter_out.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                                    samps_per_chan=200)
+                                                    samps_per_chan=self.sample_number)
 
     def change_freq(self, new_freq):
         self.count_freq = new_freq
+        if hasattr(self, 'counter_out'):
+            self.counter_out.close()
+            self.init_task()
+
+    def change_sample_number(self, new_sample_number):
+        self.sample_number = new_sample_number
         if hasattr(self, 'counter_out'):
             self.counter_out.close()
             self.init_task()
@@ -444,10 +451,10 @@ class GScanner():
             del self.y_scanner
             self.is_closed_y = True
 
-    def generating_scan_array(self, start_point: float, end_point: float, line_rate: float) \
+    def generating_scan_array(self, start_point: float, end_point: float, line_rate: float, sample_num: int = 200) \
             -> list[float]:
         # point_num_each_line = round(200 / line_rate)
-        point_num_each_line = 200
+        point_num_each_line = sample_num
         wave_forward = np.linspace(start=start_point, stop=end_point, num=point_num_each_line,
                                    endpoint=True, dtype=float)
         wave_back = np.linspace(start=end_point, stop=start_point, num=point_num_each_line,

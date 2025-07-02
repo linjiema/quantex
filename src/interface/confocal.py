@@ -33,6 +33,8 @@ class mainGUI(QtWidgets.QMainWindow):
     Z_MIN_PIEZO = 0.0  # um
     Z_MAX_PIEZO = 35.0  # um
     CACHE_LIFE = 7  # days
+    RES_XY = 100
+    RES_XZ = 100
 
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -146,7 +148,7 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndY.text()) - float(self.ui.txtStartY.text())) / float(self.ui.txtStepY.text()))
-        self.map = numpy.random.randint(0, 100, size=(yNum, xNum))
+        self.map = numpy.random.randint(0, self.RES_XY, size=(yNum, xNum))
         self.map[30][40] = 100000
 
     def init_xy_dummy_map(self):
@@ -186,7 +188,7 @@ class mainGUI(QtWidgets.QMainWindow):
         # Initialize Dummy Map Data
         xNum = int((float(self.ui.txtEndX.text()) - float(self.ui.txtStartX.text())) / float(self.ui.txtStepX.text()))
         yNum = int((float(self.ui.txtEndZ.text()) - float(self.ui.txtStartZ.text())) / float(self.ui.txtStepZ.text()))
-        self.mapZ = numpy.random.randint(0, 100, size=(yNum, xNum))
+        self.mapZ = numpy.random.randint(0, self.RES_XZ, size=(yNum, xNum))
         self.mapZ[10][10] = 100000
 
     def init_z_dummy_map(self):
@@ -405,17 +407,17 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
             self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
-            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / self.RES_XY, 3)))
             self.ui.txtStartY.setText(str(self.XY_MIN_PIEZO))
             self.ui.txtEndY.setText(str(self.XY_MAX_PIEZO))
-            self.ui.txtStepY.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / self.RES_XY, 3)))
         elif self.ui.rbGalvo.isChecked():
             self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
             self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
-            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / self.RES_XY, 3)))
             self.ui.txtStartY.setText(str(self.XY_MIN_GALVO))
             self.ui.txtEndY.setText(str(self.XY_MAX_GALVO))
-            self.ui.txtStepY.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStepY.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / self.RES_XY, 3)))
 
     @QtCore.pyqtSlot()
     def select_range(self):
@@ -477,10 +479,10 @@ class mainGUI(QtWidgets.QMainWindow):
     def select_drag_end(self, event):
         self.ui.txtStartX.setText(str(round(min(self.select_x0, self.select_x1), 3)))
         self.ui.txtEndX.setText(str(round(max(self.select_x0, self.select_x1), 3)))
-        self.ui.txtStepX.setText(str(round(abs(self.select_x0 - self.select_x1) / 100, 3)))
+        self.ui.txtStepX.setText(str(round(abs(self.select_x0 - self.select_x1) / self.RES_XY, 3)))
         self.ui.txtStartY.setText(str(round(min(self.select_y0, self.select_y1), 3)))
         self.ui.txtEndY.setText(str(round(max(self.select_y0, self.select_y1), 3)))
-        self.ui.txtStepY.setText(str(round(abs(self.select_y0 - self.select_y1) / 100, 3)))
+        self.ui.txtStepY.setText(str(round(abs(self.select_y0 - self.select_y1) / self.RES_XY, 3)))
         self.ui.mplMap.setCursor(QtCore.Qt.ArrowCursor)
         for cid in self._cid:
             self.ui.mplMap.mpl_disconnect(cid)
@@ -494,8 +496,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartY.setText(str(round(y_val - d / 2, 3)))
         self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
         self.ui.txtEndY.setText(str(round(y_val + d / 2, 3)))
-        self.ui.txtStepX.setText(str(round(d / 100, 3)))
-        self.ui.txtStepY.setText(str(round(d / 100, 3)))
+        self.ui.txtStepX.setText(str(round(d / self.RES_XY, 3)))
+        self.ui.txtStepY.setText(str(round(d / self.RES_XY, 3)))
 
     @QtCore.pyqtSlot()
     def scan_start(self):
@@ -556,7 +558,7 @@ class mainGUI(QtWidgets.QMainWindow):
 
             self.sThread.start()
         elif self.ui.rbGalvo.isChecked():
-            self.dThread.sample_rate = int(self.ui.cbFreq.currentText()) * 200
+            self.dThread.sample_rate = int(self.ui.cbFreq.currentText()) * (self.RES_XY + 100)
             self.gsThread.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
                                         float(self.ui.txtStepX.text()),
@@ -566,6 +568,7 @@ class mainGUI(QtWidgets.QMainWindow):
                                         float(self.ui.txtZcom.text()),
                                         float(self.ui.cbFreq.currentText())
                                         )
+            self.gsThread.res = self.RES_XY
 
             self.gsThread.start()
 
@@ -588,17 +591,17 @@ class mainGUI(QtWidgets.QMainWindow):
         if self.ui.rbPiezo.isChecked():
             self.ui.txtStartX.setText(str(self.XY_MIN_PIEZO))
             self.ui.txtEndX.setText(str(self.XY_MAX_PIEZO))
-            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / 100, 3)))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_PIEZO - self.XY_MIN_PIEZO) / self.RES_XZ, 3)))
             self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
             self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
-            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / (self.RES_XZ/2), 3)))
         elif self.ui.rbGalvo.isChecked():
             self.ui.txtStartX.setText(str(self.XY_MIN_GALVO))
             self.ui.txtEndX.setText(str(self.XY_MAX_GALVO))
-            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / 100, 3)))
+            self.ui.txtStepX.setText(str(round((self.XY_MAX_GALVO - self.XY_MIN_GALVO) / self.RES_XZ, 3)))
             self.ui.txtStartZ.setText(str(self.Z_MIN_PIEZO))
             self.ui.txtEndZ.setText(str(self.Z_MAX_PIEZO))
-            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / 50, 3)))
+            self.ui.txtStepZ.setText(str(round((self.Z_MAX_PIEZO - self.Z_MIN_PIEZO) / (self.RES_XZ/2), 3)))
 
     @QtCore.pyqtSlot()
     def select_range_ZScan(self):
@@ -660,10 +663,10 @@ class mainGUI(QtWidgets.QMainWindow):
     def select_drag_end_Zscan(self, event):
         self.ui.txtStartX.setText(str(round(min(self.select_x0, self.select_x1), 3)))
         self.ui.txtEndX.setText(str(round(max(self.select_x0, self.select_x1), 3)))
-        self.ui.txtStepX.setText(str(round(abs(self.select_x0 - self.select_x1) / 100, 3)))
+        self.ui.txtStepX.setText(str(round(abs(self.select_x0 - self.select_x1) / self.RES_XZ, 3)))
         self.ui.txtStartZ.setText(str(round(min(self.select_y0, self.select_y1), 3)))
         self.ui.txtEndZ.setText(str(round(max(self.select_y0, self.select_y1), 3)))
-        self.ui.txtStepZ.setText(str(round(abs(self.select_y0 - self.select_y1) / 50, 3)))
+        self.ui.txtStepZ.setText(str(round(abs(self.select_y0 - self.select_y1) / (self.RES_XZ/2), 3)))
         self.ui.mplMapZ.setCursor(QtCore.Qt.ArrowCursor)
         for cid in self._cid:
             self.ui.mplMapZ.mpl_disconnect(cid)
@@ -676,8 +679,8 @@ class mainGUI(QtWidgets.QMainWindow):
         self.ui.txtStartZ.setText(str(round(z_val - d / 2, 3)))
         self.ui.txtEndX.setText(str(round(x_val + d / 2, 3)))
         self.ui.txtEndZ.setText(str(round(z_val + d / 2, 3)))
-        self.ui.txtStepX.setText(str(round(d / 100, 3)))
-        self.ui.txtStepZ.setText(str(round(d / 50, 3)))
+        self.ui.txtStepX.setText(str(round(d / self.RES_XZ, 3)))
+        self.ui.txtStepZ.setText(str(round(d / (self.RES_XZ/2), 3)))
 
     def scan_start_Z(self):
         self.ui.statusbar.showMessage('Scanning...')
@@ -726,6 +729,7 @@ class mainGUI(QtWidgets.QMainWindow):
         self.dThread.update.connect(self.update_image_data_ZScan)
 
         if self.ui.rbPiezo.isChecked():
+            self.dThread.sample_rate = int(200)
             self.sThreadZ.parameters = (float(self.ui.txtStartX.text()),
                                         float(self.ui.txtEndX.text()),
                                         float(self.ui.txtStepX.text()),
@@ -737,6 +741,7 @@ class mainGUI(QtWidgets.QMainWindow):
                                         )
             self.sThreadZ.start()
         elif self.ui.rbGalvo.isChecked():
+            self.dThread.sample_rate = int(self.ui.cbFreq.currentText()) * (self.RES_XY + 100)
             self.gsThreadZ.parameters = (float(self.ui.txtStartX.text()),
                                          float(self.ui.txtEndX.text()),
                                          float(self.ui.txtStepX.text()),
@@ -746,6 +751,7 @@ class mainGUI(QtWidgets.QMainWindow):
                                          float(self.ui.txtYcom.text()),
                                          float(self.ui.cbFreq.currentText())
                                          )
+            self.gsThreadZ.sample_number = self.RES_XZ
             self.gsThreadZ.start()
 
     def scan_stop_Z(self):
