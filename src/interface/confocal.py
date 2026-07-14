@@ -33,8 +33,8 @@ class mainGUI(QtWidgets.QMainWindow):
     Z_MIN_PIEZO = 0.0  # um
     Z_MAX_PIEZO = 35.0  # um
     CACHE_LIFE = 7  # days
-    RES_XY = 100
-    RES_XZ = 100
+    RES_XY = 128
+    RES_XZ = 128
 
     def __init__(self, parent=None, hardware=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -751,7 +751,7 @@ class mainGUI(QtWidgets.QMainWindow):
                                          float(self.ui.txtYcom.text()),
                                          float(self.ui.cbFreq.currentText())
                                          )
-            self.gsThreadZ.sample_number = self.RES_XZ
+            self.gsThreadZ.res = self.RES_XZ
             self.gsThreadZ.start()
 
     def scan_stop_Z(self):
@@ -1377,11 +1377,11 @@ class mainGUI(QtWidgets.QMainWindow):
         """
         self.imageZ.set_data(self.mapZ)
         self.imageZ.set_extent(
-            [float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text()), float(self.ui.txtStartZ.text()),
-             float(self.ui.txtEndZ.text())])
+            [float(self.ui.txtStartX.text())/30, float(self.ui.txtEndX.text())/30,
+             float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
 
         self.ui.mplMapZ.axes.set_ylim([float(self.ui.txtStartZ.text()), float(self.ui.txtEndZ.text())])
-        self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text()), float(self.ui.txtEndX.text())])
+        self.ui.mplMapZ.axes.set_xlim([float(self.ui.txtStartX.text())/30, float(self.ui.txtEndX.text())/30])
 
         self.ui.vsMax_ZScan.setValue(59)
         self.ui.vsMin_ZScan.setValue(0)
