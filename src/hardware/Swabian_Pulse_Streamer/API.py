@@ -51,8 +51,8 @@ class PulseGenerator:
 
     def load_rotation_gate_seq(self):
         microwave_patten = [(200000, 0), (200000, 1)]
-        rotation_gate_ref_patten = [(20000, 0), (180000, 1), (200000, 0)]
-        rotation_gate_sig_patten = [(200000, 0), (20000, 0), (180000, 1)]
+        rotation_gate_ref_patten = [(50000, 0), (150000, 1), (200000, 0)]
+        rotation_gate_sig_patten = [(200000, 0), (50000, 0), (150000, 1)]
         rotation_seq = self.pulser.createSequence()
         rotation_seq.setDigital(COUNTER_REFERENCE, rotation_gate_ref_patten)
         rotation_seq.setDigital(COUNTER_SIGNAL, rotation_gate_sig_patten)

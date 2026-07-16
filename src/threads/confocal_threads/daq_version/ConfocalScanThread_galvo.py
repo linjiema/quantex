@@ -20,12 +20,17 @@ class ConfocalScanThread_galvo(QtCore.QThread):
         super().__init__(parent)  # Inherit the init method of parent class
         self.running = False
         self.parameters = [-400, 400, 8, -400, 400, 8, 0, 0]
+        self.res = 100 # Resolution of the scan
+        self.sample_number = 200  # Number of samples per line (res + 100)
         # [X_Start, X_End, X_Step, Y_Start, Y_End, Y_Step, Z_Position, Line_Frequency]
 
     def run(self):
         self.running = True
         # set timer frequency
-        self._hardware.timer.change_freq(new_freq=int(200 * self.parameters[7] * 2))
+        self.sample_number = self.res + 100
+        self._hardware.timer.change_freq(new_freq=int(self.sample_number * self.parameters[7] * 2))
+        self._hardware.timer.change_sample_number(new_sample_number=self.sample_number)
+        self._hardware.scanner.sample_number = self.sample_number
 
         # Move to Goal layer
         # print('move to goal layer')
@@ -49,12 +54,13 @@ class ConfocalScanThread_galvo(QtCore.QThread):
         # Send the scanning parameter to stage
         full_wave = self._hardware.scanner.generating_scan_array(start_point=x_start,
                                                                  end_point=x_end,
-                                                                 line_rate=self.parameters[7]
+                                                                 line_rate=self.parameters[7],
+                                                                 sample_num=self.sample_number
                                                                  )
         # Scanning process
         forward_back_status = True
         # set counter sample number
-        self._hardware.triggered_counter.sample_number = 200
+        self._hardware.triggered_counter.sample_number = self.sample_number
         for y_points in y_axis:
             if self.running:
                 # Move to one location
@@ -111,6 +117,7 @@ class ConfocalScanThread_galvo(QtCore.QThread):
 
     def fast_scan(self):
         pass
+        # TODO: Implement fast scan
         '''
         # set parameter
         try:

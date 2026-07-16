@@ -64,7 +64,7 @@ class DataThread(QtCore.QThread):
 
         # Update the plot every 1 second.
         t = time.perf_counter()
-        if t - self.last_update_time > 1 or state:
+        if t - self.last_update_time > 0.2 or state:
             self.ref_emit = list(np.average(self.ref_all, axis=0))
             self.sig_emit = list(np.average(self.sig_all, axis=0))
             self.update.emit(self.ref_emit, self.sig_emit)
