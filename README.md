@@ -17,3 +17,7 @@ Use `conda env update -f .\config\env_config.yaml` to update the existed environ
 1. Install ___Visual Studio 2010 C#___
 2. Use `conda env create -n quantex-py311 -f .\Cache\Environment` create virtual environment 
 3. Config __nv_experiment__ as Python Interpreter
+
+---
+ ### Working features: 
+ - high_res
