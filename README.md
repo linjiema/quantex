@@ -1,23 +1,64 @@
-#Environment Settings
-To use this program, the __Visual Studio 2010 Runtime__ has to be installed previously.
+# Quantex
 
-Use `conda env create -n quantex-py311 -f .\config\env_config.yaml` to create environment
+Quantex is a PyQt-based control application for confocal imaging, pulsed ESR, and polarization
+measurements. The current hardware application is being migrated incrementally to a modular package
+architecture while preserving the working laboratory code.
 
-use 
-`conda env export -n quantex-py311 > .\config\env_config.yaml` and `pip freeze > requirements.yaml` to export the environment of the conda and pip.
+## Current application
 
-use `conda env create -n quantex-py311 -f env_config.yaml` and `pip install -r requirement.txt` to create the same environment on the new setup. 
+The legacy application still starts from the repository root:
 
-Use `conda env update -f .\config\env_config.yaml` to update the existed environment
+```console
+python main.py
+```
 
+The laboratory environment currently targets Python 3.11 on Windows. Vendor prerequisites such as
+the Visual Studio 2010 runtime, TimeTagger SDK, device DLLs, and device drivers must be installed
+separately on the control computer.
 
----
-## Environment Setup Instruction
+The existing `requirements.txt` and `config/env_config.yaml` are retained as legacy snapshots of a
+working machine. They contain machine-specific Conda paths and are not portable dependency files.
 
-1. Install ___Visual Studio 2010 C#___
-2. Use `conda env create -n quantex-py311 -f .\Cache\Environment` create virtual environment 
-3. Config __nv_experiment__ as Python Interpreter
+## Package foundation
 
----
- ### Working features: 
- - high_res
+The new package is located under `src/quantex`. During the migration it intentionally coexists with
+the legacy `src.*` and `ui.*` packages. Installing the package foundation does not yet replace the
+`python main.py` entry point.
+
+Create and activate a Python 3.11 virtual environment, then install the package in editable mode:
+
+```console
+python -m pip install -e ".[dev]"
+```
+
+Hardware-related PyPI dependencies can be installed separately:
+
+```console
+python -m pip install -e ".[hardware]"
+```
+
+The `hardware` extra does not install vendor SDKs or bundled DLL prerequisites.
+
+## Development checks
+
+Run the package smoke tests and lint the new package boundary:
+
+```console
+python -m pytest
+python -m ruff check src/quantex tests/unit
+```
+
+Legacy hardware scripts are deliberately excluded from default test discovery. They will be
+classified into manual and hardware-in-the-loop test suites in a later migration step.
+
+## Architecture direction
+
+The target dependency direction is:
+
+```text
+GUI -> experiment logic -> hardware interfaces <- concrete drivers
+```
+
+Core services will own configuration, module lifecycle, managed jobs, cancellation, and exclusive
+hardware resource access. This package-foundation change only creates the destination package and
+development metadata; it does not change experiment or device behavior.
